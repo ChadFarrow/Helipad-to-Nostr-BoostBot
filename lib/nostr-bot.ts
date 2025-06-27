@@ -937,59 +937,63 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     return; // Skip individual posts for streams
   }
 
-  // Only post boosts that were SENT (not received)
+  // Determine if this is a sent or received boost
   // Sent boosts typically have payment fees, received boosts don't
-  if (!event.payment_info || !event.payment_info.fee_msat || event.payment_info.fee_msat <= 0) {
-    logger.info(`Skipping received boost (no outgoing fees)`, { 
+  const isSentBoost = event.payment_info && event.payment_info.fee_msat && event.payment_info.fee_msat > 0;
+  
+  if (isSentBoost) {
+    logger.info(`Processing sent boost (has outgoing fees)`, { 
+      sender: event.sender, 
+      amount: event.value_msat_total / 1000,
+      feeAmount: event.payment_info.fee_msat
+    });
+  } else {
+    logger.info(`Processing received boost (no outgoing fees)`, { 
       sender: event.sender, 
       amount: event.value_msat_total / 1000,
       hasFee: !!event.payment_info?.fee_msat,
       feeAmount: event.payment_info?.fee_msat || 0
     });
-    return; // Skip received boosts - only post sent boosts
   }
 
-  logger.info(`Processing sent boost (has outgoing fees)`, { 
-    sender: event.sender, 
-    amount: event.value_msat_total / 1000,
-    feeAmount: event.payment_info.fee_msat
-  });
-
-  // Only post boosts from ChadF to avoid posting pseudonymous boosts
-  if (event.sender !== 'ChadF') {
-    logger.info(`Skipping boost from different sender`, { 
+  // For sent boosts, only post boosts from ChadF to avoid posting pseudonymous boosts
+  if (isSentBoost && event.sender !== 'ChadF') {
+    logger.info(`Skipping sent boost from different sender`, { 
       sender: event.sender, 
       amount: event.value_msat_total / 1000
     });
-    return; // Skip boosts not from ChadF
+    return; // Skip sent boosts not from ChadF
   }
 
-  // Blocklist of bot accounts - don't repost boosts sent to these accounts
-  const blockedBotPubkeys = [
-    'npub1x9txy0vttevqznkzfrl8f8u950lpy70tesd0hg7lfswmcfff9uasat8dz9', // Bot account
-  ];
-  
-  // Check if boost was sent to a blocked bot account
-  if (event.payment_info?.pubkey) {
-    try {
-      // Convert hex pubkey to npub for comparison
-      const recipientNpub = nip19.encode('npub', event.payment_info.pubkey);
-      if (blockedBotPubkeys.includes(recipientNpub)) {
-        logger.info(`Skipping boost to blocked bot account`, { 
-          sender: event.sender, 
-          recipient: recipientNpub,
-          amount: event.value_msat_total / 1000
-        });
-        return; // Skip boosts to blocked bot accounts
+  // For sent boosts, blocklist of bot accounts - don't repost boosts sent to these accounts
+  if (isSentBoost) {
+    const blockedBotPubkeys = [
+      'npub1x9txy0vttevqznkzfrl8f8u950lpy70tesd0hg7lfswmcfff9uasat8dz9', // Bot account
+    ];
+    
+    // Check if boost was sent to a blocked bot account
+    if (event.payment_info?.pubkey) {
+      try {
+        // Convert hex pubkey to npub for comparison
+        const recipientNpub = nip19.encode('npub', event.payment_info.pubkey);
+        if (blockedBotPubkeys.includes(recipientNpub)) {
+          logger.info(`Skipping sent boost to blocked bot account`, { 
+            sender: event.sender, 
+            recipient: recipientNpub,
+            amount: event.value_msat_total / 1000
+          });
+          return; // Skip sent boosts to blocked bot accounts
+        }
+      } catch (error) {
+        logger.debug('Error checking recipient pubkey against blocklist', { error: error.message });
       }
-    } catch (error) {
-      logger.debug('Error checking recipient pubkey against blocklist', { error: error.message });
     }
   }
 
   // Group splits by a wider time window to catch all splits from the same boost
   const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
-  const sessionId = `${timeWindow}-${event.sender}-${event.episode}-${event.podcast}`;
+  const boostType = isSentBoost ? 'sent' : 'received';
+  const sessionId = `${timeWindow}-${boostType}-${event.sender}-${event.episode}-${event.podcast}`;
   
   logger.info(`Processing payment`, { 
     amount: event.value_msat / 1000, 
@@ -1046,7 +1050,15 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     
     // Post the largest payment from this session
     try {
-      await postBoostToNostr(session.largestSplit, bot);
+      const isSessionSentBoost = session.largestSplit.payment_info && 
+                                session.largestSplit.payment_info.fee_msat && 
+                                session.largestSplit.payment_info.fee_msat > 0;
+      
+      if (isSessionSentBoost) {
+        await postBoostToNostr(session.largestSplit, bot);
+      } else {
+        await postReceivedBoostToNostr(session.largestSplit, bot);
+      }
     } catch (error) {
       logger.error('Error in postBoostToNostr', { 
         error: error.message, 
@@ -1406,6 +1418,94 @@ function processMessageForTags(message: string): { processedMessage: string; tag
   console.log(`🏷️ Total tags added: ${tags.length}`);
   
   return { processedMessage, tags };
+}
+
+async function postReceivedBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<void> {
+  logger.info('Starting to post received boost to Nostr', { 
+    sender: event.sender, 
+    amount: event.value_msat_total / 1000, 
+    podcast: event.podcast, 
+    episode: event.episode 
+  });
+  
+  // Process message for auto-tagging
+  let messageTags: string[][] = [];
+  let displayMessage = event.message;
+  
+  if (event.message && event.message.trim()) {
+    const { processedMessage, tags } = processMessageForTags(event.message);
+    displayMessage = processedMessage;
+    messageTags = tags;
+  }
+
+  // Get show-based tags for automatic tagging
+  let showTags: string[][] = [];
+  if (event.podcast) {
+    showTags = getShowBasedTags(event.podcast);
+  }
+
+  // Build app info with link if available
+  const appName = event.app || '';
+  const appConfig = podcastAppLinks[appName];
+  const appInfo = appConfig 
+    ? `📱 Via: ${appConfig.url}`
+    : `📱 Via: ${appName}`;
+
+  // Format the content for received boost
+  const contentParts = [
+    '🎉 Thank you for the boost!',
+    '',
+  ];
+
+  if (displayMessage && displayMessage.trim()) {
+    contentParts.push(`💬 "${displayMessage}"`, '');
+  }
+
+  contentParts.push(`👤 From: ${event.sender || 'Unknown'}`);
+  
+  // Add show info
+  if (event.podcast && event.podcast.trim() && event.podcast.trim().toLowerCase() !== 'nameless') {
+    contentParts.push(`🎧 Show: ${event.podcast}`);
+  }
+  if (event.episode && event.episode.trim() && event.episode.trim().toLowerCase() !== 'nameless') {
+    contentParts.push(`📻 Episode: ${event.episode}`);
+  }
+
+  contentParts.push(
+    `💸 Amount: ${(event.value_msat_total / 1000).toLocaleString()} sats`,
+    appInfo,
+    '',
+    '#ThankYou #BoostReceived #Podcasting20 #V4V'
+  );
+
+  const content = contentParts.join('\n');
+
+  // Combine hashtags with mention tags and show tags
+  const allTags = [
+    ['t', 'thankyou'],
+    ['t', 'boostreceived'],
+    ['t', 'podcasting20'],
+    ['t', 'v4v'],
+    ['t', 'podcast'],
+    ...messageTags,
+    ...showTags
+  ];
+
+  const nostrEvent = finalizeEvent({
+    kind: 1,
+    content,
+    tags: allTags,
+    created_at: Math.floor(Date.now() / 1000),
+  }, bot.getSecretKey());
+
+  await bot.publishToRelays(nostrEvent);
+  
+  logger.info('Successfully posted received boost to Nostr', { 
+    sender: event.sender, 
+    amount: event.value_msat_total / 1000, 
+    contentLength: content.length,
+    tagsCount: allTags.length
+  });
 }
 
 async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<void> {
