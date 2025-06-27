@@ -14,7 +14,7 @@ function getProcessInfo() {
 
 function getHealthStatus() {
   try {
-    const response = execSync('curl -s -w "%{http_code}" http://localhost:3001/health', { encoding: 'utf8' });
+    const response = execSync('curl -s -w "%{http_code}" http://localhost:3333/health', { encoding: 'utf8' });
     const statusCode = response.slice(-3);
     const body = response.slice(0, -3);
     return { statusCode: parseInt(statusCode), body: body.trim() };
@@ -25,7 +25,7 @@ function getHealthStatus() {
 
 function getPortStatus() {
   try {
-    const output = execSync('lsof -i :3001', { encoding: 'utf8' });
+    const output = execSync('lsof -i :3333', { encoding: 'utf8' });
     return output.trim().split('\n').slice(1); // Skip header
   } catch (error) {
     return [];
@@ -83,7 +83,7 @@ function main() {
   console.log(`🔍 Overall Status: ${isRunning ? '✅ RUNNING' : '❌ STOPPED'}`);
   console.log(`📊 Process Count: ${processes.length}`);
   console.log(`🏥 Health Check: ${health.statusCode === 200 ? '✅ OK' : '❌ FAILED'}`);
-  console.log(`🔌 Port 3001: ${portInfo.length > 0 ? '✅ IN USE' : '❌ NOT IN USE'}`);
+  console.log(`🔌 Port 3333: ${portInfo.length > 0 ? '✅ IN USE' : '❌ NOT IN USE'}`);
   console.log('');
   
   // Process Details
@@ -109,10 +109,10 @@ function main() {
   
   // Network Information
   console.log('🌐 Network Information:');
-  console.log('  📡 Webhook URL: http://localhost:3001/helipad-webhook');
-  console.log('  💚 Health Check: http://localhost:3001/health');
-  console.log('  🧪 Test Daily Summary: http://localhost:3001/test-daily-summary');
-  console.log('  📊 Test Weekly Summary: http://localhost:3001/test-weekly-summary');
+  console.log('  📡 Webhook URL: http://localhost:3333/helipad-webhook');
+  console.log('  💚 Health Check: http://localhost:3333/health');
+  console.log('  🧪 Test Daily Summary: http://localhost:3333/test-daily-summary');
+  console.log('  📊 Test Weekly Summary: http://localhost:3333/test-weekly-summary');
   console.log('');
   
   // System Information

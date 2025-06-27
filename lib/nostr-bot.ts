@@ -1063,6 +1063,28 @@ const showToNpubMap: Record<string, string[]> = {
   'Ungovernable Misfits': [
     'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
   ],
+  'THE BITCOIN BRIEF': [
+    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
+    'npub15c88nc8d44gsp4658dnfu5fahswzzu8gaxm5lkuwjud068swdqfspxssvx', // QnA
+  ],
+  'MONERO MONTHLY': [
+    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
+    'npub1tr4dstaptd2sp98h7hlysp8qle6mw7wmauhfkgz3rmxdd8ndprusnw2y5g', // Seth for Privacy
+  ],
+  'Pleb Miner Monthly': [
+    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
+    'npub1luwkteu2eq2e97n7hw0tlj03vvgguzl0srm3vkxz2jt75wpaf9tspt9cqr', // Jon
+  ],
+  'ACTION NEWS': [
+    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
+    'npub1luwkteu2eq2e97n7hw0tlj03vvgguzl0srm3vkxz2jt75wpaf9tspt9cqr', // Jon
+  ],
+  'The Confab': [
+    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
+  ],
+  'ASHIGARU': [
+    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
+  ],
   'UpBEATS': [
     'npub1nnkhv7scg4zxr9t6sgukyxn923ed6485ud8m7a3lurr4qd4lhv7qhrp49m', // UpBEATs
   ],
