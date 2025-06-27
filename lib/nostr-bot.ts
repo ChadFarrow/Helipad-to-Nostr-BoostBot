@@ -964,6 +964,29 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     return; // Skip boosts not from ChadF
   }
 
+  // Blocklist of bot accounts - don't repost boosts sent to these accounts
+  const blockedBotPubkeys = [
+    'npub1x9txy0vttevqznkzfrl8f8u950lpy70tesd0hg7lfswmcfff9uasat8dz9', // Bot account
+  ];
+  
+  // Check if boost was sent to a blocked bot account
+  if (event.payment_info?.pubkey) {
+    try {
+      // Convert hex pubkey to npub for comparison
+      const recipientNpub = nip19.encode('npub', event.payment_info.pubkey);
+      if (blockedBotPubkeys.includes(recipientNpub)) {
+        logger.info(`Skipping boost to blocked bot account`, { 
+          sender: event.sender, 
+          recipient: recipientNpub,
+          amount: event.value_msat_total / 1000
+        });
+        return; // Skip boosts to blocked bot accounts
+      }
+    } catch (error) {
+      logger.debug('Error checking recipient pubkey against blocklist', { error: error.message });
+    }
+  }
+
   // Group splits by a wider time window to catch all splits from the same boost
   const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
   const sessionId = `${timeWindow}-${event.sender}-${event.episode}-${event.podcast}`;
@@ -1452,12 +1475,13 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
   const contentParts = [
     actionText,
     '',
-    `${senderLabel}: ${senderDisplay || 'Unknown'}`,
   ];
 
   if (displayMessage && displayMessage.trim()) {
-    contentParts.push(`💬 Message: ${displayMessage}`);
+    contentParts.push(`💬 Message: ${displayMessage}`, '');
   }
+
+  contentParts.push(`${senderLabel}: ${senderDisplay || 'Unknown'}`);
 
   // Add visible host mentions if any
   if (showHostMentions.length > 0) {
