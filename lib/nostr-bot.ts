@@ -473,7 +473,7 @@ async function loadBoostSessions(): Promise<void> {
     let loadedCount = 0;
     let expiredCount = 0;
     
-    savedSessions.forEach(session => {
+    savedSessions.forEach(async (session) => {
       if (session.expiresAt > now) {
         // Session hasn't expired, restore it with new timeout
         const timeLeft = session.expiresAt - now;
@@ -507,7 +507,28 @@ async function loadBoostSessions(): Promise<void> {
         });
         loadedCount++;
       } else {
+        // Session has expired, post it immediately
         expiredCount++;
+        logger.info(`Posting expired session ${session.sessionId} immediately`, { 
+          amount: session.largestSplit.value_msat / 1000, 
+          total: session.largestSplit.value_msat_total / 1000,
+          expiredBy: now - session.expiresAt
+        });
+        
+        const bot = createNostrBot();
+        if (bot) {
+          postedBoosts.add(session.sessionId);
+          try {
+            await postBoostToNostr(session.largestSplit, bot);
+          } catch (error) {
+            logger.error('Error in postBoostToNostr for expired session', { 
+              error: error.message, 
+              stack: error.stack,
+              session: session.sessionId,
+              amount: session.largestSplit.value_msat_total / 1000
+            });
+          }
+        }
       }
     });
     
@@ -938,18 +959,23 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
   }
 
   // Determine if this is a sent or received boost
-  // Sent boosts typically have payment fees, received boosts don't
-  const isSentBoost = event.payment_info && event.payment_info.fee_msat && event.payment_info.fee_msat > 0;
+  // Sent boosts: sender is "ChadF" AND has payment fees
+  // Received boosts: sender is NOT "ChadF" (someone else sent to you)
+  const isSentBoost = event.sender === 'ChadF' && 
+                      event.payment_info && 
+                      event.payment_info.fee_msat && 
+                      event.payment_info.fee_msat > 0;
   
   if (isSentBoost) {
-    logger.info(`Processing sent boost (has outgoing fees)`, { 
+    logger.info(`✅ Processing SENT boost (sender=ChadF + has fees)`, { 
       sender: event.sender, 
       amount: event.value_msat_total / 1000,
       feeAmount: event.payment_info.fee_msat
     });
   } else {
-    logger.info(`Processing received boost (no outgoing fees)`, { 
+    logger.info(`📨 Processing RECEIVED boost (sender≠ChadF or no fees)`, { 
       sender: event.sender, 
+      senderIsChadF: event.sender === 'ChadF',
       amount: event.value_msat_total / 1000,
       hasFee: !!event.payment_info?.fee_msat,
       feeAmount: event.payment_info?.fee_msat || 0
@@ -975,7 +1001,8 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     if (event.payment_info?.pubkey) {
       try {
         // Convert hex pubkey to npub for comparison
-        const recipientNpub = nip19.encode('npub', event.payment_info.pubkey);
+        const pubkeyBytes = new Uint8Array(Buffer.from(event.payment_info.pubkey, 'hex'));
+        const recipientNpub = nip19.encode('npub', pubkeyBytes);
         if (blockedBotPubkeys.includes(recipientNpub)) {
           logger.info(`Skipping sent boost to blocked bot account`, { 
             sender: event.sender, 
