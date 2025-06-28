@@ -238,6 +238,25 @@ export async function announceFundraiserEnded(options: FundraiserUpdateOptions &
 const boostSessions = new Map<string, { largestSplit: HelipadPaymentEvent, timeout: NodeJS.Timeout }>();
 const postedBoosts = new Set<string>();
 
+// Clean up old posted boosts every hour to prevent memory leaks
+setInterval(() => {
+  const oneHourAgo = Math.floor((Date.now() - 3600000) / 120000); // 1 hour ago in 2-minute windows
+  const toDelete: string[] = [];
+  
+  postedBoosts.forEach(sessionId => {
+    const timeWindow = parseInt(sessionId.split('-')[0]);
+    if (timeWindow < oneHourAgo) {
+      toDelete.push(sessionId);
+    }
+  });
+  
+  toDelete.forEach(sessionId => postedBoosts.delete(sessionId));
+  
+  if (toDelete.length > 0) {
+    logger.info(`🧹 Cleaned up ${toDelete.length} old posted boost sessions`);
+  }
+}, 3600000); // Run every hour
+
 // Interface for persisting session data
 interface PersistedSession {
   sessionId: string;
@@ -973,9 +992,20 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
       feeAmount: event.payment_info.fee_msat
     });
   } else {
-    logger.info(`📨 Processing RECEIVED boost (sender≠ChadF or no fees)`, { 
+    // Skip ALL "received" boosts where sender is ChadF (even if no fees detected)
+    // ChadF's boosts should only be posted as "sent" to avoid duplicates
+    if (event.sender === 'ChadF') {
+      logger.info(`⏭️ Skipping ChadF boost as received (ChadF boosts only post as sent)`, { 
+        sender: event.sender, 
+        amount: event.value_msat_total / 1000,
+        hasFee: !!event.payment_info?.fee_msat,
+        feeAmount: event.payment_info?.fee_msat || 0
+      });
+      return;
+    }
+    
+    logger.info(`📨 Processing RECEIVED boost (from other sender)`, { 
       sender: event.sender, 
-      senderIsChadF: event.sender === 'ChadF',
       amount: event.value_msat_total / 1000,
       hasFee: !!event.payment_info?.fee_msat,
       feeAmount: event.payment_info?.fee_msat || 0
@@ -1019,6 +1049,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
 
   // Group splits by a wider time window to catch all splits from the same boost
   const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
+  // For self-boosts (ChadF with fees), don't separate sent/received - use unified session
   const boostType = isSentBoost ? 'sent' : 'received';
   const sessionId = `${timeWindow}-${boostType}-${event.sender}-${event.episode}-${event.podcast}`;
   
