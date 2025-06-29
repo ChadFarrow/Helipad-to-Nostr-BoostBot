@@ -1112,6 +1112,16 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
                                 session.largestSplit.payment_info.fee_msat && 
                                 session.largestSplit.payment_info.fee_msat > 0;
       
+      // Debug logging to trace the conditional logic
+      logger.info('Conditional logic debug', {
+        sessionId,
+        sender: session.largestSplit.sender,
+        hasPaymentInfo: !!session.largestSplit.payment_info,
+        paymentInfo: session.largestSplit.payment_info,
+        isSessionSentBoost,
+        willCallFunction: isSessionSentBoost ? 'postBoostToNostr' : 'postReceivedBoostToNostr'
+      });
+      
       if (isSessionSentBoost) {
         await postBoostToNostr(session.largestSplit, bot);
       } else {
