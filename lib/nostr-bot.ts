@@ -978,45 +978,24 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
   }
 
   // Determine if this is a sent or received boost
-  // Sent boosts: only when sender is "ChadF" (you sending boosts)
-  // Received boosts: anyone else sending boosts to you
+  // Helipad reports all boosts the same way - we determine direction from sender:
+  // Sent boosts: sender === 'ChadF' (you initiated the boost)
+  // Received boosts: sender !== 'ChadF' (someone else initiated the boost to you)
   const isSentBoost = event.sender === 'ChadF';
   
   if (isSentBoost) {
-    logger.info(`✅ Processing SENT boost (sender=ChadF + has fees)`, { 
-      sender: event.sender, 
-      amount: event.value_msat_total / 1000,
-      feeAmount: event.payment_info.fee_msat
-    });
-  } else {
-    // Skip ALL "received" boosts where sender is ChadF (even if no fees detected)
-    // ChadF's boosts should only be posted as "sent" to avoid duplicates
-    if (event.sender === 'ChadF') {
-      logger.info(`⏭️ Skipping ChadF boost as received (ChadF boosts only post as sent)`, { 
-        sender: event.sender, 
-        amount: event.value_msat_total / 1000,
-        hasFee: !!event.payment_info?.fee_msat,
-        feeAmount: event.payment_info?.fee_msat || 0
-      });
-      return;
-    }
-    
-    logger.info(`📨 Processing RECEIVED boost (from other sender)`, { 
-      sender: event.sender, 
-      amount: event.value_msat_total / 1000,
-      hasFee: !!event.payment_info?.fee_msat,
-      feeAmount: event.payment_info?.fee_msat || 0
-    });
-  }
-
-  // For sent boosts, only post boosts from ChadF to avoid posting pseudonymous boosts
-  if (isSentBoost && event.sender !== 'ChadF') {
-    logger.info(`Skipping sent boost from different sender`, { 
+    logger.info(`✅ Processing SENT boost (you initiated this boost)`, { 
       sender: event.sender, 
       amount: event.value_msat_total / 1000
     });
-    return; // Skip sent boosts not from ChadF
+  } else {
+    logger.info(`📨 Processing RECEIVED boost (someone boosted you)`, { 
+      sender: event.sender, 
+      amount: event.value_msat_total / 1000
+    });
   }
+
+  // isSentBoost already ensures sender === 'ChadF', so no additional check needed
 
   // For sent boosts, blocklist of bot accounts - don't repost boosts sent to these accounts
   if (isSentBoost) {
@@ -1046,7 +1025,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
 
   // Group splits by a wider time window to catch all splits from the same boost
   const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
-  // For self-boosts (ChadF with fees), don't separate sent/received - use unified session
+  // Distinguish sent vs received boosts in session IDs to avoid conflicts
   const boostType = isSentBoost ? 'sent' : 'received';
   const sessionId = `${timeWindow}-${boostType}-${event.sender}-${event.episode}-${event.podcast}`;
   
@@ -1105,14 +1084,13 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     
     // Post the largest payment from this session
     try {
+      // Re-check boost type using sender-based logic
       const isSessionSentBoost = session.largestSplit.sender === 'ChadF';
       
       // Debug logging to trace the conditional logic
       logger.info('Conditional logic debug', {
         sessionId,
         sender: session.largestSplit.sender,
-        hasPaymentInfo: !!session.largestSplit.payment_info,
-        paymentInfo: session.largestSplit.payment_info,
         isSessionSentBoost,
         willCallFunction: isSessionSentBoost ? 'postBoostToNostr' : 'postReceivedBoostToNostr'
       });
