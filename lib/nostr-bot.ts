@@ -978,24 +978,52 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
   }
 
   // Determine if this is a sent or received boost
-  // Helipad reports all boosts the same way - we determine direction from sender:
-  // Sent boosts: sender === 'ChadF' (you initiated the boost)
-  // Received boosts: sender !== 'ChadF' (someone else initiated the boost to you)
-  const isSentBoost = event.sender === 'ChadF';
+  // Better approach: check if payment is TO your node's pubkey/address
+  const myNodePubkey = '032870511bfa0309bab3ca1832ead69eed848a4abddbc4d50e55bb2157f9525e51';
+  const myLightningAddress = 'chadf@getalby.com';
+  
+  // Check TLV data for sender_id and reply_address
+  let tlvSenderId = '';
+  let tlvReplyAddress = '';
+  try {
+    if (event.tlv) {
+      const tlvData = JSON.parse(event.tlv);
+      tlvSenderId = tlvData.sender_id || '';
+      tlvReplyAddress = tlvData.reply_address || '';
+    }
+  } catch (error) {
+    logger.debug('Failed to parse TLV data for boost direction detection', { error: error.message });
+  }
+  
+  // Received boost: payment TO your node (pubkey matches) OR sender_id is your address
+  const isReceivedBoost = (event.payment_info?.pubkey === myNodePubkey) || 
+                         (tlvSenderId === myLightningAddress) ||
+                         (tlvReplyAddress === myNodePubkey);
+  
+  const isSentBoost = !isReceivedBoost;
   
   if (isSentBoost) {
-    logger.info(`✅ Processing SENT boost (you initiated this boost)`, { 
+    logger.info(`✅ Processing SENT boost (outgoing from your node)`, { 
       sender: event.sender, 
-      amount: event.value_msat_total / 1000
+      amount: event.value_msat_total / 1000,
+      recipientPubkey: event.payment_info?.pubkey,
+      tlvSenderId,
+      tlvReplyAddress
     });
   } else {
-    logger.info(`📨 Processing RECEIVED boost (someone boosted you)`, { 
+    logger.info(`📨 Processing RECEIVED boost (incoming to your node)`, { 
       sender: event.sender, 
-      amount: event.value_msat_total / 1000
+      amount: event.value_msat_total / 1000,
+      recipientPubkey: event.payment_info?.pubkey,
+      tlvSenderId,
+      tlvReplyAddress,
+      detectionReason: event.payment_info?.pubkey === myNodePubkey ? 'pubkey_match' : 
+                      tlvSenderId === myLightningAddress ? 'sender_id_match' :
+                      tlvReplyAddress === myNodePubkey ? 'reply_address_match' : 'unknown'
     });
   }
 
-  // isSentBoost already ensures sender === 'ChadF', so no additional check needed
+  // Boost direction now determined by recipient pubkey/address, not sender name
 
   // For sent boosts, blocklist of bot accounts - don't repost boosts sent to these accounts
   if (isSentBoost) {
@@ -1084,13 +1112,35 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     
     // Post the largest payment from this session
     try {
-      // Re-check boost type using sender-based logic
-      const isSessionSentBoost = session.largestSplit.sender === 'ChadF';
+      // Re-check boost type using recipient pubkey/address logic
+      const sessionMyNodePubkey = '032870511bfa0309bab3ca1832ead69eed848a4abddbc4d50e55bb2157f9525e51';
+      const sessionMyLightningAddress = 'chadf@getalby.com';
+      
+      let sessionTlvSenderId = '';
+      let sessionTlvReplyAddress = '';
+      try {
+        if (session.largestSplit.tlv) {
+          const tlvData = JSON.parse(session.largestSplit.tlv);
+          sessionTlvSenderId = tlvData.sender_id || '';
+          sessionTlvReplyAddress = tlvData.reply_address || '';
+        }
+      } catch (error) {
+        logger.debug('Failed to parse session TLV data', { error: error.message });
+      }
+      
+      const isSessionReceivedBoost = (session.largestSplit.payment_info?.pubkey === sessionMyNodePubkey) || 
+                                   (sessionTlvSenderId === sessionMyLightningAddress) ||
+                                   (sessionTlvReplyAddress === sessionMyNodePubkey);
+      
+      const isSessionSentBoost = !isSessionReceivedBoost;
       
       // Debug logging to trace the conditional logic
       logger.info('Conditional logic debug', {
         sessionId,
         sender: session.largestSplit.sender,
+        recipientPubkey: session.largestSplit.payment_info?.pubkey,
+        sessionTlvSenderId,
+        sessionTlvReplyAddress,
         isSessionSentBoost,
         willCallFunction: isSessionSentBoost ? 'postBoostToNostr' : 'postReceivedBoostToNostr'
       });
