@@ -978,12 +978,9 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
   }
 
   // Determine if this is a sent or received boost
-  // Sent boosts: sender is "ChadF" AND has payment fees
-  // Received boosts: sender is NOT "ChadF" (someone else sent to you)
-  const isSentBoost = event.sender === 'ChadF' && 
-                      event.payment_info && 
-                      event.payment_info.fee_msat && 
-                      event.payment_info.fee_msat > 0;
+  // Sent boosts: only when sender is "ChadF" (you sending boosts)
+  // Received boosts: anyone else sending boosts to you
+  const isSentBoost = event.sender === 'ChadF';
   
   if (isSentBoost) {
     logger.info(`✅ Processing SENT boost (sender=ChadF + has fees)`, { 
@@ -1108,9 +1105,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     
     // Post the largest payment from this session
     try {
-      const isSessionSentBoost = session.largestSplit.payment_info && 
-                                session.largestSplit.payment_info.fee_msat && 
-                                session.largestSplit.payment_info.fee_msat > 0;
+      const isSessionSentBoost = session.largestSplit.sender === 'ChadF';
       
       // Debug logging to trace the conditional logic
       logger.info('Conditional logic debug', {
