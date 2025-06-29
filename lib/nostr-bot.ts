@@ -995,10 +995,31 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     logger.debug('Failed to parse TLV data for boost direction detection', { error: error.message });
   }
   
-  // Received boost: payment TO your node (pubkey matches) OR sender_id is your address
+  // Debug: Log all the detection fields for analysis
+  logger.info('Boost direction detection debug', {
+    sender: event.sender,
+    amount: event.value_msat_total / 1000,
+    paymentInfoPubkey: event.payment_info?.pubkey,
+    paymentInfoIsNull: event.payment_info === null,
+    myNodePubkey,
+    tlvSenderId,
+    tlvReplyAddress,
+    myLightningAddress,
+    paymentPubkeyMatch: event.payment_info?.pubkey === myNodePubkey,
+    senderIdMatch: tlvSenderId === myLightningAddress,
+    replyAddressMatch: tlvReplyAddress === myNodePubkey,
+    nullPaymentExternalSender: event.payment_info === null && event.sender !== 'ChadF'
+  });
+  
+  // Received boost: payment TO your node, detected by:
+  // 1. payment_info.pubkey matches your node pubkey (direct payment)
+  // 2. TLV sender_id matches your lightning address 
+  // 3. TLV reply_address matches your node pubkey
+  // 4. payment_info is null AND sender is external (split payments from apps like Fountain)
   const isReceivedBoost = (event.payment_info?.pubkey === myNodePubkey) || 
                          (tlvSenderId === myLightningAddress) ||
-                         (tlvReplyAddress === myNodePubkey);
+                         (tlvReplyAddress === myNodePubkey) ||
+                         (event.payment_info === null && event.sender !== 'ChadF');
   
   const isSentBoost = !isReceivedBoost;
   
@@ -1130,7 +1151,8 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
       
       const isSessionReceivedBoost = (session.largestSplit.payment_info?.pubkey === sessionMyNodePubkey) || 
                                    (sessionTlvSenderId === sessionMyLightningAddress) ||
-                                   (sessionTlvReplyAddress === sessionMyNodePubkey);
+                                   (sessionTlvReplyAddress === sessionMyNodePubkey) ||
+                                   (session.largestSplit.payment_info === null && session.largestSplit.sender !== 'ChadF');
       
       const isSessionSentBoost = !isSessionReceivedBoost;
       
