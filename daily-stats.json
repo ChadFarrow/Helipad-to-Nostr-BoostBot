@@ -1,15 +1,17 @@
 {
-  "date": "2025-06-25",
-  "streamSats": 274,
-  "boostSats": 10601,
+  "date": "2025-06-29",
+  "streamSats": 178,
+  "boostSats": 5229,
   "streamShows": [
-    "bitpunk.fm unwound"
+    "The Sunday Morning Two Hour Folk Hour",
+    "Rock 'N' Roll PreShow With DarrenO",
+    "Too Angry Cunts"
   ],
   "boostShows": [
+    "Kurtisdrums",
+    "The Sunday Morning Two Hour Folk Hour",
     "Bowl After Bowl",
-    "bitpunk.fm unwound",
-    "Samurai Holiday",
-    "THE Bitcoin Podcast",
-    "The Heycitizen Experience"
+    "Too Angry Cunts",
+    "Breathe EP"
   ]
 }

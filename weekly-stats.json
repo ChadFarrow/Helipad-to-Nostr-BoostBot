@@ -1,16 +1,8 @@
 {
   "weekStart": "2025-06-23",
-  "streamSats": 274,
-  "boostSats": 10601,
-  "streamShows": [
-    "bitpunk.fm unwound"
-  ],
-  "boostShows": [
-    "Bowl After Bowl",
-    "bitpunk.fm unwound",
-    "Samurai Holiday",
-    "THE Bitcoin Podcast",
-    "The Heycitizen Experience"
-  ],
+  "streamSats": 0,
+  "boostSats": 0,
+  "streamShows": [],
+  "boostShows": [],
   "dailyBreakdown": []
 }

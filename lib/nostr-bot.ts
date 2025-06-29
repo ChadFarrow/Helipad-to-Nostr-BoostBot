@@ -305,12 +305,14 @@ let dailyStats: DailyStats = {
   boostShows: new Set()
 };
 
-// Get Monday of current week
+// Get Monday of current week in Eastern Time
 function getWeekStart(date: Date): string {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
-  return new Date(d.setDate(diff)).toISOString().split('T')[0];
+  // Convert to ET first
+  const etDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const day = etDate.getDay();
+  const diff = etDate.getDate() - day + (day === 0 ? -6 : 1); // Monday
+  etDate.setDate(diff);
+  return etDate.toLocaleDateString('en-CA'); // YYYY-MM-DD format
 }
 
 let weeklyStats: WeeklyStats = {
@@ -337,6 +339,7 @@ function scheduleHourlySave(): void {
   }
   
   hourlySaveTimeout = setTimeout(async () => {
+    updateWeeklyDailyBreakdown(); // Ensure current day is in weekly breakdown
     await saveDailyStats();
     await saveWeeklyStats();
     console.log(`💾 Hourly save completed`);
@@ -358,8 +361,8 @@ async function loadDailyStats(): Promise<void> {
     const data = await fs.readFile(DAILY_STATS_FILE, 'utf-8');
     const saved = JSON.parse(data);
     
-    // Check if saved data is from today
-    const currentDate = new Date().toISOString().split('T')[0];
+    // Check if saved data is from today (using ET timezone)
+    const currentDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
     if (saved.date === currentDate) {
       dailyStats = {
         date: saved.date,
@@ -647,21 +650,26 @@ ${boostShows.length > 0 ? `🚀 Boosted:\n${boostShows.map(show => `• ${show}`
   console.log(`📊 Posted daily summary: ${dailyStats.streamSats + dailyStats.boostSats} total sats (tagged ${pTags.length} hosts)`);
 }
 
-async function resetDailyStats(): Promise<void> {
-  // Save current day to weekly breakdown before resetting
+// Update weekly daily breakdown with current daily stats
+function updateWeeklyDailyBreakdown(): void {
   const currentDay = {
     date: dailyStats.date,
     streamSats: dailyStats.streamSats,
     boostSats: dailyStats.boostSats
   };
   
-  // Add to weekly breakdown if not already added
+  // Update or add to weekly breakdown
   const existingDayIndex = weeklyStats.dailyBreakdown.findIndex(d => d.date === currentDay.date);
   if (existingDayIndex >= 0) {
     weeklyStats.dailyBreakdown[existingDayIndex] = currentDay;
   } else {
     weeklyStats.dailyBreakdown.push(currentDay);
   }
+}
+
+async function resetDailyStats(): Promise<void> {
+  // Save current day to weekly breakdown before resetting
+  updateWeeklyDailyBreakdown();
   
   dailyStats = {
     date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }),
@@ -904,6 +912,10 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     await loadWeeklyStats();
     await loadBoostSessions();
     await loadSupportedCreators();
+    
+    // Ensure current day is in weekly breakdown after loading
+    updateWeeklyDailyBreakdown();
+    await saveWeeklyStats();
   }
 
   // Check if we need to reset daily stats (new day in Eastern Time)
@@ -934,12 +946,14 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     dailyStats.streamShows.add(showName);
     weeklyStats.streamSats += satsAmount;
     weeklyStats.streamShows.add(showName);
+    updateWeeklyDailyBreakdown(); // Update daily breakdown in weekly stats
     logger.info(`Added ${satsAmount} stream sats to daily/weekly totals`);
   } else if (event.action === 2) { // Boost
     dailyStats.boostSats += satsAmount;
     dailyStats.boostShows.add(showName);
     weeklyStats.boostSats += satsAmount;
     weeklyStats.boostShows.add(showName);
+    updateWeeklyDailyBreakdown(); // Update daily breakdown in weekly stats
     logger.info(`Added ${satsAmount} boost sats to daily/weekly totals`);
     
     // Track supported creators for boosts
