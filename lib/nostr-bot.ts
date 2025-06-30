@@ -778,7 +778,7 @@ function scheduleDailySummary(): void {
     scheduleDailySummary(); // Schedule next day
   }, msUntilMidnight);
 
-  console.log(`📅 Daily summary scheduled for ${midnightUTC.toLocaleString('en-US', { timeZone: 'America/New_York' })} (midnight EDT)`);
+  logger.info(`📅 Daily summary scheduled for ${midnightUTC.toLocaleString('en-US', { timeZone: 'America/New_York' })} (midnight EDT)`);
 }
 
 function scheduleWeeklySummary(): void {
@@ -810,7 +810,7 @@ function scheduleWeeklySummary(): void {
     scheduleWeeklySummary(); // Schedule next week
   }, msUntilSunday);
 
-  console.log(`📅 Weekly summary scheduled for ${nextSundayMidnight.toLocaleString()} (Sunday midnight EDT)`);
+  logger.info(`📅 Weekly summary scheduled for ${nextSundayMidnight.toLocaleString()} (Sunday midnight EDT)`);
 }
 
 // Test function to manually post current daily summary
@@ -1825,4 +1825,26 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
     contentLength: content.length,
     tagsCount: allTags.length
   });
+}
+
+// Initialize summary scheduling at bot startup
+export async function initializeSummaryScheduling(): Promise<void> {
+  logger.info('Initializing summary scheduling...');
+  
+  // Load existing stats
+  await loadDailyStats();
+  await loadWeeklyStats();
+  await loadBoostSessions();
+  await loadSupportedCreators();
+  
+  // Ensure current day is in weekly breakdown
+  updateWeeklyDailyBreakdown();
+  await saveWeeklyStats();
+  
+  // Start scheduling
+  scheduleDailySummary();
+  scheduleWeeklySummary();
+  scheduleHourlySave();
+  
+  logger.info('Summary scheduling initialized');
 }

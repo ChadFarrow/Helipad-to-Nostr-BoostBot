@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
-import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary } from './lib/nostr-bot.ts';
+import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary, initializeSummaryScheduling } from './lib/nostr-bot.ts';
 import { logger } from './lib/logger.js';
 
 const execAsync = promisify(exec);
@@ -433,11 +433,18 @@ function startPeriodicMonitoring() {
 }
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   logger.info(`Helipad webhook receiver started`, { port: PORT });
   logger.info(`Webhook URL: http://localhost:${PORT}/helipad-webhook`);
   logger.info(`Health check: http://localhost:${PORT}/health`);
   logger.info(`Management UI: http://localhost:${PORT}/`);
+  
+  // Initialize summary scheduling at startup
+  try {
+    await initializeSummaryScheduling();
+  } catch (error) {
+    logger.error('Failed to initialize summary scheduling:', { error: error.message });
+  }
   
   // Start periodic monitoring
   startPeriodicMonitoring();
