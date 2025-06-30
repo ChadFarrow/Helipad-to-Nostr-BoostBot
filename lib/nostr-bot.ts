@@ -1025,17 +1025,22 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     nullPaymentExternalSender: event.payment_info === null && event.sender !== 'ChadF'
   });
   
+  // Sent boost: payment FROM your node, detected by:
+  // 1. sender is 'ChadF' (your username) - this covers both direct sends and split payments
+  // Note: Split payments from your sends will have payment_info === null but sender === 'ChadF'
+  const isSentBoost = event.sender === 'ChadF';
+  
   // Received boost: payment TO your node, detected by:
   // 1. payment_info.pubkey matches your node pubkey (direct payment)
   // 2. TLV sender_id matches your lightning address 
   // 3. TLV reply_address matches your node pubkey
   // 4. payment_info is null AND sender is external (split payments from apps like Fountain)
-  const isReceivedBoost = (event.payment_info?.pubkey === myNodePubkey) || 
-                         (tlvSenderId === myLightningAddress) ||
-                         (tlvReplyAddress === myNodePubkey) ||
-                         (event.payment_info === null && event.sender !== 'ChadF');
-  
-  const isSentBoost = !isReceivedBoost;
+  const isReceivedBoost = !isSentBoost && (
+    (event.payment_info?.pubkey === myNodePubkey) || 
+    (tlvSenderId === myLightningAddress) ||
+    (tlvReplyAddress === myNodePubkey) ||
+    (event.payment_info === null && event.sender !== 'ChadF')
+  );
   
   if (isSentBoost) {
     logger.info(`✅ Processing SENT boost (outgoing from your node)`, { 
@@ -1090,7 +1095,13 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
   const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
   // Distinguish sent vs received boosts in session IDs to avoid conflicts
   const boostType = isSentBoost ? 'sent' : 'received';
-  const sessionId = `${timeWindow}-${boostType}-${event.sender}-${event.episode}-${event.podcast}`;
+  
+  // For sent boosts, include message content to deduplicate identical boosts across time windows
+  // For received boosts, use standard time window (they shouldn't have this duplication issue)
+  const messageHash = event.message ? event.message.slice(0, 50) : 'nomsg'; // First 50 chars for uniqueness
+  const sessionId = isSentBoost 
+    ? `${boostType}-${event.sender}-${event.episode}-${event.podcast}-${messageHash}`
+    : `${timeWindow}-${boostType}-${event.sender}-${event.episode}-${event.podcast}`;
   
   logger.info(`Processing payment`, { 
     amount: event.value_msat / 1000, 
