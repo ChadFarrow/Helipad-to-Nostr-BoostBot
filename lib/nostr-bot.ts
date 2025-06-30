@@ -1609,6 +1609,22 @@ async function postReceivedBoostToNostr(event: HelipadPaymentEvent, bot: any): P
     contentParts.push(`📻 Episode: ${event.episode}`);
   }
 
+  // Parse TLV data to build show link
+  let showLink = '';
+  try {
+    if (event.tlv) {
+      const tlvData = JSON.parse(event.tlv);
+      const feedID = tlvData.feedID;
+      
+      // Link to show page (has all episodes + app chooser + episodes.fm button)
+      if (feedID) {
+        showLink = `https://podcastindex.org/podcast/${feedID}`;
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ Failed to parse TLV data for show link:', error);
+  }
+
   // Show split amount vs total for received boosts
   const splitAmount = Math.floor(event.value_msat / 1000);
   const totalAmount = Math.floor(event.value_msat_total / 1000);
@@ -1616,8 +1632,14 @@ async function postReceivedBoostToNostr(event: HelipadPaymentEvent, bot: any): P
     ? `💸 Amount: ${totalAmount.toLocaleString()} sats`
     : `💸 Split: ${splitAmount.toLocaleString()} sats (of ${totalAmount.toLocaleString()} total)`;
 
+  contentParts.push(amountText);
+
+  // Add show link if available
+  if (showLink) {
+    contentParts.push(`🎧 Listen: ${showLink}`);
+  }
+
   contentParts.push(
-    amountText,
     appInfo,
     '',
     '#ThankYou #BoostReceived #Podcasting20 #V4V'
