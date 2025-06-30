@@ -1609,8 +1609,15 @@ async function postReceivedBoostToNostr(event: HelipadPaymentEvent, bot: any): P
     contentParts.push(`📻 Episode: ${event.episode}`);
   }
 
+  // Show split amount vs total for received boosts
+  const splitAmount = Math.floor(event.value_msat / 1000);
+  const totalAmount = Math.floor(event.value_msat_total / 1000);
+  const amountText = splitAmount === totalAmount 
+    ? `💸 Amount: ${totalAmount.toLocaleString()} sats`
+    : `💸 Split: ${splitAmount.toLocaleString()} sats (of ${totalAmount.toLocaleString()} total)`;
+
   contentParts.push(
-    `💸 Amount: ${(event.value_msat_total / 1000).toLocaleString()} sats`,
+    amountText,
     appInfo,
     '',
     '#ThankYou #BoostReceived #Podcasting20 #V4V'
