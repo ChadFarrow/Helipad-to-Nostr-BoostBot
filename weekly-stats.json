@@ -1,8 +1,68 @@
 {
-  "weekStart": "2025-06-23",
+  "weekStart": "2025-07-01",
   "streamSats": 0,
-  "boostSats": 0,
+  "boostSats": 14582,
   "streamShows": [],
-  "boostShows": [],
-  "dailyBreakdown": []
+  "boostShows": [
+    "Entire Discography",
+    "The Satellite Skirmish",
+    "Aged Friends & Old Whiskey",
+    "V4V Radio",
+    "The Sunday Morning Two Hour Folk Hour",
+    "Samurai Holiday",
+    "Bowl After Bowl",
+    "White Triangles",
+    "Through The Mic - Single",
+    "Bloodshot Lies - The Album",
+    "Jawbone II",
+    "Mr. Videoman",
+    "Our Big Dumb Mouth",
+    "Opt Out",
+    "Ungovernable Misfits",
+    "Sats and Sounds",
+    "Rock Paper Bitcoin",
+    "bitpunk.fm",
+    "Podcasting 2.0",
+    "Polar Embrace",
+    "Tripodacus",
+    "Opus",
+    "The Jetsons"
+  ],
+  "dailyBreakdown": [
+    {
+      "date": "2025-07-01",
+      "streamSats": 0,
+      "boostSats": 3834
+    },
+    {
+      "date": "2025-07-02",
+      "streamSats": 0,
+      "boostSats": 3582
+    },
+    {
+      "date": "2025-07-03",
+      "streamSats": 0,
+      "boostSats": 3470
+    },
+    {
+      "date": "2025-07-04",
+      "streamSats": 0,
+      "boostSats": 0
+    },
+    {
+      "date": "2025-07-05",
+      "streamSats": 0,
+      "boostSats": 0
+    },
+    {
+      "date": "2025-07-06",
+      "streamSats": 0,
+      "boostSats": 0
+    },
+    {
+      "date": "2025-07-07",
+      "streamSats": 0,
+      "boostSats": 0
+    }
+  ]
 }

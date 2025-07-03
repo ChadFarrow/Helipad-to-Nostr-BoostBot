@@ -56,7 +56,7 @@ class NostrBot {
   private nsec: string;
   private relays: string[];
 
-  constructor(nsec: string, relays: string[] = ['wss://relay.damus.io', 'wss://relay.nostr.band', 'wss://relay.primal.net', 'wss://7srr7chyc6vlhzpc2hl6lyungvluohzrmt76kbs4kmydhrxoakkbquad.local/', 'wss://chadf.nostr1.com/']) {
+  constructor(nsec: string, relays: string[] = ['wss://relay.damus.io', 'wss://relay.nostr.band', 'wss://relay.primal.net', 'wss://nos.lol', 'wss://relay.snort.social', 'wss://relay.current.fyi', 'wss://chadf.nostr1.com/']) {
     this.nsec = nsec;
     this.relays = relays;
   }
@@ -91,14 +91,16 @@ class NostrBot {
         await relay.publish(event);
         relay.close();
         logger.info(`Successfully published to ${relayUrl}`);
+        return true; // Success
       } catch (error) {
         logger.error(`Failed to publish to ${relayUrl}`, { error: error?.message || error });
+        return false; // Failure
       }
     });
 
     const results = await Promise.allSettled(publishPromises);
-    const successful = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
+    const successful = results.filter(r => r.status === 'fulfilled' && r.value === true).length;
+    const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value === false)).length;
     
     logger.info(`Publish results: ${successful} successful, ${failed} failed out of ${this.relays.length} relays`);
   }
@@ -949,26 +951,40 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     updateWeeklyDailyBreakdown(); // Update daily breakdown in weekly stats
     logger.info(`Added ${satsAmount} stream sats to daily/weekly totals`);
   } else if (event.action === 2) { // Boost
-    dailyStats.boostSats += satsAmount;
-    dailyStats.boostShows.add(showName);
-    weeklyStats.boostSats += satsAmount;
-    weeklyStats.boostShows.add(showName);
-    updateWeeklyDailyBreakdown(); // Update daily breakdown in weekly stats
-    logger.info(`Added ${satsAmount} boost sats to daily/weekly totals`);
+    // For boosts, we need to check if this is a new session or a split payment
+    // Only add to stats if this is a new boost session, not on every split
+    const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
+    const boostType = 'sent';
+    const messageHash = event.message ? event.message.slice(0, 50) : 'nomsg'; // First 50 chars for uniqueness
+    const sessionId = `${boostType}-${event.sender}-${event.episode}-${event.podcast}-${messageHash}`;
     
-    // Track supported creators for boosts
-    if (showName && showName !== 'Unknown') {
-      // Check if this is a music boost
-      const isMusic = event.remote_podcast && event.remote_podcast.trim() && 
-                      event.remote_episode && event.remote_episode.trim();
+    const existingSession = boostSessions.get(sessionId);
+    
+    if (!existingSession) {
+      // This is a new boost session - add to stats
+      dailyStats.boostSats += satsAmount;
+      dailyStats.boostShows.add(showName);
+      weeklyStats.boostSats += satsAmount;
+      weeklyStats.boostShows.add(showName);
+      updateWeeklyDailyBreakdown(); // Update daily breakdown in weekly stats
+      logger.info(`Added ${satsAmount} boost sats to daily/weekly totals (new session)`);
       
-      if (isMusic) {
-        // Track the musician
-        await trackSupportedCreator(event.remote_podcast, 'musician', satsAmount);
-      } else {
-        // Track the podcast
-        await trackSupportedCreator(showName, 'podcast', satsAmount);
+      // Track supported creators for boosts
+      if (showName && showName !== 'Unknown') {
+        // Check if this is a music boost
+        const isMusic = event.remote_podcast && event.remote_podcast.trim() && 
+                        event.remote_episode && event.remote_episode.trim();
+        
+        if (isMusic) {
+          // Track the musician
+          await trackSupportedCreator(event.remote_podcast, 'musician', satsAmount);
+        } else {
+          // Track the podcast
+          await trackSupportedCreator(showName, 'podcast', satsAmount);
+        }
       }
+    } else {
+      logger.info(`Skipping stats update for split payment in existing session ${sessionId}`);
     }
   }
   
@@ -991,77 +1007,105 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     return; // Skip individual posts for streams
   }
 
-  // Determine if this is a sent or received boost
-  // Better approach: check if payment is TO your node's pubkey/address
-  const myNodePubkey = '032870511bfa0309bab3ca1832ead69eed848a4abddbc4d50e55bb2157f9525e51';
-  const myLightningAddress = 'chadf@getalby.com';
+  // RECEIVING BOOST DETECTION COMMENTED OUT - ONLY PROCESS SENT BOOSTS
+  // TODO: Uncomment and modify when setting up separate webhook for receiving
   
-  // Check TLV data for sender_id and reply_address
-  let tlvSenderId = '';
-  let tlvReplyAddress = '';
-  try {
-    if (event.tlv) {
-      const tlvData = JSON.parse(event.tlv);
-      tlvSenderId = tlvData.sender_id || '';
-      tlvReplyAddress = tlvData.reply_address || '';
-    }
-  } catch (error) {
-    logger.debug('Failed to parse TLV data for boost direction detection', { error: error.message });
-  }
+  // // Determine if this is a sent or received boost
+  // // Better approach: check if payment is TO your node's pubkey/address
+  // const myNodePubkey = '032870511bfa0309bab3ca1832ead69eed848a4abddbc4d50e55bb2157f9525e51';
+  // const myLightningAddress = 'chadf@getalby.com';
+  // 
+  // // Check TLV data for sender_id and reply_address
+  // let tlvSenderId = '';
+  // let tlvReplyAddress = '';
+  // try {
+  //   if (event.tlv) {
+  //     const tlvData = JSON.parse(event.tlv);
+  //     tlvSenderId = tlvData.sender_id || '';
+  //     tlvReplyAddress = tlvData.reply_address || '';
+  //   }
+  // } catch (error) {
+  //   logger.debug('Failed to parse TLV data for boost direction detection', { error: error.message });
+  // }
+  // 
+  // // Debug: Log all the detection fields for analysis
+  // logger.info('Boost direction detection debug', {
+  //   sender: event.sender,
+  //   amount: event.value_msat_total / 1000,
+  //   paymentInfoPubkey: event.payment_info?.pubkey,
+  //   paymentInfoIsNull: event.payment_info === null,
+  //   myNodePubkey,
+  //   tlvSenderId,
+  //   tlvReplyAddress,
+  //   myLightningAddress,
+  //   paymentPubkeyMatch: event.payment_info?.pubkey === myNodePubkey,
+  //   senderIdMatch: tlvSenderId === myLightningAddress,
+  //   replyAddressMatch: tlvReplyAddress === myNodePubkey,
+  //   nullPaymentExternalSender: event.payment_info === null && event.sender !== 'ChadF'
+  // });
+  // 
+  // // Sent boost: payment FROM your node, detected by:
+  // // 1. sender is 'ChadF' (your username) - this covers both direct sends and split payments
+  // // Note: Split payments from your sends will have payment_info === null but sender === 'ChadF'
+  // const isSentBoost = event.sender === 'ChadF';
+  // 
+  // // Received boost: payment TO your node, detected by:
+  // // 1. payment_info.pubkey matches your node pubkey (direct payment)
+  // // 2. TLV sender_id matches your lightning address 
+  // // 3. TLV reply_address matches your node pubkey
+  // // 4. payment_info is null AND sender is external (split payments from apps like Fountain)
+  // const isReceivedBoost = !isSentBoost && (
+  //   (event.payment_info?.pubkey === myNodePubkey) || 
+  //   (tlvSenderId === myLightningAddress) ||
+  //   (tlvReplyAddress === myNodePubkey) ||
+  //   (event.payment_info === null && event.sender !== 'ChadF')
+  // );
+  // 
+  // if (isSentBoost) {
+  //   logger.info(`✅ Processing SENT boost (outgoing from your node)`, { 
+  //     sender: event.sender, 
+  //     amount: event.value_msat_total / 1000,
+  //     recipientPubkey: event.payment_info?.pubkey,
+  //     tlvSenderId,
+  //     tlvReplyAddress
+  //   });
+  // } else {
+  //   logger.info(`📨 Processing RECEIVED boost (incoming to your node)`, { 
+  //     sender: event.sender, 
+  //     amount: event.value_msat_total / 1000,
+  //     recipientPubkey: event.payment_info?.pubkey,
+  //     tlvSenderId,
+  //     tlvReplyAddress,
+  //     detectionReason: event.payment_info?.pubkey === myNodePubkey ? 'pubkey_match' : 
+  //                     tlvSenderId === myLightningAddress ? 'sender_id_match' :
+  //                     tlvReplyAddress === myNodePubkey ? 'reply_address_match' : 'unknown'
+  //   });
+  // }
   
-  // Debug: Log all the detection fields for analysis
-  logger.info('Boost direction detection debug', {
-    sender: event.sender,
-    amount: event.value_msat_total / 1000,
-    paymentInfoPubkey: event.payment_info?.pubkey,
-    paymentInfoIsNull: event.payment_info === null,
-    myNodePubkey,
-    tlvSenderId,
-    tlvReplyAddress,
-    myLightningAddress,
-    paymentPubkeyMatch: event.payment_info?.pubkey === myNodePubkey,
-    senderIdMatch: tlvSenderId === myLightningAddress,
-    replyAddressMatch: tlvReplyAddress === myNodePubkey,
-    nullPaymentExternalSender: event.payment_info === null && event.sender !== 'ChadF'
-  });
-  
-  // Sent boost: payment FROM your node, detected by:
-  // 1. sender is 'ChadF' (your username) - this covers both direct sends and split payments
-  // Note: Split payments from your sends will have payment_info === null but sender === 'ChadF'
+  // SIMPLIFIED LOGIC: Only process sent boosts (sender === 'ChadF')
   const isSentBoost = event.sender === 'ChadF';
   
-  // Received boost: payment TO your node, detected by:
-  // 1. payment_info.pubkey matches your node pubkey (direct payment)
-  // 2. TLV sender_id matches your lightning address 
-  // 3. TLV reply_address matches your node pubkey
-  // 4. payment_info is null AND sender is external (split payments from apps like Fountain)
-  const isReceivedBoost = !isSentBoost && (
-    (event.payment_info?.pubkey === myNodePubkey) || 
-    (tlvSenderId === myLightningAddress) ||
-    (tlvReplyAddress === myNodePubkey) ||
-    (event.payment_info === null && event.sender !== 'ChadF')
-  );
+  // Log ALL boosts for debugging
+  logger.info(`🔍 Boost received - checking sender`, { 
+    sender: event.sender, 
+    expectedSender: 'ChadF',
+    isSentBoost: isSentBoost,
+    amount: event.value_msat_total / 1000
+  });
   
-  if (isSentBoost) {
-    logger.info(`✅ Processing SENT boost (outgoing from your node)`, { 
+  // Skip all non-sent boosts for now
+  if (!isSentBoost) {
+    logger.info(`⏭️  Skipping non-sent boost (will be handled by separate webhook)`, { 
       sender: event.sender, 
-      amount: event.value_msat_total / 1000,
-      recipientPubkey: event.payment_info?.pubkey,
-      tlvSenderId,
-      tlvReplyAddress
+      amount: event.value_msat_total / 1000
     });
-  } else {
-    logger.info(`📨 Processing RECEIVED boost (incoming to your node)`, { 
-      sender: event.sender, 
-      amount: event.value_msat_total / 1000,
-      recipientPubkey: event.payment_info?.pubkey,
-      tlvSenderId,
-      tlvReplyAddress,
-      detectionReason: event.payment_info?.pubkey === myNodePubkey ? 'pubkey_match' : 
-                      tlvSenderId === myLightningAddress ? 'sender_id_match' :
-                      tlvReplyAddress === myNodePubkey ? 'reply_address_match' : 'unknown'
-    });
+    return;
   }
+  
+  logger.info(`✅ Processing SENT boost (outgoing from your node)`, { 
+    sender: event.sender, 
+    amount: event.value_msat_total / 1000
+  });
 
   // Boost direction now determined by recipient pubkey/address, not sender name
 
@@ -1093,15 +1137,12 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
 
   // Group splits by a wider time window to catch all splits from the same boost
   const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
-  // Distinguish sent vs received boosts in session IDs to avoid conflicts
-  const boostType = isSentBoost ? 'sent' : 'received';
+  // Only handling sent boosts now
+  const boostType = 'sent';
   
   // For sent boosts, include message content to deduplicate identical boosts across time windows
-  // For received boosts, use standard time window (they shouldn't have this duplication issue)
   const messageHash = event.message ? event.message.slice(0, 50) : 'nomsg'; // First 50 chars for uniqueness
-  const sessionId = isSentBoost 
-    ? `${boostType}-${event.sender}-${event.episode}-${event.podcast}-${messageHash}`
-    : `${timeWindow}-${boostType}-${event.sender}-${event.episode}-${event.podcast}`;
+  const sessionId = `${boostType}-${event.sender}-${event.episode}-${event.podcast}-${messageHash}`;
   
   logger.info(`Processing payment`, { 
     amount: event.value_msat / 1000, 
@@ -1156,47 +1197,59 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     postedBoosts.add(sessionId);
     boostSessions.delete(sessionId);
     
-    // Post the largest payment from this session
+    // Post the largest payment from this session (only sent boosts)
     try {
-      // Re-check boost type using recipient pubkey/address logic
-      const sessionMyNodePubkey = '032870511bfa0309bab3ca1832ead69eed848a4abddbc4d50e55bb2157f9525e51';
-      const sessionMyLightningAddress = 'chadf@getalby.com';
+      // RECEIVING BOOST HANDLING COMMENTED OUT - ONLY HANDLE SENT BOOSTS
+      // TODO: Remove this comment when setting up separate webhook for receiving
       
-      let sessionTlvSenderId = '';
-      let sessionTlvReplyAddress = '';
-      try {
-        if (session.largestSplit.tlv) {
-          const tlvData = JSON.parse(session.largestSplit.tlv);
-          sessionTlvSenderId = tlvData.sender_id || '';
-          sessionTlvReplyAddress = tlvData.reply_address || '';
-        }
-      } catch (error) {
-        logger.debug('Failed to parse session TLV data', { error: error.message });
-      }
+      // // Re-check boost type using recipient pubkey/address logic
+      // const sessionMyNodePubkey = '032870511bfa0309bab3ca1832ead69eed848a4abddbc4d50e55bb2157f9525e51';
+      // const sessionMyLightningAddress = 'chadf@getalby.com';
+      // 
+      // let sessionTlvSenderId = '';
+      // let sessionTlvReplyAddress = '';
+      // try {
+      //   if (session.largestSplit.tlv) {
+      //     const tlvData = JSON.parse(session.largestSplit.tlv);
+      //     sessionTlvSenderId = tlvData.sender_id || '';
+      //     sessionTlvReplyAddress = tlvData.reply_address || '';
+      //   }
+      // } catch (error) {
+      //   logger.debug('Failed to parse session TLV data', { error: error.message });
+      // }
+      // 
+      // const isSessionReceivedBoost = (session.largestSplit.payment_info?.pubkey === sessionMyNodePubkey) || 
+      //                              (sessionTlvSenderId === sessionMyLightningAddress) ||
+      //                              (sessionTlvReplyAddress === sessionMyNodePubkey) ||
+      //                              (session.largestSplit.payment_info === null && session.largestSplit.sender !== 'ChadF');
+      // 
+      // const isSessionSentBoost = !isSessionReceivedBoost;
+      // 
+      // // Debug logging to trace the conditional logic
+      // logger.info('Conditional logic debug', {
+      //   sessionId,
+      //   sender: session.largestSplit.sender,
+      //   recipientPubkey: session.largestSplit.payment_info?.pubkey,
+      //   sessionTlvSenderId,
+      //   sessionTlvReplyAddress,
+      //   isSessionSentBoost,
+      //   willCallFunction: isSessionSentBoost ? 'postBoostToNostr' : 'postReceivedBoostToNostr'
+      // });
+      // 
+      // if (isSessionSentBoost) {
+      //   await postBoostToNostr(session.largestSplit, bot);
+      // } else {
+      //   await postReceivedBoostToNostr(session.largestSplit, bot);
+      // }
       
-      const isSessionReceivedBoost = (session.largestSplit.payment_info?.pubkey === sessionMyNodePubkey) || 
-                                   (sessionTlvSenderId === sessionMyLightningAddress) ||
-                                   (sessionTlvReplyAddress === sessionMyNodePubkey) ||
-                                   (session.largestSplit.payment_info === null && session.largestSplit.sender !== 'ChadF');
-      
-      const isSessionSentBoost = !isSessionReceivedBoost;
-      
-      // Debug logging to trace the conditional logic
-      logger.info('Conditional logic debug', {
+      // SIMPLIFIED: Only handle sent boosts
+      logger.info('Posting sent boost to Nostr', {
         sessionId,
         sender: session.largestSplit.sender,
-        recipientPubkey: session.largestSplit.payment_info?.pubkey,
-        sessionTlvSenderId,
-        sessionTlvReplyAddress,
-        isSessionSentBoost,
-        willCallFunction: isSessionSentBoost ? 'postBoostToNostr' : 'postReceivedBoostToNostr'
+        amount: session.largestSplit.value_msat_total / 1000
       });
       
-      if (isSessionSentBoost) {
-        await postBoostToNostr(session.largestSplit, bot);
-      } else {
-        await postReceivedBoostToNostr(session.largestSplit, bot);
-      }
+      await postBoostToNostr(session.largestSplit, bot);
     } catch (error) {
       logger.error('Error in postBoostToNostr', { 
         error: error.message, 
@@ -1558,6 +1611,9 @@ function processMessageForTags(message: string): { processedMessage: string; tag
   return { processedMessage, tags };
 }
 
+// COMMENTED OUT - RECEIVED BOOST FUNCTIONALITY DISABLED
+// TODO: Uncomment and modify for separate webhook handling received boosts
+/*
 async function postReceivedBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<void> {
   logger.info('Starting to post received boost to Nostr', { 
     sender: event.sender, 
@@ -1674,6 +1730,7 @@ async function postReceivedBoostToNostr(event: HelipadPaymentEvent, bot: any): P
     tagsCount: allTags.length
   });
 }
+*/
 
 async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<void> {
   logger.info('Starting to post boost to Nostr', { 
