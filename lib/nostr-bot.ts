@@ -1809,7 +1809,8 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
 
   // Add visible host mentions if any
   if (showHostMentions.length > 0) {
-    contentParts.push(`👥 Hosts: ${showHostMentions.join(' ')}`);
+    const hostLabel = showHostMentions.length === 1 ? '👤 Host:' : '👥 Hosts:';
+    contentParts.push(`${hostLabel} ${showHostMentions.join(' ')}`);
   }
 
   // Build app info with link if available
