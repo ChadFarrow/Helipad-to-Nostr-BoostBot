@@ -1,0 +1,35 @@
+
+services:
+  boostbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PORT: 3333
+    container_name: helipad-boostbot
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    environment:
+      - NODE_ENV=production
+      - PORT=3333
+      - NOSTR_BOOST_BOT_NSEC=${NOSTR_BOOST_BOT_NSEC}
+      - HELIPAD_WEBHOOK_TOKEN=${HELIPAD_WEBHOOK_TOKEN}
+      - TEST_MODE=${TEST_MODE:-false}
+    volumes:
+      # Persistent data storage
+      - ./data:/app/data
+      # Optional: Mount logs for debugging
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3333/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - boostbot-network
+
+networks:
+  boostbot-network:
+    driver: bridge 

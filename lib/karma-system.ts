@@ -9,12 +9,15 @@ export interface KarmaEntity {
   karma: number;
   firstSeen: string;
   lastSeen: string;
-  boostCount: number;
+  totalBoosts: number;
+  totalSats: number;
+  // Optional fields for tracks
+  npub?: string;
+  showName?: string;
 }
 
 export interface KarmaData {
-  entities: { [key: string]: KarmaEntity };
-  lastUpdated: string;
+  [key: string]: KarmaEntity;
 }
 
 class KarmaSystem {
@@ -31,30 +34,32 @@ class KarmaSystem {
       if (fs.existsSync(this.dataPath)) {
         const fileContent = fs.readFileSync(this.dataPath, 'utf8');
         const loadedData = JSON.parse(fileContent);
-        logger.info(`📊 Loaded karma data for ${Object.keys(loadedData.entities || {}).length} entities`);
+        
+        // Check if data is in old nested format and migrate
+        if (loadedData.entities) {
+          logger.info('📊 Migrating karma data from old nested format');
+          const migratedData = loadedData.entities;
+          this.saveData();
+          return migratedData;
+        }
+        
+        logger.info(`📊 Loaded karma data for ${Object.keys(loadedData).length} entities`);
         return loadedData;
       } else {
         logger.info('📊 No previous karma data found, starting fresh');
-        return {
-          entities: {},
-          lastUpdated: new Date().toISOString()
-        };
+        return {};
       }
     } catch (error) {
-      logger.error('Error loading karma data:', error);
-      return {
-        entities: {},
-        lastUpdated: new Date().toISOString()
-      };
+      logger.error('Error loading karma data:', error as any);
+      return {};
     }
   }
 
   private saveData(): void {
     try {
-      this.data.lastUpdated = new Date().toISOString();
       fs.writeFileSync(this.dataPath, JSON.stringify(this.data, null, 2));
     } catch (error) {
-      logger.error('Error saving karma data:', error);
+      logger.error('Error saving karma data:', error as any);
     }
   }
 
@@ -62,30 +67,45 @@ class KarmaSystem {
     return `${type}:${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
   }
 
-  public addKarma(name: string, type: 'person' | 'show' | 'track', amount: number = 1): void {
+  public addKarma(name: string, type: 'person' | 'show' | 'track', amount: number = 1, sats: number = 0, metadata?: { npub?: string; showName?: string }): void {
     const id = this.generateId(name, type);
-    const now = new Date().toISOString();
+    const now = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
-    if (this.data.entities[id]) {
+    if (this.data[id]) {
       // Update existing entity
-      const entity = this.data.entities[id];
-      const oldKarma = entity.karma;
+      const entity = this.data[id];
       entity.karma += amount;
       entity.lastSeen = now;
-      entity.boostCount += 1;
+      entity.totalBoosts += 1;
+      entity.totalSats += sats;
+      
+      // Update metadata for tracks
+      if (type === 'track' && metadata) {
+        if (metadata.npub) entity.npub = metadata.npub;
+        if (metadata.showName) entity.showName = metadata.showName;
+      }
       
       logger.info(`📈 Updated karma for ${type} "${name}": ${entity.karma} karma (+${amount})`);
     } else {
       // Create new entity
-      this.data.entities[id] = {
+      const newEntity: KarmaEntity = {
         id,
         name,
         type,
         karma: amount,
         firstSeen: now,
         lastSeen: now,
-        boostCount: 1
+        totalBoosts: 1,
+        totalSats: sats
       };
+      
+      // Add metadata for tracks
+      if (type === 'track' && metadata) {
+        if (metadata.npub) newEntity.npub = metadata.npub;
+        if (metadata.showName) newEntity.showName = metadata.showName;
+      }
+      
+      this.data[id] = newEntity;
       
       logger.info(`🆕 New ${type} added to karma system: "${name}" (${amount} karma)`);
     }
@@ -95,16 +115,16 @@ class KarmaSystem {
 
   public getKarma(name: string, type: 'person' | 'show' | 'track'): number {
     const id = this.generateId(name, type);
-    return this.data.entities[id]?.karma || 0;
+    return this.data[id]?.karma || 0;
   }
 
   public getEntity(name: string, type: 'person' | 'show' | 'track'): KarmaEntity | null {
     const id = this.generateId(name, type);
-    return this.data.entities[id] || null;
+    return this.data[id] || null;
   }
 
   public getAllEntities(): KarmaEntity[] {
-    return Object.values(this.data.entities);
+    return Object.values(this.data);
   }
 
   public getTopEntities(type?: 'person' | 'show' | 'track', limit: number = 10): KarmaEntity[] {
@@ -131,7 +151,7 @@ class KarmaSystem {
     
     topEntities.forEach((entity, index) => {
       const emoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
-      leaderboard += `${emoji} **${entity.name}** - ${entity.karma} karma (${entity.boostCount} boosts)\n`;
+      leaderboard += `${emoji} **${entity.name}** - ${entity.karma} karma (${entity.totalBoosts} boosts)\n`;
     });
     
     return leaderboard;
@@ -144,20 +164,18 @@ class KarmaSystem {
     const tracks = entities.filter(e => e.type === 'track');
     
     const totalKarma = entities.reduce((sum, e) => sum + e.karma, 0);
-    const totalBoosts = entities.reduce((sum, e) => sum + e.boostCount, 0);
+    const totalBoosts = entities.reduce((sum, e) => sum + e.totalBoosts, 0);
+    const totalSats = entities.reduce((sum, e) => sum + e.totalSats, 0);
     
     return `📊 **Karma System Stats**\n\n` +
            `👥 **People:** ${people.length} (${people.reduce((sum, p) => sum + p.karma, 0)} karma)\n` +
            `📻 **Shows:** ${shows.length} (${shows.reduce((sum, s) => sum + s.karma, 0)} karma)\n` +
            `🎵 **Tracks:** ${tracks.length} (${tracks.reduce((sum, t) => sum + t.karma, 0)} karma)\n\n` +
-           `💫 **Total:** ${entities.length} entities, ${totalKarma} karma, ${totalBoosts} boosts`;
+           `💫 **Total:** ${entities.length} entities, ${totalKarma} karma, ${totalBoosts} boosts, ${totalSats} sats`;
   }
 
   public resetKarma(): void {
-    this.data = {
-      entities: {},
-      lastUpdated: new Date().toISOString()
-    };
+    this.data = {};
     this.saveData();
     logger.info('🔄 Karma system reset');
   }

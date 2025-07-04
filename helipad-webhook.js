@@ -7,6 +7,7 @@ import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
 import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary, initializeSummaryScheduling } from './lib/nostr-bot.ts';
 import { logger } from './lib/logger.js';
+import { karmaSystem } from './lib/karma-system.ts';
 
 const execAsync = promisify(exec);
 
@@ -99,7 +100,9 @@ dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 
-// Serve static files from public directory
+
+
+// Serve static files from public directory (after root route)
 app.use(express.static('public'));
 
 const AUTH_TOKEN = process.env.HELIPAD_WEBHOOK_TOKEN;
@@ -166,6 +169,33 @@ app.post('/helipad-webhook', authenticate, async (req, res) => {
       podcast: event.podcast,
       episode: event.episode
     });
+    
+    // Track karma for boosts (action === 2) - BETA: Data collection only, no Nostr posting
+    if (event.action === 2 && satsAmount > 0) {
+      try {
+        // Track show karma
+        const showName = event.podcast || event.episode || 'Unknown Show';
+        karmaSystem.addKarma(showName, 'show', 1, satsAmount);
+        
+        // Track episode karma if different from show
+        if (event.episode && event.episode !== event.podcast) {
+          const episodeName = event.episode;
+          karmaSystem.addKarma(episodeName, 'track', 1, satsAmount, {
+            showName: showName,
+            npub: event.sender || ''
+          });
+        }
+        
+        // Track sender karma (person who sent the boost)
+        if (event.sender && event.sender !== 'Unknown') {
+          karmaSystem.addKarma(event.sender, 'person', 1, satsAmount);
+        }
+        
+        logger.info(`🧪 [BETA] Karma tracked: Show "${showName}", Episode "${event.episode || 'N/A'}", Sender "${event.sender || 'Unknown'}" (+${satsAmount} sats)`);
+      } catch (karmaError) {
+        logger.error('Error tracking karma:', karmaError);
+      }
+    }
     
     await announceHelipadPayment(event);
     
