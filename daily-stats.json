@@ -1,13 +1,7 @@
 {
-  "date": "2025-07-03",
+  "date": "2025-07-04",
   "streamSats": 0,
-  "boostSats": 3470,
+  "boostSats": 0,
   "streamShows": [],
-  "boostShows": [
-    "Entire Discography",
-    "The Satellite Skirmish",
-    "Aged Friends & Old Whiskey",
-    "V4V Radio",
-    "The Sunday Morning Two Hour Folk Hour"
-  ]
+  "boostShows": []
 }
