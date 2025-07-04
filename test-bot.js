@@ -1,4 +1,8 @@
+import dotenv from 'dotenv';
 import { createNostrBot } from './lib/nostr-bot.ts';
+
+// Load environment variables
+dotenv.config();
 
 try {
   const bot = createNostrBot();
