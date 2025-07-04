@@ -6,6 +6,7 @@ import { Relay } from 'nostr-tools/relay';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { logger } from './logger.js';
+import { loadKarmaData, processBoostForKarma, getTopKarma } from './karma-system.js';
 
 interface FundraiserUpdateOptions {
   title: string;
@@ -212,6 +213,19 @@ export function createNostrBot(): NostrBot | null {
   }
 
   return new NostrBot(botNsec);
+}
+
+// Helper function to format karma leaderboard
+function formatKarmaLeaderboard(title: string, entities: any[]): string {
+  if (entities.length === 0) return '';
+  
+  let output = `\n🏆 ${title}\n`;
+  entities.forEach((entity, idx) => {
+    output += `${idx + 1}. ${entity.name} (${entity.karma} karma)`;
+    if (entity.showName) output += ` - ${entity.showName}`;
+    output += '\n';
+  });
+  return output;
 }
 
 // Helper functions for easy use
@@ -622,6 +636,15 @@ async function postDailySummary(): Promise<void> {
     }
   }
 
+  // Get karma leaderboards
+  const topShows = getTopKarma(3, 'show');
+  const topTracks = getTopKarma(3, 'track');
+  const topPeople = getTopKarma(3, 'person');
+  
+  const karmaLeaderboard = formatKarmaLeaderboard('Top Shows', topShows) +
+                          formatKarmaLeaderboard('Top Tracks', topTracks) +
+                          formatKarmaLeaderboard('Top People', topPeople);
+
   const content = `📊 Daily V4V Summary - ${dailyStats.date}
 
 🌊 Streamed: ${dailyStats.streamSats.toLocaleString()} sats
@@ -629,9 +652,9 @@ async function postDailySummary(): Promise<void> {
 💰 Total: ${(dailyStats.streamSats + dailyStats.boostSats).toLocaleString()} sats
 
 ${streamShows.length > 0 ? `🎧 Streamed to:\n${streamShows.map(show => `• ${show}`).join('\n')}\n` : ''}
-${boostShows.length > 0 ? `🚀 Boosted:\n${boostShows.map(show => `• ${show}`).join('\n')}` : ''}
+${boostShows.length > 0 ? `🚀 Boosted:\n${boostShows.map(show => `• ${show}`).join('\n')}\n` : ''}${karmaLeaderboard}
 
-#V4V #Podcasting20 #PC20 #ValueStreaming #Boostagram`;
+#V4V #Podcasting20 #PC20 #ValueStreaming #Boostagram #Karma`;
 
   const nostrEvent = finalizeEvent({
     kind: 1,
@@ -709,6 +732,15 @@ async function postWeeklySummary(): Promise<void> {
     })
     .join(' | ');
 
+  // Get karma leaderboards for weekly summary
+  const topShows = getTopKarma(5, 'show'); // Show more for weekly
+  const topTracks = getTopKarma(5, 'track');
+  const topPeople = getTopKarma(5, 'person');
+  
+  const karmaLeaderboard = formatKarmaLeaderboard('Top Shows', topShows) +
+                          formatKarmaLeaderboard('Top Tracks', topTracks) +
+                          formatKarmaLeaderboard('Top People', topPeople);
+
   const content = `📊 Weekly V4V Summary - ${dateRange}
 
 🌊 Streamed: ${weeklyStats.streamSats.toLocaleString()} sats
@@ -718,9 +750,9 @@ async function postWeeklySummary(): Promise<void> {
 📈 Daily breakdown: ${dailyBreakdownText}
 
 ${streamShows.length > 0 ? `🎧 Streamed to:\n${streamShows.map(show => `• ${show}`).join('\n')}\n` : ''}
-${boostShows.length > 0 ? `🚀 Boosted:\n${boostShows.map(show => `• ${show}`).join('\n')}` : ''}
+${boostShows.length > 0 ? `🚀 Boosted:\n${boostShows.map(show => `• ${show}`).join('\n')}\n` : ''}${karmaLeaderboard}
 
-#V4V #Podcasting20 #PC20 #ValueStreaming #WeeklySummary`;
+#V4V #Podcasting20 #PC20 #ValueStreaming #WeeklySummary #Karma`;
 
   const nostrEvent = finalizeEvent({
     kind: 1,
@@ -914,6 +946,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     await loadWeeklyStats();
     await loadBoostSessions();
     await loadSupportedCreators();
+    await loadKarmaData();
     
     // Ensure current day is in weekly breakdown after loading
     updateWeeklyDailyBreakdown();
@@ -983,6 +1016,9 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
           await trackSupportedCreator(showName, 'podcast', satsAmount);
         }
       }
+      
+      // Process karma for this boost
+      await processBoostForKarma(event);
     } else {
       logger.info(`Skipping stats update for split payment in existing session ${sessionId}`);
     }
@@ -1894,6 +1930,7 @@ export async function initializeSummaryScheduling(): Promise<void> {
   await loadWeeklyStats();
   await loadBoostSessions();
   await loadSupportedCreators();
+  await loadKarmaData();
   
   // Ensure current day is in weekly breakdown
   updateWeeklyDailyBreakdown();

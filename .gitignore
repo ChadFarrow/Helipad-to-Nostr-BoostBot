@@ -25,6 +25,7 @@ daily-stats.json
 weekly-stats.json
 boost-sessions.json
 supported-creators.json
+karma-data.json
 
 # LIT_Bot specific
 convert-key.js 
