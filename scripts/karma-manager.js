@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { karmaSystem } from '../lib/karma-system.js';
+import { karmaSystem } from '../dist/lib/karma-system.js';
 
 const args = process.argv.slice(2);
 const command = args[0];

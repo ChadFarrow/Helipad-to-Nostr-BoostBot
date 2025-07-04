@@ -1,6 +1,12 @@
 // Server-side only - Nostr bot for posting fundraiser updates
 // NOTE: This will only work if you deploy to a server environment (not static hosting)
 // For static hosting, you'll need to set up a separate server/API for bot posting
+
+// WebSocket polyfill for Node.js
+import WebSocket from 'ws';
+// @ts-ignore
+global.WebSocket = WebSocket;
+
 import { finalizeEvent, nip19 } from 'nostr-tools';
 import { Relay } from 'nostr-tools/relay';
 import { promises as fs } from 'fs';
@@ -78,11 +84,11 @@ class NostrBot {
         content: event.content,
         tags: event.tags,
         relays: this.relays 
-      });
+      } as any);
       return;
     }
 
-    logger.info(`Attempting to publish to ${this.relays.length} relays`, { content: event.content });
+    logger.info(`Attempting to publish to ${this.relays.length} relays`, { content: event.content } as any);
     
     const publishPromises = this.relays.map(async (relayUrl) => {
       try {
@@ -94,7 +100,12 @@ class NostrBot {
         logger.info(`Successfully published to ${relayUrl}`);
         return true; // Success
       } catch (error) {
-        logger.error(`Failed to publish to ${relayUrl}`, { error: error?.message || error });
+        logger.error(
+          `Failed to publish to ${relayUrl}`,
+          error instanceof Error
+            ? { error: error.message, stack: error.stack }
+            : { error: String(error) }
+        );
         return false; // Failure
       }
     });
@@ -103,7 +114,7 @@ class NostrBot {
     const successful = results.filter(r => r.status === 'fulfilled' && r.value === true).length;
     const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value === false)).length;
     
-    logger.info(`Publish results: ${successful} successful, ${failed} failed out of ${this.relays.length} relays`);
+    logger.info(`Publish results: ${successful} successful, ${failed} failed out of ${this.relays.length} relays`, { successful, failed, total: this.relays.length } as any);
   }
 
   async postFundraiserCreated(options: FundraiserUpdateOptions): Promise<void> {
@@ -506,7 +517,7 @@ async function loadBoostSessions(): Promise<void> {
           logger.info(`Posting delayed session ${session.sessionId} after restart`, { 
             amount: session.largestSplit.value_msat / 1000, 
             total: session.largestSplit.value_msat_total / 1000 
-          });
+          } as any);
           
           const bot = createNostrBot();
           if (bot) {
@@ -516,11 +527,11 @@ async function loadBoostSessions(): Promise<void> {
               await postBoostToNostr(session.largestSplit, bot);
             } catch (error) {
               logger.error('Error in postBoostToNostr during session restoration', { 
-                error: error.message, 
-                stack: error.stack,
+                error: error instanceof Error ? error.message : String(error), 
+                stack: error instanceof Error ? error.stack : undefined,
                 session: session.sessionId,
                 amount: session.largestSplit.value_msat_total / 1000
-              });
+              } as any);
             }
             await saveBoostSessions(); // Clean up file
           }
@@ -538,7 +549,7 @@ async function loadBoostSessions(): Promise<void> {
           amount: session.largestSplit.value_msat / 1000, 
           total: session.largestSplit.value_msat_total / 1000,
           expiredBy: now - session.expiresAt
-        });
+        } as any);
         
         const bot = createNostrBot();
         if (bot) {
@@ -547,11 +558,11 @@ async function loadBoostSessions(): Promise<void> {
             await postBoostToNostr(session.largestSplit, bot);
           } catch (error) {
             logger.error('Error in postBoostToNostr for expired session', { 
-              error: error.message, 
-              stack: error.stack,
+              error: error instanceof Error ? error.message : String(error), 
+              stack: error instanceof Error ? error.stack : undefined,
               session: session.sessionId,
               amount: session.largestSplit.value_msat_total / 1000
-            });
+            } as any);
           }
         }
       }
@@ -781,7 +792,7 @@ function scheduleDailySummary(): void {
     scheduleDailySummary(); // Schedule next day
   }, msUntilMidnight);
 
-  logger.info(`📅 Daily summary scheduled for ${midnightUTC.toLocaleString('en-US', { timeZone: 'America/New_York' })} (midnight EDT)`);
+  logger.info(`📅 Daily summary scheduled for ${midnightUTC.toLocaleString('en-US', { timeZone: 'America/New_York' })} (midnight EDT)`, { midnightUTC } as any);
 }
 
 function scheduleWeeklySummary(): void {
@@ -813,7 +824,7 @@ function scheduleWeeklySummary(): void {
     scheduleWeeklySummary(); // Schedule next week
   }, msUntilSunday);
 
-  logger.info(`📅 Weekly summary scheduled for ${nextSundayMidnight.toLocaleString()} (Sunday midnight EDT)`);
+  logger.info(`📅 Weekly summary scheduled for ${nextSundayMidnight.toLocaleString()} (Sunday midnight EDT)`, { nextSundayMidnight } as any);
 }
 
 // Test function to manually post current daily summary
@@ -907,7 +918,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     sender: event.sender,
     podcast: event.podcast,
     episode: event.episode
-  });
+  } as any);
   
   // Load daily and weekly stats on first run
   if (dailyStats.streamSats === 0 && dailyStats.boostSats === 0 && dailyStats.streamShows.size === 0) {
@@ -978,7 +989,15 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
         
         if (isMusic) {
           // Track the musician
-          await trackSupportedCreator(event.remote_podcast, 'musician', satsAmount);
+          try {
+            await trackSupportedCreator(event.remote_podcast ?? '', 'musician', satsAmount);
+          } catch (error) {
+            if (error instanceof Error) {
+              logger.error('msg', { error: error.message, stack: error.stack });
+            } else {
+              logger.error('msg', { error: String(error) });
+            }
+          }
         } else {
           // Track the podcast
           await trackSupportedCreator(showName, 'podcast', satsAmount);
@@ -1092,21 +1111,21 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     expectedSender: 'ChadF',
     isSentBoost: isSentBoost,
     amount: event.value_msat_total / 1000
-  });
+  } as any);
   
   // Skip all non-sent boosts for now
   if (!isSentBoost) {
     logger.info(`⏭️  Skipping non-sent boost (will be handled by separate webhook)`, { 
       sender: event.sender, 
       amount: event.value_msat_total / 1000
-    });
+    } as any);
     return;
   }
   
   logger.info(`✅ Processing SENT boost (outgoing from your node)`, { 
     sender: event.sender, 
     amount: event.value_msat_total / 1000
-  });
+  } as any);
 
   // Boost direction now determined by recipient pubkey/address, not sender name
 
@@ -1120,18 +1139,22 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     if (event.payment_info?.pubkey) {
       try {
         // Convert hex pubkey to npub for comparison
-        const pubkeyBytes = new Uint8Array(Buffer.from(event.payment_info.pubkey, 'hex'));
-        const recipientNpub = nip19.encode('npub', pubkeyBytes);
+        const recipientNpub = nip19.npubEncode(event.payment_info.pubkey);
         if (blockedBotPubkeys.includes(recipientNpub)) {
           logger.info(`Skipping sent boost to blocked bot account`, { 
             sender: event.sender, 
             recipient: recipientNpub,
             amount: event.value_msat_total / 1000
-          });
+          } as any);
           return; // Skip sent boosts to blocked bot accounts
         }
       } catch (error) {
-        logger.debug('Error checking recipient pubkey against blocklist', { error: error.message });
+        logger.debug(
+          'Error checking recipient pubkey against blocklist',
+          error instanceof Error
+            ? { error: error.message, stack: error.stack }
+            : { error: String(error) }
+        );
       }
     }
   }
@@ -1149,7 +1172,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     amount: event.value_msat / 1000, 
     total: event.value_msat_total / 1000, 
     session: sessionId 
-  });
+  } as any);
   
   // Check if we already posted for this boost session
   if (postedBoosts.has(sessionId)) {
@@ -1170,11 +1193,11 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
       logger.info(`Updated largest split for session ${sessionId}`, { 
         amount: event.value_msat / 1000, 
         total: event.value_msat_total / 1000 
-      });
+      } as any);
     } else {
       logger.info(`Keeping existing largest split for session ${sessionId}`, { 
         amount: existingSession.largestSplit.value_msat / 1000 
-      });
+      } as any);
     }
   } else {
     // First split for this session
@@ -1182,7 +1205,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     logger.info(`New boost session ${sessionId}`, { 
       amount: event.value_msat / 1000, 
       total: event.value_msat_total / 1000 
-    });
+    } as any);
   }
 
   // Set a timeout to post the largest payment after 30 seconds of no new payments
@@ -1192,7 +1215,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     logger.info(`Posting largest payment for session ${sessionId}`, { 
       amount: session.largestSplit.value_msat / 1000, 
       total: session.largestSplit.value_msat_total / 1000 
-    });
+    } as any);
     
     // Mark this session as posted
     postedBoosts.add(sessionId);
@@ -1248,16 +1271,16 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
         sessionId,
         sender: session.largestSplit.sender,
         amount: session.largestSplit.value_msat_total / 1000
-      });
+      } as any);
       
       await postBoostToNostr(session.largestSplit, bot);
     } catch (error) {
       logger.error('Error in postBoostToNostr', { 
-        error: error.message, 
-        stack: error.stack,
+        error: error instanceof Error ? error.message : String(error), 
+        stack: error instanceof Error ? error.stack : undefined,
         session: sessionId,
         amount: session.largestSplit.value_msat_total / 1000
-      });
+      } as any);
     }
     await saveBoostSessions(); // Clean up persisted sessions
   }, 30000);
@@ -1518,7 +1541,7 @@ function getShowBasedTags(showName: string): string[][] {
         } else if (data instanceof Uint8Array) {
           hexPubkey = Array.from(data, byte => byte.toString(16).padStart(2, '0')).join('');
         } else {
-          const uint8Array = new Uint8Array(data as ArrayBufferLike);
+          const uint8Array = new Uint8Array(data as unknown as ArrayBufferLike);
           hexPubkey = Array.from(uint8Array, byte => byte.toString(16).padStart(2, '0')).join('');
         }
         if (hexPubkey.length === 128) {
@@ -1582,7 +1605,7 @@ function processMessageForTags(message: string): { processedMessage: string; tag
           hexPubkey = Array.from(data, byte => byte.toString(16).padStart(2, '0')).join('');
         } else {
           // Try to convert to Uint8Array first
-          const uint8Array = new Uint8Array(data as ArrayBufferLike);
+          const uint8Array = new Uint8Array(data as unknown as ArrayBufferLike);
           hexPubkey = Array.from(uint8Array, byte => byte.toString(16).padStart(2, '0')).join('');
         }
         
@@ -1729,7 +1752,7 @@ async function postReceivedBoostToNostr(event: HelipadPaymentEvent, bot: any): P
     amount: event.value_msat_total / 1000, 
     contentLength: content.length,
     tagsCount: allTags.length
-  });
+  } as any);
 }
 */
 
@@ -1883,7 +1906,7 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
     amount: event.value_msat_total / 1000, 
     contentLength: content.length,
     tagsCount: allTags.length
-  });
+  } as any);
 }
 
 // Initialize summary scheduling at bot startup
