@@ -1,7 +1,13 @@
 {
   "date": "2025-07-04",
-  "streamSats": 0,
-  "boostSats": 0,
-  "streamShows": [],
-  "boostShows": []
+  "streamSats": 6900,
+  "boostSats": 7055,
+  "streamShows": [
+    "bitpunk.fm"
+  ],
+  "boostShows": [
+    "bitpunk.fm unwound",
+    "Poetry on Tape",
+    "Test Show"
+  ]
 }

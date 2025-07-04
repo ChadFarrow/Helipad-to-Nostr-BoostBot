@@ -1,8 +1,68 @@
 {
-  "weekStart": "2025-07-07",
-  "streamSats": 0,
-  "boostSats": 0,
-  "streamShows": [],
-  "boostShows": [],
-  "dailyBreakdown": []
+  "weekStart": "2025-06-30",
+  "streamSats": 15668,
+  "boostSats": 151463,
+  "streamShows": [
+    "bitpunk.fm",
+    "Rock Paper Bitcoin",
+    "Our Big Dumb Mouth",
+    "Homegrown Hits"
+  ],
+  "boostShows": [
+    "Opus",
+    "The Jetsons",
+    "Tripodacus",
+    "Polar Embrace",
+    "The Satellite Skirmish",
+    "bitpunk.fm",
+    "Rock Paper Bitcoin",
+    "Podcasting 2.0",
+    "Sats and Sounds",
+    "Ungovernable Misfits",
+    "Opt Out",
+    "Our Big Dumb Mouth",
+    "Test Show",
+    "Test Podcast",
+    "Test 100 Sats",
+    "Bloodshot Lies - The Album",
+    "Test Recent Boost",
+    "White Triangles",
+    "Through The Mic - Single",
+    "Bowl After Bowl",
+    "Samurai Holiday",
+    "The Sunday Morning Two Hour Folk Hour",
+    "V4V Radio",
+    "Aged Friends & Old Whiskey",
+    "Entire Discography",
+    "Homegrown Hits",
+    "bitpunk.fm unwound",
+    "Poetry on Tape"
+  ],
+  "dailyBreakdown": [
+    {
+      "date": "2025-06-30",
+      "streamSats": 535,
+      "boostSats": 36069
+    },
+    {
+      "date": "2025-07-01",
+      "streamSats": 4314,
+      "boostSats": 22189
+    },
+    {
+      "date": "2025-07-02",
+      "streamSats": 1700,
+      "boostSats": 9301
+    },
+    {
+      "date": "2025-07-03",
+      "streamSats": 2219,
+      "boostSats": 76949
+    },
+    {
+      "date": "2025-07-04",
+      "streamSats": 6900,
+      "boostSats": 7055
+    }
+  ]
 }

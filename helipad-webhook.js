@@ -126,6 +126,7 @@ const authenticate = (req, res, next) => {
   next();
 };
 
+// SENT BOOSTS WEBHOOK - Port 3333 (SENT BOOSTS ONLY)
 app.post('/helipad-webhook', authenticate, async (req, res) => {
   try {
     const event = req.body;
@@ -432,8 +433,8 @@ function startPeriodicMonitoring() {
   }, 5000); // Update every 5 seconds
 }
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, async () => {
+const PORT = process.env.PORT || 3333;
+app.listen(PORT, '0.0.0.0', async () => {
   logger.info(`Helipad webhook receiver started`, { port: PORT });
   logger.info(`Webhook URL: http://localhost:${PORT}/helipad-webhook`);
   logger.info(`Health check: http://localhost:${PORT}/health`);

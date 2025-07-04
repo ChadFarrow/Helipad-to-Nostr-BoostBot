@@ -6,6 +6,7 @@ import { Relay } from 'nostr-tools/relay';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { logger } from './logger.js';
+import { karmaSystem } from './karma-system.js';
 
 interface FundraiserUpdateOptions {
   title: string;
