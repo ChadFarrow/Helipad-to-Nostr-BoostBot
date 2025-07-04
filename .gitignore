@@ -10,10 +10,12 @@
 
 # Log files
 *.log
+*.log.*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-boostbot.log
+boostbot.log*
+logs/
 
 # Build output
 dist
@@ -25,6 +27,35 @@ daily-stats.json
 weekly-stats.json
 boost-sessions.json
 supported-creators.json
+karma-data.json
+
+# CSV reports and data files
+*.csv
+sent_this_week.csv
+report*.csv
+
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+
+# Data directory (runtime data)
+data/
 
 # LIT_Bot specific
 convert-key.js 
