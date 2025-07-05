@@ -22,7 +22,7 @@
 
 **⚠️ Security Disclaimer:** I recommend creating a new set of Nostr keys for this bot so you don't leak your personal ones.
 
-**📱 Compatible Apps:** This only works with apps that use Lightning payments: Alby, Podverse, PodcastGuru, CurioCaster, Castamatic, and LNBeats. Find more compatible apps at [https://podcasting2.org/apps](https://podcasting2.org/apps).
+**📱 Compatible Apps:** This only works with apps that use AlbyHub like Podverse, PodcastGuru, CurioCaster, Castamatic, and LNBeats. Find more compatible apps at [https://podcasting2.org/apps](https://podcasting2.org/apps).
 
 A simplified version of BoostBot for new users. This bot receives Helipad webhooks and posts boosts to Nostr without the complex custom features of the full version.
 
