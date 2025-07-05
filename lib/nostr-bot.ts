@@ -1511,6 +1511,15 @@ function normalizeShowName(name: string): string {
 
 // Utility to get npubs for a show, handling exact and partial matches
 function getShowNpubs(showName: string, episodeName?: string): string[] {
+  // Check episode name for special cases first
+  if (episodeName) {
+    const lowerEpisodeName = normalizeShowName(episodeName);
+    if (lowerEpisodeName.includes('freedom tech friday')) {
+      logger.info(`🎪 Matched episode "${episodeName}" to FREEDOM TECH FRIDAY`);
+      return showToNpubMap['FREEDOM TECH FRIDAY'] || [];
+    }
+  }
+  
   let showNpubs = showToNpubMap[showName];
   if (!showNpubs) {
     const lowerShowName = normalizeShowName(showName);
@@ -1525,15 +1534,6 @@ function getShowNpubs(showName: string, episodeName?: string): string[] {
         logger.info(`🎪 Matched ${showName} to ${mappedShow} via bitpunk pattern`);
         break;
       }
-    }
-  }
-  
-  // Check episode name for special cases
-  if (!showNpubs && episodeName) {
-    const lowerEpisodeName = normalizeShowName(episodeName);
-    if (lowerEpisodeName.includes('freedom tech friday')) {
-      showNpubs = showToNpubMap['FREEDOM TECH FRIDAY'];
-      logger.info(`🎪 Matched episode "${episodeName}" to FREEDOM TECH FRIDAY`);
     }
   }
   

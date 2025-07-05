@@ -31,6 +31,7 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy built application from build stage
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/lib ./lib
+COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/*.js ./
 COPY --from=build /app/public ./public
 # Make compiled lib available as lib for imports
