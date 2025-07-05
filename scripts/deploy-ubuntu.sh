@@ -102,8 +102,12 @@ initial_setup() {
     sudo mkdir -p $PROJECT_DIR
     sudo chown $USER:$USER $PROJECT_DIR
     
-    # Clone repository
+    # Clone repository or pull latest changes
     if [ ! -d "$PROJECT_DIR/.git" ]; then
+        if [ -d "$PROJECT_DIR" ] && [ "$(ls -A $PROJECT_DIR)" ]; then
+            log "Project directory exists but is not a git repository. Backing up and cloning fresh..."
+            sudo mv $PROJECT_DIR ${PROJECT_DIR}.backup.$(date +%Y%m%d-%H%M%S)
+        fi
         log "Cloning repository..."
         git clone $REPO_URL $PROJECT_DIR
     else
