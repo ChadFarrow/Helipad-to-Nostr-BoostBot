@@ -381,7 +381,6 @@ app.get('/logs/stream', (req, res) => {
 
   try {
     // Start Docker logs stream using spawn for better control
-    const { spawn } = require('child_process');
     const dockerLogs = spawn('docker', ['logs', '-f', '--tail', '50', 'helipad-boostbot'], {
       cwd: process.cwd(),
       stdio: ['ignore', 'pipe', 'pipe']
