@@ -19,6 +19,7 @@ services:
       - HELIPAD_WEBHOOK_TOKEN=${HELIPAD_WEBHOOK_TOKEN}
       - TEST_MODE=${TEST_MODE:-false}
       - SERVER_IP=${SERVER_IP:-192.168.0.243}
+      - DOCKER_CONTAINER=true
     volumes:
       # Persistent data storage
       - ./data:/app/data

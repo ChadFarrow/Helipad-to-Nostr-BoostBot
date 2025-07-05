@@ -11,6 +11,12 @@ const __dirname = dirname(__filename);
 // Detect if running in Docker container
 function isDockerContainer() {
   try {
+    // Check for Docker environment variables
+    if (process.env.DOCKER_CONTAINER || process.env.HOSTNAME?.match(/^[a-f0-9]{12}$/)) {
+      return true;
+    }
+    
+    // Check cgroup for Docker
     const cgroup = readFileSync('/proc/1/cgroup', 'utf8');
     return cgroup.includes('docker') || cgroup.includes('kubepods');
   } catch (error) {
@@ -43,7 +49,7 @@ function getServerIP() {
 
 function getProcessInfo() {
   try {
-    const output = execSync('ps aux | grep -E "(helipad-webhook|tsx.*helipad)" | grep -v grep', { encoding: 'utf8' });
+    const output = execSync('ps aux | grep -E "(helipad-webhook|tsx.*helipad|node.*helipad)" | grep -v grep', { encoding: 'utf8' });
     return output.trim().split('\n').filter(line => line.trim());
   } catch (error) {
     return [];
@@ -106,11 +112,16 @@ function main() {
   // Show process details
   processes.forEach((process, index) => {
     const parts = process.split(/\s+/);
+    if (parts.length < 10) return; // Skip malformed lines
+    
     const pid = parts[1];
     const cpu = parts[2];
     const mem = parts[3];
     const time = parts[8];
     const command = parts.slice(10).join(' ');
+    
+    // Skip if this looks like a malformed process line
+    if (!pid || isNaN(parseInt(pid))) return;
     
     console.log(`Process ${index + 1}:`);
     console.log(`  PID: ${pid}`);

@@ -16,6 +16,9 @@ RUN npm run build
 # Production stage
 FROM node:20-alpine
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S boostbot -u 1001
