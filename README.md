@@ -107,8 +107,8 @@ docker compose up -d
 ### For Advanced Users
 ```bash
 # Clone the repository  
-git clone [your-repo-url]
-cd BoostBot
+git clone https://github.com/ChadFarrow/Helipad-to-Nostr-BoostBot.git
+cd Helipad-to-Nostr-BoostBot
 
 # Setup and run
 cp env.example .env
