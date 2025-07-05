@@ -8,6 +8,39 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Detect if running in Docker container
+function isDockerContainer() {
+  try {
+    const cgroup = readFileSync('/proc/1/cgroup', 'utf8');
+    return cgroup.includes('docker') || cgroup.includes('kubepods');
+  } catch (error) {
+    // If we can't read cgroup, check for common Docker indicators
+    try {
+      const hostname = execSync('hostname', { encoding: 'utf8' }).trim();
+      return hostname.length === 12 && /^[a-f0-9]{12}$/.test(hostname); // Docker container ID format
+    } catch (e) {
+      return false;
+    }
+  }
+}
+
+// Get server IP address
+function getServerIP() {
+  try {
+    // Try to get the external IP or use environment variable
+    const serverIP = process.env.SERVER_IP || process.env.HOST_IP;
+    if (serverIP) return serverIP;
+    
+    // Try to get IP from network interfaces
+    const output = execSync('hostname -I', { encoding: 'utf8' });
+    const ips = output.trim().split(/\s+/);
+    // Return the first non-localhost IP
+    return ips.find(ip => ip && ip !== '127.0.0.1' && ip !== '::1') || 'localhost';
+  } catch (error) {
+    return 'localhost';
+  }
+}
+
 function getProcessInfo() {
   try {
     const output = execSync('ps aux | grep -E "(helipad-webhook|tsx.*helipad)" | grep -v grep', { encoding: 'utf8' });
@@ -46,7 +79,17 @@ function formatUptime(seconds) {
 }
 
 function main() {
+  const isDocker = isDockerContainer();
+  const serverIP = getServerIP();
+  const port = process.env.PORT || 3333;
+  
   console.log('🤖 BoostBot Status Check\n');
+  
+  if (isDocker) {
+    console.log('🐳 Running in Docker container');
+    console.log(`🌐 Server IP: ${serverIP}`);
+    console.log(`🔌 Port: ${port}\n`);
+  }
   
   // Check if processes are running
   const processes = getProcessInfo();
@@ -91,26 +134,37 @@ function main() {
   console.log('');
   
   // Check port usage
-  console.log('🔌 Port Status (3333):');
+  console.log(`🔌 Port Status (${port}):`);
   const portInfo = getPortStatus();
   if (portInfo.length > 0) {
-    console.log('  ✅ Port 3333 is in use');
+    console.log(`  ✅ Port ${port} is in use`);
     portInfo.forEach(info => {
       const parts = info.split(/\s+/);
       console.log(`  📡 Process: ${parts[0]} (PID: ${parts[1]})`);
     });
   } else {
-    console.log('  ❌ Port 3333 is not in use');
+    console.log(`  ❌ Port ${port} is not in use`);
   }
   console.log('');
   
-  // Show webhook URL
+  // Show webhook URL with appropriate host
   console.log('🌐 Webhook Information:');
-  console.log('  📡 Webhook URL: http://localhost:3333/helipad-webhook');
-  console.log('  💚 Health Check: http://localhost:3333/health');
-  console.log('  🧪 Test Daily Summary: http://localhost:3333/test-daily-summary');
-  console.log('  📊 Test Weekly Summary: http://localhost:3333/test-weekly-summary');
+  const baseUrl = isDocker ? `http://${serverIP}:${port}` : `http://localhost:${port}`;
+  console.log(`  📡 Webhook URL: ${baseUrl}/helipad-webhook`);
+  console.log(`  💚 Health Check: ${baseUrl}/health`);
+  console.log(`  🧪 Test Daily Summary: ${baseUrl}/test-daily-summary`);
+  console.log(`  📊 Test Weekly Summary: ${baseUrl}/test-weekly-summary`);
+  console.log(`  🖥️  Web Dashboard: ${baseUrl}/`);
   console.log('');
+  
+  if (isDocker) {
+    console.log('🐳 Docker Information:');
+    console.log('  📦 Container: helipad-boostbot');
+    console.log('  🔄 Restart: docker compose restart');
+    console.log('  📋 Logs: docker compose logs -f');
+    console.log('  ⏹️  Stop: docker compose down');
+    console.log('');
+  }
   
   console.log('💡 Management Commands:');
   console.log('  npm run status    - Check this status again');
