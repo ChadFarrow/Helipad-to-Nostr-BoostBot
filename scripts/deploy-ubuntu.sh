@@ -315,4 +315,13 @@ main() {
 }
 
 # Run main function with all arguments
-main "$@" 
+main "$@"
+
+# Check the Docker port mapping
+docker port helipad-boostbot
+
+# Check if the server is actually listening on all interfaces inside the container
+docker exec -it helipad-boostbot ss -tlnp | grep 3333
+
+# Check the container's network configuration
+docker inspect helipad-boostbot | grep -A 10 "NetworkSettings" 

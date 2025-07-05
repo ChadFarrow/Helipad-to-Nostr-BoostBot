@@ -3,7 +3,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
-import { exec, execSync } from 'child_process';
+import { exec, execSync, spawn } from 'child_process';
 import { promisify } from 'util';
 import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary, initializeSummaryScheduling } from './lib/nostr-bot.ts';
 import { logger } from './lib/logger.js';
@@ -379,33 +379,92 @@ app.get('/logs/stream', (req, res) => {
 
   logger.info('Docker logs stream client connected');
 
-  // Start Docker logs stream
-  const dockerLogs = execAsync('docker logs -f --tail 50 helipad-boostbot', { cwd: process.cwd() });
-  
-  dockerLogs.stdout.on('data', (data) => {
-    const lines = data.toString().split('\n').filter(line => line.trim());
-    lines.forEach(line => {
-      res.write(`data: ${JSON.stringify({
-        timestamp: new Date().toISOString(),
-        message: line,
-        type: 'log'
-      })}\n\n`);
+  try {
+    // Start Docker logs stream using spawn for better control
+    const { spawn } = require('child_process');
+    const dockerLogs = spawn('docker', ['logs', '-f', '--tail', '50', 'helipad-boostbot'], {
+      cwd: process.cwd(),
+      stdio: ['ignore', 'pipe', 'pipe']
     });
-  });
+    
+    dockerLogs.stdout.on('data', (data) => {
+      const lines = data.toString().split('\n').filter(line => line.trim());
+      lines.forEach(line => {
+        try {
+          res.write(`data: ${JSON.stringify({
+            timestamp: new Date().toISOString(),
+            message: line,
+            type: 'log'
+          })}\n\n`);
+        } catch (error) {
+          logger.error('Error writing log data to client:', error.message);
+        }
+      });
+    });
 
-  dockerLogs.stderr.on('data', (data) => {
+    dockerLogs.stderr.on('data', (data) => {
+      try {
+        res.write(`data: ${JSON.stringify({
+          timestamp: new Date().toISOString(),
+          message: data.toString(),
+          type: 'error'
+        })}\n\n`);
+      } catch (error) {
+        logger.error('Error writing error data to client:', error.message);
+      }
+    });
+
+    dockerLogs.on('error', (error) => {
+      logger.error('Docker logs process error:', error.message);
+      try {
+        res.write(`data: ${JSON.stringify({
+          timestamp: new Date().toISOString(),
+          message: `Docker logs error: ${error.message}`,
+          type: 'error'
+        })}\n\n`);
+      } catch (writeError) {
+        logger.error('Error writing error to client:', writeError.message);
+      }
+    });
+
+    dockerLogs.on('close', (code) => {
+      logger.info('Docker logs process closed with code:', code);
+      try {
+        res.write(`data: ${JSON.stringify({
+          timestamp: new Date().toISOString(),
+          message: `Docker logs process closed (code: ${code})`,
+          type: 'info'
+        })}\n\n`);
+      } catch (writeError) {
+        logger.error('Error writing close message to client:', writeError.message);
+      }
+    });
+
+    // Handle client disconnect
+    req.on('close', () => {
+      logger.info('Docker logs stream client disconnected');
+      try {
+        dockerLogs.kill();
+      } catch (error) {
+        logger.error('Error killing Docker logs process:', error.message);
+      }
+    });
+
+    // Send initial connection message
     res.write(`data: ${JSON.stringify({
       timestamp: new Date().toISOString(),
-      message: data.toString(),
+      message: 'Connected to Docker logs stream',
+      type: 'info'
+    })}\n\n`);
+
+  } catch (error) {
+    logger.error('Error setting up Docker logs stream:', error.message);
+    res.write(`data: ${JSON.stringify({
+      timestamp: new Date().toISOString(),
+      message: `Failed to start Docker logs: ${error.message}`,
       type: 'error'
     })}\n\n`);
-  });
-
-  // Handle client disconnect
-  req.on('close', () => {
-    logger.info('Docker logs stream client disconnected');
-    dockerLogs.kill();
-  });
+  }
 });
 
 // Live monitor endpoint using Server-Sent Events

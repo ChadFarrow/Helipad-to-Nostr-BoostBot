@@ -517,8 +517,16 @@
                 logsEventSource = new EventSource('/logs/stream');
                 
                 logsEventSource.onmessage = function(event) {
-                    const data = JSON.parse(event.data);
-                    addLogLine(data);
+                    try {
+                        const data = JSON.parse(event.data);
+                        addLogLine(data);
+                    } catch (error) {
+                        addLogLine({
+                            timestamp: new Date().toISOString(),
+                            message: `Error parsing message: ${event.data}`,
+                            type: 'error'
+                        });
+                    }
                 };
                 
                 logsEventSource.onerror = function(event) {
@@ -528,6 +536,21 @@
                         message: 'Connection lost. Retrying...',
                         type: 'error'
                     });
+                    
+                    // Close the connection to prevent automatic retries
+                    logsEventSource.close();
+                    
+                    // Try to reconnect after a delay
+                    setTimeout(() => {
+                        if (isLogging) {
+                            addLogLine({
+                                timestamp: new Date().toISOString(),
+                                message: 'Attempting to reconnect...',
+                                type: 'info'
+                            });
+                            toggleLiveLogs(); // Restart the connection
+                        }
+                    }, 3000);
                 };
                 
             } else {
