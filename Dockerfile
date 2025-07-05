@@ -40,8 +40,11 @@ RUN ln -sf /app/dist/lib /app/lib
 # Create data directory for persistent files
 RUN mkdir -p /app/data && chown -R boostbot:nodejs /app/data /app/public
 
-# Switch to non-root user
-USER boostbot
+# Create a startup script that fixes permissions and then runs the app
+RUN echo '#!/bin/sh\nchown -R boostbot:nodejs /app/data\nchmod -R 755 /app/data\nexec su boostbot -c "$@"' > /app/start.sh && \
+    chmod +x /app/start.sh
+
+# Don't switch user here - we'll do it in the startup script
 
 # Environment variables
 ARG PORT=3333
@@ -56,5 +59,5 @@ EXPOSE ${PORT}
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || 3333) + '/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
 
-# Start the application  
-CMD ["npx", "tsx", "helipad-webhook.js"] 
+# Start the application with permission fix
+CMD ["/app/start.sh", "npx tsx helipad-webhook.js"] 
