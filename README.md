@@ -1,5 +1,7 @@
 # BoostBot - Helipad to Nostr Webhook Bot
 
+> **Note**: This is my custom version with advanced features. For a stripped-down starter version, see [BoostBot Starter](https://github.com/ChadFarrow/BoostBot-Starter).
+
 ## Requirements
 
 **Helipad and Alby Hub are required for this project.**
