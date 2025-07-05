@@ -304,6 +304,9 @@
                 <button class="btn-info" onclick="toggleLiveMonitor()" id="liveMonitorBtn">
                     <span>📊</span> Start Live Monitor
                 </button>
+                <button class="btn-secondary" onclick="toggleLiveLogs()" id="liveLogsBtn">
+                    <span>📋</span> Start Live Logs
+                </button>
             </div>
 
             <div class="status-display" id="statusDisplay" style="display: none;">
@@ -314,6 +317,11 @@
             <div class="status-display" id="liveMonitorDisplay" style="display: none;">
                 <h3 id="liveMonitorTitle">🔴 Live BoostBot Monitor</h3>
                 <div id="liveMonitorContent" class="live-monitor"></div>
+            </div>
+
+            <div class="status-display" id="liveLogsDisplay" style="display: none;">
+                <h3 id="liveLogsTitle">🔴 Live Docker Logs</h3>
+                <div id="liveLogsContent" class="live-monitor"></div>
             </div>
         </div>
     </div>
@@ -427,6 +435,10 @@
         let eventSource = null;
         let isMonitoring = false;
         
+        // Live logs functionality
+        let logsEventSource = null;
+        let isLogging = false;
+        
         function toggleLiveMonitor() {
             const button = document.getElementById('liveMonitorBtn');
             const display = document.getElementById('liveMonitorDisplay');
@@ -484,6 +496,100 @@
                 message: 'Monitor stopped by user',
                 type: 'info'
             });
+        }
+        
+        function toggleLiveLogs() {
+            const button = document.getElementById('liveLogsBtn');
+            const display = document.getElementById('liveLogsDisplay');
+            const title = document.getElementById('liveLogsTitle');
+            const content = document.getElementById('liveLogsContent');
+            
+            if (!isLogging) {
+                // Start logging
+                isLogging = true;
+                button.innerHTML = '⏹️ Stop Live Logs';
+                button.className = 'btn-danger';
+                display.style.display = 'block';
+                title.innerHTML = '🟢 Live Docker Logs - Connected';
+                content.innerHTML = 'Connecting to Docker logs stream...\n';
+                
+                // Start Server-Sent Events connection
+                logsEventSource = new EventSource('/logs/stream');
+                
+                logsEventSource.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    addLogLine(data);
+                };
+                
+                logsEventSource.onerror = function(event) {
+                    title.innerHTML = '🔴 Live Docker Logs - Connection Error';
+                    addLogLine({
+                        timestamp: new Date().toISOString(),
+                        message: 'Connection lost. Retrying...',
+                        type: 'error'
+                    });
+                };
+                
+            } else {
+                // Stop logging
+                stopLiveLogs();
+            }
+        }
+        
+        function stopLiveLogs() {
+            const button = document.getElementById('liveLogsBtn');
+            const title = document.getElementById('liveLogsTitle');
+            
+            isLogging = false;
+            button.innerHTML = '📋 Start Live Logs';
+            button.className = 'btn-secondary';
+            title.innerHTML = '🔴 Live Docker Logs - Disconnected';
+            
+            if (logsEventSource) {
+                logsEventSource.close();
+                logsEventSource = null;
+            }
+            
+            addLogLine({
+                timestamp: new Date().toISOString(),
+                message: 'Logs stream stopped by user',
+                type: 'info'
+            });
+        }
+        
+        function addLogLine(data) {
+            const content = document.getElementById('liveLogsContent');
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            
+            let statusClass = '';
+            let statusIcon = '';
+            
+            if (data.type === 'log') {
+                statusClass = '';
+                statusIcon = '📋';
+            } else if (data.type === 'error') {
+                statusClass = 'monitor-status-stopped';
+                statusIcon = '❌';
+            } else if (data.type === 'info') {
+                statusClass = '';
+                statusIcon = 'ℹ️';
+            } else {
+                statusIcon = '📋';
+            }
+            
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<span class="monitor-timestamp">[${timestamp}]</span>${statusIcon} <span class="${statusClass}">${data.message}</span>`;
+            
+            content.appendChild(line);
+            
+            // Auto-scroll to bottom
+            content.scrollTop = content.scrollHeight;
+            
+            // Keep only last 200 lines for logs
+            while (content.children.length > 200) {
+                content.removeChild(content.firstChild);
+            }
         }
         
         function addMonitorLine(data) {

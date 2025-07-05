@@ -320,14 +320,19 @@ app.post('/manage/:action', async (req, res) => {
         break;
         
       case 'logs':
-        // Try multiple log locations
+        // Get Docker logs for the container
         try {
-          result = await execWithTimeout('tail -n 50 logs/helipad-webhook.log', 5000);
-        } catch (logError) {
+          result = await execWithTimeout('docker logs --tail 100 helipad-boostbot', 5000);
+        } catch (dockerError) {
+          // Fallback to file logs if Docker command fails
           try {
-            result = await execWithTimeout('tail -n 50 logs/launch-agent.log', 5000);
-          } catch (launchError) {
-            result = { stdout: 'No log files found in logs/ directory', stderr: '' };
+            result = await execWithTimeout('tail -n 50 logs/helipad-webhook.log', 5000);
+          } catch (logError) {
+            try {
+              result = await execWithTimeout('tail -n 50 logs/launch-agent.log', 5000);
+            } catch (launchError) {
+              result = { stdout: 'No log files found in logs/ directory', stderr: '' };
+            }
           }
         }
         break;
@@ -360,6 +365,47 @@ app.post('/manage/:action', async (req, res) => {
       output: error.stdout || error.stderr || 'Command failed'
     });
   }
+});
+
+// Docker logs streaming endpoint
+app.get('/logs/stream', (req, res) => {
+  // Set up SSE headers
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*'
+  });
+
+  logger.info('Docker logs stream client connected');
+
+  // Start Docker logs stream
+  const dockerLogs = execAsync('docker logs -f --tail 50 helipad-boostbot', { cwd: process.cwd() });
+  
+  dockerLogs.stdout.on('data', (data) => {
+    const lines = data.toString().split('\n').filter(line => line.trim());
+    lines.forEach(line => {
+      res.write(`data: ${JSON.stringify({
+        timestamp: new Date().toISOString(),
+        message: line,
+        type: 'log'
+      })}\n\n`);
+    });
+  });
+
+  dockerLogs.stderr.on('data', (data) => {
+    res.write(`data: ${JSON.stringify({
+      timestamp: new Date().toISOString(),
+      message: data.toString(),
+      type: 'error'
+    })}\n\n`);
+  });
+
+  // Handle client disconnect
+  req.on('close', () => {
+    logger.info('Docker logs stream client disconnected');
+    dockerLogs.kill();
+  });
 });
 
 // Live monitor endpoint using Server-Sent Events
