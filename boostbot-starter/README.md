@@ -18,6 +18,8 @@
   - [Umbrel](https://umbrel.com/)
   - [RaspiBlitz](https://github.com/raspiblitz/raspiblitz)
 
+**Note:** Currently, BoostBot Starter only posts **sent boosts** to Nostr. Support for received boosts and streams may be added in the future.
+
 A simplified version of BoostBot for new users. This bot receives Helipad webhooks and posts boosts to Nostr without the complex custom features of the full version.
 
 ## Features

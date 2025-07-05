@@ -16,6 +16,8 @@
   - [Umbrel](https://umbrel.com/)
   - [RaspiBlitz](https://github.com/raspiblitz/raspiblitz)
 
+**Note:** Currently, BoostBot only posts **sent boosts** to Nostr. Support for received boosts and streams may be added in the future.
+
 ---
 
 BoostBot receives Helipad webhooks and posts boosts to Nostr. Choose the version that fits your needs:
