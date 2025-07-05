@@ -351,20 +351,76 @@ app.post('/manage/:action', async (req, res) => {
         break;
         
       case 'logs':
-        // Get Docker logs for the container
+        // Get logs from various sources in Docker environment
         try {
-          result = await execWithTimeout('docker logs --tail 100 helipad-boostbot', 5000);
-        } catch (dockerError) {
-          // Fallback to file logs if Docker command fails
+          let logOutput = '';
+          
+          // Try to get Docker logs first (from host perspective)
           try {
-            result = await execWithTimeout('tail -n 50 logs/helipad-webhook.log', 5000);
-          } catch (logError) {
+            const dockerLogs = execSync('docker logs --tail 50 helipad-boostbot 2>/dev/null', { encoding: 'utf8', timeout: 5000 });
+            logOutput += '=== Docker Container Logs ===\n';
+            logOutput += dockerLogs + '\n\n';
+          } catch (dockerError) {
+            logOutput += '=== Docker Logs (unavailable) ===\n';
+            logOutput += 'Docker logs command failed: ' + dockerError.message + '\n\n';
+          }
+          
+          // Try to get application log files
+          const logFiles = [
+            path.join(process.env.DATA_DIR || './data', 'boostbot.log'),
+            path.join(process.env.DATA_DIR || './data', 'nostr-bot.log'),
+            path.join(process.env.DATA_DIR || './data', 'karma-system.log'),
+            'boostbot.log', // Fallback to current directory
+            'logs/helipad-webhook.log', // Legacy log location
+            'logs/launch-agent.log' // Legacy log location
+          ];
+          
+          logOutput += '=== Application Log Files ===\n';
+          let foundLogs = false;
+          
+          for (const logFile of logFiles) {
             try {
-              result = await execWithTimeout('tail -n 50 logs/launch-agent.log', 5000);
-            } catch (launchError) {
-              result = { stdout: 'No log files found in logs/ directory', stderr: '' };
+              if (fs.existsSync(logFile)) {
+                const stats = fs.statSync(logFile);
+                if (stats.size > 0) {
+                  logOutput += `--- ${logFile} (${stats.size} bytes) ---\n`;
+                  const content = fs.readFileSync(logFile, 'utf8');
+                  const lines = content.split('\n').filter(line => line.trim());
+                  const lastLines = lines.slice(-20); // Last 20 lines
+                  logOutput += lastLines.join('\n') + '\n\n';
+                  foundLogs = true;
+                }
+              }
+            } catch (error) {
+              logOutput += `--- ${logFile} (error: ${error.message}) ---\n\n`;
             }
           }
+          
+          if (!foundLogs) {
+            logOutput += 'No application log files found.\n';
+            logOutput += 'Available files in data directory:\n';
+            try {
+              const dataDir = process.env.DATA_DIR || './data';
+              if (fs.existsSync(dataDir)) {
+                const files = fs.readdirSync(dataDir);
+                files.forEach(file => {
+                  const filePath = path.join(dataDir, file);
+                  const stats = fs.statSync(filePath);
+                  logOutput += `  ${file} (${stats.size} bytes)\n`;
+                });
+              }
+            } catch (error) {
+              logOutput += `  Error reading data directory: ${error.message}\n`;
+            }
+          }
+          
+          result = { stdout: logOutput, stderr: '' };
+          
+        } catch (error) {
+          result = { 
+            stdout: 'Failed to retrieve logs: ' + error.message,
+            stderr: error.message
+          };
         }
         break;
         
