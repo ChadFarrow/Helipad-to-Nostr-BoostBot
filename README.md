@@ -26,7 +26,7 @@
 
 BoostBot receives Helipad webhooks and posts boosts to Nostr. Choose the version that fits your needs:
 
-## 🚀 [BoostBot Starter](./boostbot-starter/) - For New Users
+## 🚀 [BoostBot Starter](https://github.com/ChadFarrow/BoostBot-Starter) - For New Users
 **Simple, easy-to-use version for getting started**
 
 - ✅ Receives Helipad webhooks
@@ -38,7 +38,7 @@ BoostBot receives Helipad webhooks and posts boosts to Nostr. Choose the version
 
 **Perfect for:** New users, simple setups, basic webhook needs
 
-[📖 Starter Documentation](./boostbot-starter/) | [🚀 Quick Start](./boostbot-starter/#quick-start)
+[📖 Starter Repository](https://github.com/ChadFarrow/BoostBot-Starter) | [🚀 Quick Start](https://github.com/ChadFarrow/BoostBot-Starter#quick-start)
 
 ---
 
@@ -94,9 +94,9 @@ BoostBot receives Helipad webhooks and posts boosts to Nostr. Choose the version
 
 ### For New Users (Recommended)
 ```bash
-# Clone the repository
-git clone [your-repo-url]
-cd BoostBot/boostbot-starter
+# Clone the starter repository
+git clone https://github.com/ChadFarrow/BoostBot-Starter.git
+cd BoostBot-Starter
 
 # Setup and run
 cp env.example .env
@@ -119,8 +119,7 @@ npm start
 
 ## Documentation
 
-- **[Starter Version](./boostbot-starter/)** - Complete documentation for the simplified version
-- **[Full vs Starter Comparison](./boostbot-starter/COMPARISON.md)** - Detailed feature comparison
+- **[Starter Version](https://github.com/ChadFarrow/BoostBot-Starter)** - Complete documentation for the simplified version
 - **[Docker Setup](./DOCKER.md)** - Docker configuration for full version
 - **[Monitoring](./MONITORING.md)** - Monitoring and management for full version
 
