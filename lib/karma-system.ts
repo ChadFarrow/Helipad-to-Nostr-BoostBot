@@ -25,7 +25,8 @@ class KarmaSystem {
   private data: KarmaData;
 
   constructor() {
-    this.dataPath = path.join(process.cwd(), 'karma-data.json');
+    const dataDir = process.env.DATA_DIR || path.join(process.cwd(), 'data');
+    this.dataPath = path.join(dataDir, 'karma-data.json');
     this.data = this.loadData();
   }
 

@@ -13,6 +13,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3333
+      - DATA_DIR=/app/data
       - NOSTR_BOOST_BOT_NSEC=${NOSTR_BOOST_BOT_NSEC}
       - HELIPAD_WEBHOOK_TOKEN=${HELIPAD_WEBHOOK_TOKEN}
       - TEST_MODE=${TEST_MODE:-false}

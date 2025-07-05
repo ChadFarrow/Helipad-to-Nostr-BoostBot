@@ -364,10 +364,11 @@ function scheduleHourlySave(): void {
 }
 
 // File paths for persisting stats and sessions
-const DAILY_STATS_FILE = path.join(process.cwd(), 'daily-stats.json');
-const WEEKLY_STATS_FILE = path.join(process.cwd(), 'weekly-stats.json');
-const BOOST_SESSIONS_FILE = path.join(process.cwd(), 'boost-sessions.json');
-const SUPPORTED_CREATORS_FILE = path.join(process.cwd(), 'supported-creators.json');
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
+const DAILY_STATS_FILE = path.join(DATA_DIR, 'daily-stats.json');
+const WEEKLY_STATS_FILE = path.join(DATA_DIR, 'weekly-stats.json');
+const BOOST_SESSIONS_FILE = path.join(DATA_DIR, 'boost-sessions.json');
+const SUPPORTED_CREATORS_FILE = path.join(DATA_DIR, 'supported-creators.json');
 
 // Load daily stats from file
 async function loadDailyStats(): Promise<void> {

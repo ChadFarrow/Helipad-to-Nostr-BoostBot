@@ -47,6 +47,7 @@ USER boostbot
 ARG PORT=3333
 ENV PORT=${PORT}
 ENV NODE_ENV=production
+ENV DATA_DIR=/app/data
 
 # Expose port
 EXPOSE ${PORT}
