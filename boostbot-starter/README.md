@@ -2,16 +2,25 @@
 
 > **Note**: This is the simplified starter version of BoostBot. For the full version with advanced features, see the [main repository](../).
 
+## Requirements
+
+**Helipad is required for this project.**
+
+- Helipad is a simple LND poller and web front-end to see and read boosts and boostagrams.
+- BoostBot Starter receives webhooks from Helipad and posts boosts to Nostr.
+- You must have Helipad running and configured to send webhooks to BoostBot Starter.
+- Get Helipad here: [https://github.com/Podcastindex-org/helipad](https://github.com/Podcastindex-org/helipad)
+
 A simplified version of BoostBot for new users. This bot receives Helipad webhooks and posts boosts to Nostr without the complex custom features of the full version.
 
 ## Features
 
 - ✅ Receives Helipad webhooks
 - ✅ Posts boosts to Nostr
-- ✅ Docker support
+- ✅ Simple setup (no TypeScript, no build step)
+- ✅ Clear logging with emojis
 - ✅ Health checks
-- ✅ Simple logging
-- ✅ Authentication support
+- ✅ Easy testing
 
 ## What's NOT included (compared to full version)
 
@@ -28,49 +37,36 @@ A simplified version of BoostBot for new users. This bot receives Helipad webhoo
 
 ```bash
 git clone <your-repo>
-cd boostbot-starter
+cd BoostBot/boostbot-starter
 cp env.example .env
 ```
 
 ### 2. Configure Environment
 
-Edit `.env` file:
+Edit `.env` file with **only one required setting**:
 
 ```bash
-# Required: Your Nostr private key
+# REQUIRED: Your Nostr private key
 NOSTR_BOOST_BOT_NSEC=nsec1your_actual_nsec_here
-
-# Optional: Webhook authentication
-HELIPAD_WEBHOOK_TOKEN=your_webhook_token_here
-
-# Optional: Test mode (logs without posting)
-TEST_MODE=false
 ```
 
-### 3. Run with Docker
+That's it! All other settings are optional.
 
-```bash
-# Build and start
-docker compose up -d
-
-# Check logs
-docker compose logs -f
-
-# Stop
-docker compose down
-```
-
-### 4. Run Locally
+### 3. Install and Run
 
 ```bash
 # Install dependencies
 npm install
 
-# Start in development mode
-npm run dev
-
-# Or start in production
+# Start the bot
 npm start
+```
+
+### 4. Test It
+
+In another terminal:
+```bash
+npm test
 ```
 
 ## API Endpoints
@@ -113,34 +109,14 @@ Posts include:
 - Message (if provided)
 - Standard hashtags
 
-## Docker Commands
-
-```bash
-# Build image
-npm run docker:build
-
-# Start container
-npm run docker:run
-
-# Stop container
-npm run docker:stop
-
-# View logs
-npm run docker:logs
-
-# Check status
-npm run docker:status
-```
-
 ## Environment Variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NOSTR_BOOST_BOT_NSEC` | Yes | Your Nostr private key (nsec format) |
+| `NOSTR_BOOST_BOT_NSEC` | **Yes** | Your Nostr private key (nsec format) |
 | `HELIPAD_WEBHOOK_TOKEN` | No | Authentication token for webhooks |
 | `TEST_MODE` | No | Set to 'true' for test mode |
 | `PORT` | No | Server port (default: 3333) |
-| `LOG_LEVEL` | No | Log level (default: INFO) |
 
 ## Getting a Nostr Key
 
@@ -161,10 +137,10 @@ npm run docker:status
 - Check authentication token if configured
 - Ensure the webhook payload format is correct
 
-### Docker issues
-- Check if port 3333 is available
-- Verify Docker and Docker Compose are installed
-- Check container logs: `docker compose logs`
+### Bot won't start
+- Make sure Node.js 18+ is installed
+- Check that port 3333 is available
+- Verify your `.env` file exists
 
 ## Development
 
@@ -172,11 +148,26 @@ npm run docker:status
 # Install dependencies
 npm install
 
-# Run in development mode with auto-reload
-npm run dev
+# Start the bot
+npm start
 
-# Build TypeScript
-npm run build
+# Test the webhook
+npm test
+```
+
+## File Structure
+
+```
+boostbot-starter/
+├── 📄 README.md              # This documentation
+├── 📄 env.example            # Environment template
+├── 📄 package.json           # Dependencies
+├── 📄 .gitignore             # Git ignore rules
+├── 🧪 test-webhook.js        # Test script
+├── 🤖 helipad-webhook.js     # Main webhook handler
+└── 📁 lib/                   # Library files
+    ├── 📄 logger.js          # Simple logging
+    └── 📄 nostr-bot.js       # Nostr posting logic
 ```
 
 ## License

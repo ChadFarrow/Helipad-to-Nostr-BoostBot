@@ -1,5 +1,16 @@
 # BoostBot - Helipad to Nostr Webhook Bot
 
+## Requirements
+
+**Helipad is required for this project.**
+
+- Helipad is a simple LND poller and web front-end to see and read boosts and boostagrams.
+- BoostBot receives webhooks from Helipad and posts boosts to Nostr.
+- You must have Helipad running and configured to send webhooks to BoostBot.
+- Get Helipad here: [https://github.com/Podcastindex-org/helipad](https://github.com/Podcastindex-org/helipad)
+
+---
+
 BoostBot receives Helipad webhooks and posts boosts to Nostr. Choose the version that fits your needs:
 
 ## 🚀 [BoostBot Starter](./boostbot-starter/) - For New Users

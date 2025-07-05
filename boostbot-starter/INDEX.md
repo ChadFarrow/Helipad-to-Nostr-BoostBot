@@ -6,11 +6,11 @@ This directory contains the simplified starter version of BoostBot.
 
 ```
 boostbot-starter/
-├── 📄 README.md              # This documentation
+├── 📄 README.md              # Complete documentation
 ├── 📄 INDEX.md               # This file
 ├── 📄 COMPARISON.md          # Comparison with full version
+├── 📄 CHANGELOG.md           # Version history
 ├── 📄 package.json           # Node.js dependencies
-├── 📄 tsconfig.json          # TypeScript configuration
 ├── 📄 env.example            # Environment variables template
 ├── 📄 .env                   # Your environment variables (create this)
 ├── 📄 .gitignore             # Git ignore rules
@@ -22,7 +22,7 @@ boostbot-starter/
 ├── 🤖 helipad-webhook.js     # Main webhook handler
 ├── 📁 lib/                   # Library files
 │   ├── 📄 logger.js          # Simple logging
-│   └── 📄 nostr-bot.ts       # Nostr posting logic
+│   └── 📄 nostr-bot.js       # Nostr posting logic
 └── 📁 public/                # Static web files
     └── 📄 index.html         # Status page
 ```
@@ -35,15 +35,15 @@ boostbot-starter/
    # Edit .env with your Nostr key
    ```
 
-2. **Run with Docker** (Recommended)
-   ```bash
-   docker compose up -d
-   ```
-
-3. **Or Run Locally**
+2. **Install and Run**
    ```bash
    npm install
    npm start
+   ```
+
+3. **Test It**
+   ```bash
+   npm test
    ```
 
 ## 🔗 Related Files
@@ -61,6 +61,7 @@ boostbot-starter/
 
 ## 🛠️ Development
 
-- **[TypeScript Config](./tsconfig.json)** - TypeScript settings
 - **[Package Config](./package.json)** - Dependencies and scripts
-- **[Test Script](./test-webhook.js)** - Testing utilities 
+- **[Test Script](./test-webhook.js)** - Testing utilities
+- **[Main Handler](./helipad-webhook.js)** - Webhook processing
+- **[Nostr Bot](./lib/nostr-bot.js)** - Nostr posting logic 
