@@ -355,14 +355,20 @@ app.post('/manage/:action', async (req, res) => {
         try {
           let logOutput = '';
           
+          // Show recent console output (what would be in Docker logs)
+          logOutput += '=== Recent Console Output ===\n';
+          logOutput += 'Note: In Docker environment, console output goes to Docker logs.\n';
+          logOutput += 'Use "docker logs helipad-boostbot" from the host to see full logs.\n\n';
+          
           // Try to get Docker logs first (from host perspective)
           try {
             const dockerLogs = execSync('docker logs --tail 50 helipad-boostbot 2>/dev/null', { encoding: 'utf8', timeout: 5000 });
-            logOutput += '=== Docker Container Logs ===\n';
+            logOutput += '=== Docker Container Logs (Last 50 lines) ===\n';
             logOutput += dockerLogs + '\n\n';
           } catch (dockerError) {
-            logOutput += '=== Docker Logs (unavailable) ===\n';
-            logOutput += 'Docker logs command failed: ' + dockerError.message + '\n\n';
+            logOutput += '=== Docker Logs (unavailable from container) ===\n';
+            logOutput += 'Docker logs command failed: ' + dockerError.message + '\n';
+            logOutput += 'To view Docker logs, run: docker logs helipad-boostbot\n\n';
           }
           
           // Try to get application log files
@@ -413,6 +419,14 @@ app.post('/manage/:action', async (req, res) => {
               logOutput += `  Error reading data directory: ${error.message}\n`;
             }
           }
+          
+          // Add helpful information
+          logOutput += '\n=== Log Management ===\n';
+          logOutput += '• Docker logs: docker logs helipad-boostbot\n';
+          logOutput += '• Follow logs: docker logs -f helipad-boostbot\n';
+          logOutput += '• Recent logs: docker logs --tail 100 helipad-boostbot\n';
+          logOutput += '• Container logs are stored in Docker\'s log system\n';
+          logOutput += '• Application logs (if any) are in /app/data/\n';
           
           result = { stdout: logOutput, stderr: '' };
           
