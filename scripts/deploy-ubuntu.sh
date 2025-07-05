@@ -160,6 +160,12 @@ deploy() {
         log "✅ BoostBot deployed successfully!"
         log "Container is running on port 3333"
         log "Check logs with: docker logs $CONTAINER_NAME"
+        
+        # Install systemd service if not already installed
+        if [ ! -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
+            log "Installing systemd service for auto-start on boot..."
+            ./scripts/install-systemd-service.sh
+        fi
     else
         error "❌ Container failed to start. Check logs with: docker logs $CONTAINER_NAME"
         exit 1
