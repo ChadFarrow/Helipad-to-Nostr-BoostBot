@@ -1,85 +1,115 @@
-# BoostBot - Nostr Boost Management
+# BoostBot - Helipad to Nostr Webhook Bot
 
-BoostBot is a Nostr bot that manages and automates boost interactions on the Nostr network.
+BoostBot receives Helipad webhooks and posts boosts to Nostr. Choose the version that fits your needs:
 
-## Features
+## 🚀 [BoostBot Starter](./boostbot-starter/) - For New Users
+**Simple, easy-to-use version for getting started**
 
-- 🤖 **Automated Boost Management** - Handles boost interactions automatically
-- 📊 **Statistics Tracking** - Monitors boost activity and performance
-- 🔧 **Webhook Integration** - Receives boost requests via webhooks
-- ⚡ **Real-time Processing** - Processes boosts quickly and efficiently
-- 🛡️ **Secure Configuration** - Environment-based configuration management
+- ✅ Receives Helipad webhooks
+- ✅ Posts boosts to Nostr  
+- ✅ Docker support
+- ✅ Health checks
+- ✅ Simple logging
+- ✅ Easy setup
+
+**Perfect for:** New users, simple setups, basic webhook needs
+
+[📖 Starter Documentation](./boostbot-starter/) | [🚀 Quick Start](./boostbot-starter/#quick-start)
+
+---
+
+## ⚡ BoostBot Full - For Advanced Users
+**Complete feature set with advanced functionality**
+
+- ✅ All Starter features
+- ✅ Karma system for tracking engagement
+- ✅ Custom npub mappings for shows
+- ✅ Daily/weekly summaries
+- ✅ Complex monitoring and live feeds
+- ✅ Boost session tracking
+- ✅ 20+ management scripts
+- ✅ Advanced analytics
+
+**Perfect for:** Podcast networks, content creators, advanced users
+
+---
+
+## Quick Comparison
+
+| Feature | Starter | Full |
+|---------|---------|------|
+| **Core Functionality** |
+| Helipad webhook reception | ✅ | ✅ |
+| Nostr posting | ✅ | ✅ |
+| Docker support | ✅ | ✅ |
+| **Advanced Features** |
+| Karma system | ❌ | ✅ |
+| Custom show mappings | ❌ | ✅ |
+| Daily/weekly summaries | ❌ | ✅ |
+| Complex monitoring | ❌ | ✅ |
+| **Complexity** |
+| Lines of code | ~500 | ~3,000+ |
+| Files | 10 | 30+ |
+| Setup time | 5 minutes | 15+ minutes |
+
+## Which Version Should You Choose?
+
+### Start with **Starter** if:
+- You're new to BoostBot
+- You just want basic webhook → Nostr functionality
+- You prefer simple, easy-to-understand code
+- You don't need advanced analytics
+
+### Use **Full** if:
+- You need karma tracking and analytics
+- You have custom show-specific requirements
+- You want daily/weekly summaries
+- You need advanced monitoring and management
 
 ## Quick Start
 
-1. **Clone and Install**
-   ```bash
-   git clone [your-repo-url]
-   cd BoostBot
-   npm install
-   ```
-
-2. **Configure Environment**
-   ```bash
-   cp env.example .env
-   # Edit .env with your configuration
-   ```
-
-3. **Run BoostBot**
-   ```bash
-   npm start
-   ```
-
-## Configuration
-
-Create a `.env` file with:
-
+### For New Users (Recommended)
 ```bash
-# Required: Your Nostr private key
-NOSTR_PRIVATE_KEY=your_nostr_private_key_here
+# Clone the repository
+git clone [your-repo-url]
+cd BoostBot/boostbot-starter
 
-# Optional: Port (default: 3333)
-PORT=3333
-
-# Optional: Webhook settings
-WEBHOOK_SECRET=your_webhook_secret
+# Setup and run
+cp env.example .env
+# Edit .env with your Nostr key
+docker compose up -d
 ```
 
-## How It Works
-
-1. **Webhook Reception** - BoostBot receives boost requests via webhooks
-2. **Request Processing** - Validates and processes incoming boost requests
-3. **Nostr Interaction** - Posts boosts to the Nostr network
-4. **Statistics Tracking** - Records boost activity for analysis
-
-## Commands
-
+### For Advanced Users
 ```bash
-npm start          # Start BoostBot
-npm run dev        # Start with file watching
-npm run health     # Check if running
-npm run status     # Get status info
+# Clone the repository  
+git clone [your-repo-url]
+cd BoostBot
+
+# Setup and run
+cp env.example .env
+# Edit .env with your configuration
+npm install
+npm start
 ```
 
-## Technical Details
+## Documentation
 
-- **Built with**: Node.js, Express, nostr-tools
-- **Monitoring**: Webhook-based request processing
-- **Relays**: relay.damus.io, relay.nostr.band, nostr.mom, relay.primal.net
-- **Port**: 3333 (configurable)
+- **[Starter Version](./boostbot-starter/)** - Complete documentation for the simplified version
+- **[Full vs Starter Comparison](./boostbot-starter/COMPARISON.md)** - Detailed feature comparison
+- **[Docker Setup](./DOCKER.md)** - Docker configuration for full version
+- **[Monitoring](./MONITORING.md)** - Monitoring and management for full version
 
-## Development
+## Migration Path
 
-1. **Local Testing**: Bot runs on `http://localhost:3333`
-2. **Health Check**: `curl http://localhost:3333/health`
-3. **Status**: `curl http://localhost:3333/status`
+- **Starter → Full**: Add features from the full version as needed
+- **Full → Starter**: Simplify by removing advanced features
 
-## Security
+## Support
 
-- ✅ `.env` file is gitignored to protect your private keys
-- ✅ Use `env.example` as template
-- ✅ Never commit private keys to version control
+- **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-repo/discussions)
 
 ## License
 
-MIT
+MIT License
