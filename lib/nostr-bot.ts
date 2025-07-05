@@ -1510,7 +1510,7 @@ function normalizeShowName(name: string): string {
 }
 
 // Utility to get npubs for a show, handling exact and partial matches
-function getShowNpubs(showName: string): string[] {
+function getShowNpubs(showName: string, episodeName?: string): string[] {
   let showNpubs = showToNpubMap[showName];
   if (!showNpubs) {
     const lowerShowName = normalizeShowName(showName);
@@ -1527,14 +1527,24 @@ function getShowNpubs(showName: string): string[] {
       }
     }
   }
+  
+  // Check episode name for special cases
+  if (!showNpubs && episodeName) {
+    const lowerEpisodeName = normalizeShowName(episodeName);
+    if (lowerEpisodeName.includes('freedom tech friday')) {
+      showNpubs = showToNpubMap['FREEDOM TECH FRIDAY'];
+      logger.info(`🎪 Matched episode "${episodeName}" to FREEDOM TECH FRIDAY`);
+    }
+  }
+  
   return showNpubs || [];
 }
 
 // Refactored: getShowBasedTags uses getShowNpubs
-function getShowBasedTags(showName: string): string[][] {
+function getShowBasedTags(showName: string, episodeName?: string): string[][] {
   const tags: string[][] = [];
   const addedPubkeys = new Set<string>();
-  const showNpubs = getShowNpubs(showName);
+  const showNpubs = getShowNpubs(showName, episodeName);
   if (showNpubs.length > 0) {
     logger.info(`🎪 Found ${showNpubs.length} npubs for show: ${showName}`);
     showNpubs.forEach(npub => {
@@ -1664,7 +1674,7 @@ async function postReceivedBoostToNostr(event: HelipadPaymentEvent, bot: any): P
   // Get show-based tags for automatic tagging
   let showTags: string[][] = [];
   if (event.podcast) {
-    showTags = getShowBasedTags(event.podcast);
+    showTags = getShowBasedTags(event.podcast, event.episode);
   }
 
   // Build app info with link if available
@@ -1810,15 +1820,15 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
   let showHostMentions: string[] = [];
   if (isMusic && event.podcast) {
     // For music, tag based on the hosting show
-    showTags = getShowBasedTags(event.podcast);
+    showTags = getShowBasedTags(event.podcast, event.episode);
   } else if (event.podcast) {
     // For regular podcasts, tag based on podcast name
-    showTags = getShowBasedTags(event.podcast);
+    showTags = getShowBasedTags(event.podcast, event.episode);
   }
 
   // Build visible host mentions (e.g., nostr:npub1... nostr:npub1...)
   if (event.podcast) {
-    const showNpubs = getShowNpubs(event.podcast);
+    const showNpubs = getShowNpubs(event.podcast, event.episode);
     for (const npub of showNpubs) {
       showHostMentions.push(`nostr:${npub}`);
     }

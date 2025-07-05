@@ -57,5 +57,5 @@ Thumbs.db
 # Data directory (runtime data)
 data/
 
-# LIT_Bot specific
+# Convert key utility
 convert-key.js 
