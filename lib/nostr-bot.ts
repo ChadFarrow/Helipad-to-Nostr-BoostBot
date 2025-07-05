@@ -1371,6 +1371,11 @@ const showToNpubMap: Record<string, string[]> = {
   'Radio bitpunk.fm': [
     'npub1f49twdlzlw667r74jz6t06xxlemd8gp2j7g77l76easpl8jsltvqvlzpez', // bitpunk_fm
   ],
+  'FREEDOM TECH FRIDAY': [
+    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
+    'npub15c88nc8d44gsp4658dnfu5fahswzzu8gaxm5lkuwjud068swdqfspxssvx', // QnA
+    'npub1tr4dstaptd2sp98h7hlysp8qle6mw7wmauhfkgz3rmxdd8ndprusnw2y5g', // Seth for Privacy
+  ],
   // Add more shows and their associated npubs
 };
 
