@@ -3,6 +3,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { exec, execSync, spawn } from 'child_process';
 import { promisify } from 'util';
 import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary, initializeSummaryScheduling } from './lib/nostr-bot.ts';
@@ -380,87 +381,74 @@ app.get('/logs/stream', (req, res) => {
   logger.info('Docker logs stream client connected');
 
   try {
-    // Start Docker logs stream using spawn for better control
-    const dockerLogs = spawn('docker', ['logs', '-f', '--tail', '50', 'helipad-boostbot'], {
-      cwd: process.cwd(),
-      stdio: ['ignore', 'pipe', 'pipe']
-    });
-    
-    dockerLogs.stdout.on('data', (data) => {
-      const lines = data.toString().split('\n').filter(line => line.trim());
-      lines.forEach(line => {
-        try {
-          res.write(`data: ${JSON.stringify({
-            timestamp: new Date().toISOString(),
-            message: line,
-            type: 'log'
-          })}\n\n`);
-        } catch (error) {
-          logger.error('Error writing log data to client:', error.message);
-        }
-      });
-    });
-
-    dockerLogs.stderr.on('data', (data) => {
-      try {
-        res.write(`data: ${JSON.stringify({
-          timestamp: new Date().toISOString(),
-          message: data.toString(),
-          type: 'error'
-        })}\n\n`);
-      } catch (error) {
-        logger.error('Error writing error data to client:', error.message);
-      }
-    });
-
-    dockerLogs.on('error', (error) => {
-      logger.error('Docker logs process error:', error.message);
-      try {
-        res.write(`data: ${JSON.stringify({
-          timestamp: new Date().toISOString(),
-          message: `Docker logs error: ${error.message}`,
-          type: 'error'
-        })}\n\n`);
-      } catch (writeError) {
-        logger.error('Error writing error to client:', writeError.message);
-      }
-    });
-
-    dockerLogs.on('close', (code) => {
-      logger.info('Docker logs process closed with code:', code);
-      try {
-        res.write(`data: ${JSON.stringify({
-          timestamp: new Date().toISOString(),
-          message: `Docker logs process closed (code: ${code})`,
-          type: 'info'
-        })}\n\n`);
-      } catch (writeError) {
-        logger.error('Error writing close message to client:', writeError.message);
-      }
-    });
-
-    // Handle client disconnect
-    req.on('close', () => {
-      logger.info('Docker logs stream client disconnected');
-      try {
-        dockerLogs.kill();
-      } catch (error) {
-        logger.error('Error killing Docker logs process:', error.message);
-      }
-    });
+    // Read logs from the application's own log files instead of Docker
+    const logFiles = [
+      path.join(process.env.DATA_DIR || './data', 'boostbot.log'),
+      path.join(process.env.DATA_DIR || './data', 'nostr-bot.log'),
+      path.join(process.env.DATA_DIR || './data', 'karma-system.log')
+    ];
 
     // Send initial connection message
     res.write(`data: ${JSON.stringify({
       timestamp: new Date().toISOString(),
-      message: 'Connected to Docker logs stream',
+      message: 'Connected to application logs stream',
       type: 'info'
     })}\n\n`);
 
+    // Function to read and send log files
+    const readAndSendLogs = () => {
+      logFiles.forEach(logFile => {
+        try {
+          if (fs.existsSync(logFile)) {
+            const stats = fs.statSync(logFile);
+            const lastModified = stats.mtime;
+            
+            // Read the last 50 lines of each log file
+            const content = fs.readFileSync(logFile, 'utf8');
+            const lines = content.split('\n').filter(line => line.trim());
+            const lastLines = lines.slice(-50);
+            
+            lastLines.forEach(line => {
+              try {
+                res.write(`data: ${JSON.stringify({
+                  timestamp: new Date().toISOString(),
+                  message: `[${path.basename(logFile)}] ${line}`,
+                  type: 'log'
+                })}\n\n`);
+              } catch (error) {
+                logger.error('Error writing log data to client:', error.message);
+              }
+            });
+          }
+        } catch (error) {
+          logger.error(`Error reading log file ${logFile}:`, error.message);
+        }
+      });
+    };
+
+    // Send initial logs
+    readAndSendLogs();
+
+    // Set up periodic log reading (every 2 seconds)
+    const logInterval = setInterval(() => {
+      try {
+        readAndSendLogs();
+      } catch (error) {
+        logger.error('Error in periodic log reading:', error.message);
+      }
+    }, 2000);
+
+    // Handle client disconnect
+    req.on('close', () => {
+      logger.info('Logs stream client disconnected');
+      clearInterval(logInterval);
+    });
+
   } catch (error) {
-    logger.error('Error setting up Docker logs stream:', error.message);
+    logger.error('Error setting up logs stream:', error.message);
     res.write(`data: ${JSON.stringify({
       timestamp: new Date().toISOString(),
-      message: `Failed to start Docker logs: ${error.message}`,
+      message: `Failed to start logs stream: ${error.message}`,
       type: 'error'
     })}\n\n`);
   }

@@ -320,7 +320,7 @@
             </div>
 
             <div class="status-display" id="liveLogsDisplay" style="display: none;">
-                <h3 id="liveLogsTitle">🔴 Live Docker Logs</h3>
+                <h3 id="liveLogsTitle">🔴 Live Application Logs</h3>
                 <div id="liveLogsContent" class="live-monitor"></div>
             </div>
         </div>
@@ -510,8 +510,8 @@
                 button.innerHTML = '⏹️ Stop Live Logs';
                 button.className = 'btn-danger';
                 display.style.display = 'block';
-                title.innerHTML = '🟢 Live Docker Logs - Connected';
-                content.innerHTML = 'Connecting to Docker logs stream...\n';
+                title.innerHTML = '🟢 Live Application Logs - Connected';
+                content.innerHTML = 'Connecting to application logs stream...\n';
                 
                 // Start Server-Sent Events connection
                 logsEventSource = new EventSource('/logs/stream');
@@ -530,7 +530,7 @@
                 };
                 
                 logsEventSource.onerror = function(event) {
-                    title.innerHTML = '🔴 Live Docker Logs - Connection Error';
+                    title.innerHTML = '🔴 Live Application Logs - Connection Error';
                     addLogLine({
                         timestamp: new Date().toISOString(),
                         message: 'Connection lost. Retrying...',
@@ -566,7 +566,7 @@
             isLogging = false;
             button.innerHTML = '📋 Start Live Logs';
             button.className = 'btn-secondary';
-            title.innerHTML = '🔴 Live Docker Logs - Disconnected';
+            title.innerHTML = '🔴 Live Application Logs - Disconnected';
             
             if (logsEventSource) {
                 logsEventSource.close();
