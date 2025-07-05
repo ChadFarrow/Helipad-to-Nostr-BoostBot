@@ -313,7 +313,37 @@ app.post('/manage/:action', async (req, res) => {
         break;
         
       case 'restart':
-        result = await execWithTimeout('npm run restart', 15000);
+        // In Docker environment, we can't restart the container from within
+        // Instead, we'll signal a graceful restart by updating a restart flag
+        try {
+          // Create a restart flag file that the entrypoint script can check
+          const restartFlagPath = path.join(process.env.DATA_DIR || './data', 'restart-requested');
+          fs.writeFileSync(restartFlagPath, new Date().toISOString());
+          
+          result = { 
+            stdout: 'Restart request sent. The container will restart shortly. The web interface will reconnect automatically.',
+            stderr: ''
+          };
+          
+          // Broadcast restart notification to live monitors
+          broadcastToMonitorClients({
+            timestamp: new Date().toISOString(),
+            message: '🔄 Restart request received - container will restart shortly',
+            type: 'info'
+          });
+          
+          // Exit the process after a short delay to trigger container restart
+          setTimeout(() => {
+            logger.info('Restarting container as requested');
+            process.exit(0);
+          }, 2000);
+          
+        } catch (error) {
+          result = { 
+            stdout: 'Failed to initiate restart: ' + error.message,
+            stderr: error.message
+          };
+        }
         break;
         
       case 'stop':
