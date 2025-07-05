@@ -120,6 +120,13 @@ initial_setup() {
     mkdir -p $PROJECT_DIR/data
     mkdir -p $PROJECT_DIR/logs
     
+    # Fix permissions for data directories
+    log "Fixing permissions for data directories..."
+    sudo chown -R 1001:1001 $PROJECT_DIR/data
+    sudo chown -R 1001:1001 $PROJECT_DIR/logs
+    sudo chmod -R 755 $PROJECT_DIR/data
+    sudo chmod -R 755 $PROJECT_DIR/logs
+    
     # Set up environment file if it doesn't exist
     if [ ! -f "$PROJECT_DIR/.env" ]; then
         log "Creating .env file from template..."
