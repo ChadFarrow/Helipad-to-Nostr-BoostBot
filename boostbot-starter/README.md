@@ -4,12 +4,19 @@
 
 ## Requirements
 
-**Helipad is required for this project.**
+**Helipad and Alby Hub are required for this project.**
 
 - Helipad is a simple LND poller and web front-end to see and read boosts and boostagrams.
 - BoostBot Starter receives webhooks from Helipad and posts boosts to Nostr.
 - You must have Helipad running and configured to send webhooks to BoostBot Starter.
 - Get Helipad here: [https://github.com/Podcastindex-org/helipad](https://github.com/Podcastindex-org/helipad)
+- **You will also need Alby Hub running on your node.**
+  - Alby Hub is available in the app stores of [Umbrel](https://umbrel.com/) and [Start9](https://start9.com/).
+  - See the Alby Hub guide: [https://guides.getalby.com/user-guide/alby-hub/alby-hub-flavors/umbrel-start9-etc](https://guides.getalby.com/user-guide/alby-hub/alby-hub-flavors/umbrel-start9-etc)
+- **Helipad is most commonly run on:**
+  - [Start9](https://start9.com/)
+  - [Umbrel](https://umbrel.com/)
+  - [RaspiBlitz](https://github.com/raspiblitz/raspiblitz)
 
 A simplified version of BoostBot for new users. This bot receives Helipad webhooks and posts boosts to Nostr without the complex custom features of the full version.
 
