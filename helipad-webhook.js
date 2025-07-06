@@ -7,7 +7,6 @@ import fs from 'fs';
 import { execSync } from 'child_process';
 import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary, initializeSummaryScheduling } from './lib/nostr-bot.ts';
 import { logger } from './lib/logger.js';
-import { karmaSystem } from './lib/karma-system.ts';
 
 // Store active monitor connections
 const monitorClients = new Set();
@@ -98,9 +97,7 @@ dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 
-
-
-// Serve static files from public directory (after root route)
+// Serve static files from public directory
 app.use(express.static('public'));
 
 const AUTH_TOKEN = process.env.HELIPAD_WEBHOOK_TOKEN;
@@ -114,22 +111,19 @@ const authenticate = (req, res, next) => {
 
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    logger.warn('Missing or invalid Authorization header - TEMPORARILY ALLOWING FOR TESTING');
-    // Temporarily allow requests without proper auth for testing
-    return next();
+    logger.warn('Missing or invalid Authorization header');
+    return res.status(401).send('Unauthorized: Missing or invalid token');
   }
 
   const token = authHeader.substring(7); // Remove 'Bearer '
   if (token !== AUTH_TOKEN) {
-    logger.warn('Invalid token received - TEMPORARILY ALLOWING FOR TESTING');
-    // Temporarily allow invalid tokens for testing
-    return next();
+    logger.warn('Invalid token received');
+    return res.status(403).send('Forbidden: Invalid token');
   }
 
   next();
 };
 
-// SENT BOOSTS WEBHOOK - Port 3333 (SENT BOOSTS ONLY)
 app.post('/helipad-webhook', authenticate, async (req, res) => {
   try {
     const event = req.body;
@@ -169,33 +163,6 @@ app.post('/helipad-webhook', authenticate, async (req, res) => {
       podcast: event.podcast,
       episode: event.episode
     });
-    
-    // Track karma for boosts (action === 2) - BETA: Data collection only, no Nostr posting
-    if (event.action === 2 && satsAmount > 0) {
-      try {
-        // Track show karma
-        const showName = event.podcast || event.episode || 'Unknown Show';
-        karmaSystem.addKarma(showName, 'show', 1, satsAmount);
-        
-        // Track episode karma if different from show
-        if (event.episode && event.episode !== event.podcast) {
-          const episodeName = event.episode;
-          karmaSystem.addKarma(episodeName, 'track', 1, satsAmount, {
-            showName: showName,
-            npub: event.sender || ''
-          });
-        }
-        
-        // Track sender karma (person who sent the boost)
-        if (event.sender && event.sender !== 'Unknown') {
-          karmaSystem.addKarma(event.sender, 'person', 1, satsAmount);
-        }
-        
-        logger.info(`🧪 [BETA] Karma tracked: Show "${showName}", Episode "${event.episode || 'N/A'}", Sender "${event.sender || 'Unknown'}" (+${satsAmount} sats)`);
-      } catch (karmaError) {
-        logger.error('Error tracking karma:', karmaError);
-      }
-    }
     
     await announceHelipadPayment(event);
     
@@ -316,37 +283,7 @@ app.post('/manage/:action', async (req, res) => {
         break;
         
       case 'restart':
-        // In Docker environment, we can't restart the container from within
-        // Instead, we'll signal a graceful restart by updating a restart flag
-        try {
-          // Create a restart flag file that the entrypoint script can check
-          const restartFlagPath = path.join(process.env.DATA_DIR || './data', 'restart-requested');
-          fs.writeFileSync(restartFlagPath, new Date().toISOString());
-          
-          result = { 
-            stdout: 'Restart request sent. The container will restart shortly. The web interface will reconnect automatically.',
-            stderr: ''
-          };
-          
-          // Broadcast restart notification to live monitors
-          broadcastToMonitorClients({
-            timestamp: new Date().toISOString(),
-            message: '🔄 Restart request received - container will restart shortly',
-            type: 'info'
-          });
-          
-          // Exit the process after a short delay to trigger container restart
-          setTimeout(() => {
-            logger.info('Restarting container as requested');
-            process.exit(0);
-          }, 2000);
-          
-        } catch (error) {
-          result = { 
-            stdout: 'Failed to initiate restart: ' + error.message,
-            stderr: error.message
-          };
-        }
+        result = await execWithTimeout('npm run restart', 15000);
         break;
         
       case 'stop':
@@ -354,90 +291,15 @@ app.post('/manage/:action', async (req, res) => {
         break;
         
       case 'logs':
-        // Get logs from various sources in Docker environment
+        // Try multiple log locations
         try {
-          let logOutput = '';
-          
-          // Show recent console output (what would be in Docker logs)
-          logOutput += '=== Recent Console Output ===\n';
-          logOutput += 'Note: In Docker environment, console output goes to Docker logs.\n';
-          logOutput += 'Use "docker logs helipad-boostbot" from the host to see full logs.\n\n';
-          
-          // Try to get Docker logs first (from host perspective)
+          result = await execWithTimeout('tail -n 50 logs/helipad-webhook.log', 5000);
+        } catch (logError) {
           try {
-            const dockerLogs = execSync('docker logs --tail 50 helipad-boostbot 2>/dev/null', { encoding: 'utf8', timeout: 5000 });
-            logOutput += '=== Docker Container Logs (Last 50 lines) ===\n';
-            logOutput += dockerLogs + '\n\n';
-          } catch (dockerError) {
-            logOutput += '=== Docker Logs (unavailable from container) ===\n';
-            logOutput += 'Docker logs command failed: ' + dockerError.message + '\n';
-            logOutput += 'To view Docker logs, run: docker logs helipad-boostbot\n\n';
+            result = await execWithTimeout('tail -n 50 logs/launch-agent.log', 5000);
+          } catch (launchError) {
+            result = { stdout: 'No log files found in logs/ directory', stderr: '' };
           }
-          
-          // Try to get application log files
-          const logFiles = [
-            path.join(process.env.DATA_DIR || './data', 'boostbot.log'),
-            path.join(process.env.DATA_DIR || './data', 'nostr-bot.log'),
-            path.join(process.env.DATA_DIR || './data', 'karma-system.log'),
-            'boostbot.log', // Fallback to current directory
-            'logs/helipad-webhook.log', // Legacy log location
-            'logs/launch-agent.log' // Legacy log location
-          ];
-          
-          logOutput += '=== Application Log Files ===\n';
-          let foundLogs = false;
-          
-          for (const logFile of logFiles) {
-            try {
-              if (fs.existsSync(logFile)) {
-                const stats = fs.statSync(logFile);
-                if (stats.size > 0) {
-                  logOutput += `--- ${logFile} (${stats.size} bytes) ---\n`;
-                  const content = fs.readFileSync(logFile, 'utf8');
-                  const lines = content.split('\n').filter(line => line.trim());
-                  const lastLines = lines.slice(-20); // Last 20 lines
-                  logOutput += lastLines.join('\n') + '\n\n';
-                  foundLogs = true;
-                }
-              }
-            } catch (error) {
-              logOutput += `--- ${logFile} (error: ${error.message}) ---\n\n`;
-            }
-          }
-          
-          if (!foundLogs) {
-            logOutput += 'No application log files found.\n';
-            logOutput += 'Available files in data directory:\n';
-            try {
-              const dataDir = process.env.DATA_DIR || './data';
-              if (fs.existsSync(dataDir)) {
-                const files = fs.readdirSync(dataDir);
-                files.forEach(file => {
-                  const filePath = path.join(dataDir, file);
-                  const stats = fs.statSync(filePath);
-                  logOutput += `  ${file} (${stats.size} bytes)\n`;
-                });
-              }
-            } catch (error) {
-              logOutput += `  Error reading data directory: ${error.message}\n`;
-            }
-          }
-          
-          // Add helpful information
-          logOutput += '\n=== Log Management ===\n';
-          logOutput += '• Docker logs: docker logs helipad-boostbot\n';
-          logOutput += '• Follow logs: docker logs -f helipad-boostbot\n';
-          logOutput += '• Recent logs: docker logs --tail 100 helipad-boostbot\n';
-          logOutput += '• Container logs are stored in Docker\'s log system\n';
-          logOutput += '• Application logs (if any) are in /app/data/\n';
-          
-          result = { stdout: logOutput, stderr: '' };
-          
-        } catch (error) {
-          result = { 
-            stdout: 'Failed to retrieve logs: ' + error.message,
-            stderr: error.message
-          };
         }
         break;
         
@@ -468,92 +330,6 @@ app.post('/manage/:action', async (req, res) => {
       error: error.message,
       output: error.stdout || error.stderr || 'Command failed'
     });
-  }
-});
-
-// Docker logs streaming endpoint
-app.get('/logs/stream', (req, res) => {
-  // Set up SSE headers
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
-    'Access-Control-Allow-Origin': '*'
-  });
-
-  logger.info('Docker logs stream client connected');
-
-  try {
-    // Read logs from the application's own log files instead of Docker
-    const logFiles = [
-      path.join(process.env.DATA_DIR || './data', 'boostbot.log'),
-      path.join(process.env.DATA_DIR || './data', 'nostr-bot.log'),
-      path.join(process.env.DATA_DIR || './data', 'karma-system.log')
-    ];
-
-    // Send initial connection message
-    res.write(`data: ${JSON.stringify({
-      timestamp: new Date().toISOString(),
-      message: 'Connected to application logs stream',
-      type: 'info'
-    })}\n\n`);
-
-    // Function to read and send log files
-    const readAndSendLogs = () => {
-      logFiles.forEach(logFile => {
-        try {
-          if (fs.existsSync(logFile)) {
-            const stats = fs.statSync(logFile);
-            const lastModified = stats.mtime;
-            
-            // Read the last 50 lines of each log file
-            const content = fs.readFileSync(logFile, 'utf8');
-            const lines = content.split('\n').filter(line => line.trim());
-            const lastLines = lines.slice(-50);
-            
-            lastLines.forEach(line => {
-              try {
-                res.write(`data: ${JSON.stringify({
-                  timestamp: new Date().toISOString(),
-                  message: `[${path.basename(logFile)}] ${line}`,
-                  type: 'log'
-                })}\n\n`);
-              } catch (error) {
-                logger.error('Error writing log data to client:', error.message);
-              }
-            });
-          }
-        } catch (error) {
-          logger.error(`Error reading log file ${logFile}:`, error.message);
-        }
-      });
-    };
-
-    // Send initial logs
-    readAndSendLogs();
-
-    // Set up periodic log reading (every 2 seconds)
-    const logInterval = setInterval(() => {
-      try {
-        readAndSendLogs();
-      } catch (error) {
-        logger.error('Error in periodic log reading:', error.message);
-      }
-    }, 2000);
-
-    // Handle client disconnect
-    req.on('close', () => {
-      logger.info('Logs stream client disconnected');
-      clearInterval(logInterval);
-    });
-
-  } catch (error) {
-    logger.error('Error setting up logs stream:', error.message);
-    res.write(`data: ${JSON.stringify({
-      timestamp: new Date().toISOString(),
-      message: `Failed to start logs stream: ${error.message}`,
-      type: 'error'
-    })}\n\n`);
   }
 });
 
@@ -660,19 +436,12 @@ function startPeriodicMonitoring() {
   }, 5000); // Update every 5 seconds
 }
 
-const PORT = process.env.PORT || 3333;
-app.listen(PORT, '0.0.0.0', async () => {
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
   logger.info(`Helipad webhook receiver started`, { port: PORT });
   logger.info(`Webhook URL: http://localhost:${PORT}/helipad-webhook`);
   logger.info(`Health check: http://localhost:${PORT}/health`);
   logger.info(`Management UI: http://localhost:${PORT}/`);
-  
-  // Initialize summary scheduling at startup
-  try {
-    await initializeSummaryScheduling();
-  } catch (error) {
-    logger.error('Failed to initialize summary scheduling:', { error: error.message });
-  }
   
   // Start periodic monitoring
   startPeriodicMonitoring();

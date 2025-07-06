@@ -1,18 +1,11 @@
 // Server-side only - Nostr bot for posting fundraiser updates
 // NOTE: This will only work if you deploy to a server environment (not static hosting)
 // For static hosting, you'll need to set up a separate server/API for bot posting
-
-// WebSocket polyfill for Node.js
-import WebSocket from 'ws';
-// @ts-ignore
-global.WebSocket = WebSocket;
-
 import { finalizeEvent, nip19 } from 'nostr-tools';
 import { Relay } from 'nostr-tools/relay';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { logger } from './logger.js';
-import { karmaSystem } from './karma-system.js';
 
 interface FundraiserUpdateOptions {
   title: string;
@@ -63,7 +56,7 @@ class NostrBot {
   private nsec: string;
   private relays: string[];
 
-  constructor(nsec: string, relays: string[] = ['wss://relay.damus.io', 'wss://relay.nostr.band', 'wss://relay.primal.net', 'wss://nos.lol', 'wss://relay.snort.social', 'wss://relay.current.fyi', 'wss://chadf.nostr1.com/']) {
+  constructor(nsec: string, relays: string[] = ['wss://relay.damus.io', 'wss://relay.nostr.band', 'wss://relay.primal.net', 'wss://7srr7chyc6vlhzpc2hl6lyungvluohzrmt76kbs4kmydhrxoakkbquad.local/', 'wss://chadf.nostr1.com/']) {
     this.nsec = nsec;
     this.relays = relays;
   }
@@ -84,11 +77,11 @@ class NostrBot {
         content: event.content,
         tags: event.tags,
         relays: this.relays 
-      } as any);
+      });
       return;
     }
 
-    logger.info(`Attempting to publish to ${this.relays.length} relays`, { content: event.content } as any);
+    logger.info(`Attempting to publish to ${this.relays.length} relays`, { content: event.content });
     
     const publishPromises = this.relays.map(async (relayUrl) => {
       try {
@@ -98,23 +91,16 @@ class NostrBot {
         await relay.publish(event);
         relay.close();
         logger.info(`Successfully published to ${relayUrl}`);
-        return true; // Success
       } catch (error) {
-        logger.error(
-          `Failed to publish to ${relayUrl}`,
-          error instanceof Error
-            ? { error: error.message, stack: error.stack }
-            : { error: String(error) }
-        );
-        return false; // Failure
+        logger.error(`Failed to publish to ${relayUrl}`, { error: error?.message || error });
       }
     });
 
     const results = await Promise.allSettled(publishPromises);
-    const successful = results.filter(r => r.status === 'fulfilled' && r.value === true).length;
-    const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value === false)).length;
+    const successful = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
     
-    logger.info(`Publish results: ${successful} successful, ${failed} failed out of ${this.relays.length} relays`, { successful, failed, total: this.relays.length } as any);
+    logger.info(`Publish results: ${successful} successful, ${failed} failed out of ${this.relays.length} relays`);
   }
 
   async postFundraiserCreated(options: FundraiserUpdateOptions): Promise<void> {
@@ -252,25 +238,6 @@ export async function announceFundraiserEnded(options: FundraiserUpdateOptions &
 const boostSessions = new Map<string, { largestSplit: HelipadPaymentEvent, timeout: NodeJS.Timeout }>();
 const postedBoosts = new Set<string>();
 
-// Clean up old posted boosts every hour to prevent memory leaks
-setInterval(() => {
-  const oneHourAgo = Math.floor((Date.now() - 3600000) / 120000); // 1 hour ago in 2-minute windows
-  const toDelete: string[] = [];
-  
-  postedBoosts.forEach(sessionId => {
-    const timeWindow = parseInt(sessionId.split('-')[0]);
-    if (timeWindow < oneHourAgo) {
-      toDelete.push(sessionId);
-    }
-  });
-  
-  toDelete.forEach(sessionId => postedBoosts.delete(sessionId));
-  
-  if (toDelete.length > 0) {
-    logger.info(`🧹 Cleaned up ${toDelete.length} old posted boost sessions`);
-  }
-}, 3600000); // Run every hour
-
 // Interface for persisting session data
 interface PersistedSession {
   sessionId: string;
@@ -319,14 +286,12 @@ let dailyStats: DailyStats = {
   boostShows: new Set()
 };
 
-// Get Monday of current week in Eastern Time
+// Get Monday of current week
 function getWeekStart(date: Date): string {
-  // Convert to ET first
-  const etDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  const day = etDate.getDay();
-  const diff = etDate.getDate() - day + (day === 0 ? -6 : 1); // Monday
-  etDate.setDate(diff);
-  return etDate.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
+  return new Date(d.setDate(diff)).toISOString().split('T')[0];
 }
 
 let weeklyStats: WeeklyStats = {
@@ -353,7 +318,6 @@ function scheduleHourlySave(): void {
   }
   
   hourlySaveTimeout = setTimeout(async () => {
-    updateWeeklyDailyBreakdown(); // Ensure current day is in weekly breakdown
     await saveDailyStats();
     await saveWeeklyStats();
     console.log(`💾 Hourly save completed`);
@@ -364,11 +328,10 @@ function scheduleHourlySave(): void {
 }
 
 // File paths for persisting stats and sessions
-const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data');
-const DAILY_STATS_FILE = path.join(DATA_DIR, 'daily-stats.json');
-const WEEKLY_STATS_FILE = path.join(DATA_DIR, 'weekly-stats.json');
-const BOOST_SESSIONS_FILE = path.join(DATA_DIR, 'boost-sessions.json');
-const SUPPORTED_CREATORS_FILE = path.join(DATA_DIR, 'supported-creators.json');
+const DAILY_STATS_FILE = path.join(process.cwd(), 'daily-stats.json');
+const WEEKLY_STATS_FILE = path.join(process.cwd(), 'weekly-stats.json');
+const BOOST_SESSIONS_FILE = path.join(process.cwd(), 'boost-sessions.json');
+const SUPPORTED_CREATORS_FILE = path.join(process.cwd(), 'supported-creators.json');
 
 // Load daily stats from file
 async function loadDailyStats(): Promise<void> {
@@ -376,8 +339,8 @@ async function loadDailyStats(): Promise<void> {
     const data = await fs.readFile(DAILY_STATS_FILE, 'utf-8');
     const saved = JSON.parse(data);
     
-    // Check if saved data is from today (using ET timezone)
-    const currentDate = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+    // Check if saved data is from today
+    const currentDate = new Date().toISOString().split('T')[0];
     if (saved.date === currentDate) {
       dailyStats = {
         date: saved.date,
@@ -510,7 +473,7 @@ async function loadBoostSessions(): Promise<void> {
     let loadedCount = 0;
     let expiredCount = 0;
     
-    savedSessions.forEach(async (session) => {
+    savedSessions.forEach(session => {
       if (session.expiresAt > now) {
         // Session hasn't expired, restore it with new timeout
         const timeLeft = session.expiresAt - now;
@@ -518,7 +481,7 @@ async function loadBoostSessions(): Promise<void> {
           logger.info(`Posting delayed session ${session.sessionId} after restart`, { 
             amount: session.largestSplit.value_msat / 1000, 
             total: session.largestSplit.value_msat_total / 1000 
-          } as any);
+          });
           
           const bot = createNostrBot();
           if (bot) {
@@ -528,11 +491,11 @@ async function loadBoostSessions(): Promise<void> {
               await postBoostToNostr(session.largestSplit, bot);
             } catch (error) {
               logger.error('Error in postBoostToNostr during session restoration', { 
-                error: error instanceof Error ? error.message : String(error), 
-                stack: error instanceof Error ? error.stack : undefined,
+                error: error.message, 
+                stack: error.stack,
                 session: session.sessionId,
                 amount: session.largestSplit.value_msat_total / 1000
-              } as any);
+              });
             }
             await saveBoostSessions(); // Clean up file
           }
@@ -544,28 +507,7 @@ async function loadBoostSessions(): Promise<void> {
         });
         loadedCount++;
       } else {
-        // Session has expired, post it immediately
         expiredCount++;
-        logger.info(`Posting expired session ${session.sessionId} immediately`, { 
-          amount: session.largestSplit.value_msat / 1000, 
-          total: session.largestSplit.value_msat_total / 1000,
-          expiredBy: now - session.expiresAt
-        } as any);
-        
-        const bot = createNostrBot();
-        if (bot) {
-          postedBoosts.add(session.sessionId);
-          try {
-            await postBoostToNostr(session.largestSplit, bot);
-          } catch (error) {
-            logger.error('Error in postBoostToNostr for expired session', { 
-              error: error instanceof Error ? error.message : String(error), 
-              stack: error instanceof Error ? error.stack : undefined,
-              session: session.sessionId,
-              amount: session.largestSplit.value_msat_total / 1000
-            } as any);
-          }
-        }
       }
     });
     
@@ -665,26 +607,21 @@ ${boostShows.length > 0 ? `🚀 Boosted:\n${boostShows.map(show => `• ${show}`
   console.log(`📊 Posted daily summary: ${dailyStats.streamSats + dailyStats.boostSats} total sats (tagged ${pTags.length} hosts)`);
 }
 
-// Update weekly daily breakdown with current daily stats
-function updateWeeklyDailyBreakdown(): void {
+async function resetDailyStats(): Promise<void> {
+  // Save current day to weekly breakdown before resetting
   const currentDay = {
     date: dailyStats.date,
     streamSats: dailyStats.streamSats,
     boostSats: dailyStats.boostSats
   };
   
-  // Update or add to weekly breakdown
+  // Add to weekly breakdown if not already added
   const existingDayIndex = weeklyStats.dailyBreakdown.findIndex(d => d.date === currentDay.date);
   if (existingDayIndex >= 0) {
     weeklyStats.dailyBreakdown[existingDayIndex] = currentDay;
   } else {
     weeklyStats.dailyBreakdown.push(currentDay);
   }
-}
-
-async function resetDailyStats(): Promise<void> {
-  // Save current day to weekly breakdown before resetting
-  updateWeeklyDailyBreakdown();
   
   dailyStats = {
     date: new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }),
@@ -793,7 +730,7 @@ function scheduleDailySummary(): void {
     scheduleDailySummary(); // Schedule next day
   }, msUntilMidnight);
 
-  logger.info(`📅 Daily summary scheduled for ${midnightUTC.toLocaleString('en-US', { timeZone: 'America/New_York' })} (midnight EDT)`, { midnightUTC } as any);
+  console.log(`📅 Daily summary scheduled for ${midnightUTC.toLocaleString('en-US', { timeZone: 'America/New_York' })} (midnight EDT)`);
 }
 
 function scheduleWeeklySummary(): void {
@@ -825,7 +762,7 @@ function scheduleWeeklySummary(): void {
     scheduleWeeklySummary(); // Schedule next week
   }, msUntilSunday);
 
-  logger.info(`📅 Weekly summary scheduled for ${nextSundayMidnight.toLocaleString()} (Sunday midnight EDT)`, { nextSundayMidnight } as any);
+  console.log(`📅 Weekly summary scheduled for ${nextSundayMidnight.toLocaleString()} (Sunday midnight EDT)`);
 }
 
 // Test function to manually post current daily summary
@@ -919,7 +856,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     sender: event.sender,
     podcast: event.podcast,
     episode: event.episode
-  } as any);
+  });
   
   // Load daily and weekly stats on first run
   if (dailyStats.streamSats === 0 && dailyStats.boostSats === 0 && dailyStats.streamShows.size === 0) {
@@ -927,10 +864,6 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     await loadWeeklyStats();
     await loadBoostSessions();
     await loadSupportedCreators();
-    
-    // Ensure current day is in weekly breakdown after loading
-    updateWeeklyDailyBreakdown();
-    await saveWeeklyStats();
   }
 
   // Check if we need to reset daily stats (new day in Eastern Time)
@@ -961,51 +894,27 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     dailyStats.streamShows.add(showName);
     weeklyStats.streamSats += satsAmount;
     weeklyStats.streamShows.add(showName);
-    updateWeeklyDailyBreakdown(); // Update daily breakdown in weekly stats
     logger.info(`Added ${satsAmount} stream sats to daily/weekly totals`);
   } else if (event.action === 2) { // Boost
-    // For boosts, we need to check if this is a new session or a split payment
-    // Only add to stats if this is a new boost session, not on every split
-    const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
-    const boostType = 'sent';
-    const messageHash = event.message ? event.message.slice(0, 50) : 'nomsg'; // First 50 chars for uniqueness
-    const sessionId = `${boostType}-${event.sender}-${event.episode}-${event.podcast}-${messageHash}`;
+    dailyStats.boostSats += satsAmount;
+    dailyStats.boostShows.add(showName);
+    weeklyStats.boostSats += satsAmount;
+    weeklyStats.boostShows.add(showName);
+    logger.info(`Added ${satsAmount} boost sats to daily/weekly totals`);
     
-    const existingSession = boostSessions.get(sessionId);
-    
-    if (!existingSession) {
-      // This is a new boost session - add to stats
-      dailyStats.boostSats += satsAmount;
-      dailyStats.boostShows.add(showName);
-      weeklyStats.boostSats += satsAmount;
-      weeklyStats.boostShows.add(showName);
-      updateWeeklyDailyBreakdown(); // Update daily breakdown in weekly stats
-      logger.info(`Added ${satsAmount} boost sats to daily/weekly totals (new session)`);
+    // Track supported creators for boosts
+    if (showName && showName !== 'Unknown') {
+      // Check if this is a music boost
+      const isMusic = event.remote_podcast && event.remote_podcast.trim() && 
+                      event.remote_episode && event.remote_episode.trim();
       
-      // Track supported creators for boosts
-      if (showName && showName !== 'Unknown') {
-        // Check if this is a music boost
-        const isMusic = event.remote_podcast && event.remote_podcast.trim() && 
-                        event.remote_episode && event.remote_episode.trim();
-        
-        if (isMusic) {
-          // Track the musician
-          try {
-            await trackSupportedCreator(event.remote_podcast ?? '', 'musician', satsAmount);
-          } catch (error) {
-            if (error instanceof Error) {
-              logger.error('msg', { error: error.message, stack: error.stack });
-            } else {
-              logger.error('msg', { error: String(error) });
-            }
-          }
-        } else {
-          // Track the podcast
-          await trackSupportedCreator(showName, 'podcast', satsAmount);
-        }
+      if (isMusic) {
+        // Track the musician
+        await trackSupportedCreator(event.remote_podcast, 'musician', satsAmount);
+      } else {
+        // Track the podcast
+        await trackSupportedCreator(showName, 'podcast', satsAmount);
       }
-    } else {
-      logger.info(`Skipping stats update for split payment in existing session ${sessionId}`);
     }
   }
   
@@ -1028,152 +937,42 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     return; // Skip individual posts for streams
   }
 
-  // RECEIVING BOOST DETECTION COMMENTED OUT - ONLY PROCESS SENT BOOSTS
-  // TODO: Uncomment and modify when setting up separate webhook for receiving
-  
-  // // Determine if this is a sent or received boost
-  // // Better approach: check if payment is TO your node's pubkey/address
-  // const myNodePubkey = '032870511bfa0309bab3ca1832ead69eed848a4abddbc4d50e55bb2157f9525e51';
-  // const myLightningAddress = 'chadf@getalby.com';
-  // 
-  // // Check TLV data for sender_id and reply_address
-  // let tlvSenderId = '';
-  // let tlvReplyAddress = '';
-  // try {
-  //   if (event.tlv) {
-  //     const tlvData = JSON.parse(event.tlv);
-  //     tlvSenderId = tlvData.sender_id || '';
-  //     tlvReplyAddress = tlvData.reply_address || '';
-  //   }
-  // } catch (error) {
-  //   logger.debug('Failed to parse TLV data for boost direction detection', { error: error.message });
-  // }
-  // 
-  // // Debug: Log all the detection fields for analysis
-  // logger.info('Boost direction detection debug', {
-  //   sender: event.sender,
-  //   amount: event.value_msat_total / 1000,
-  //   paymentInfoPubkey: event.payment_info?.pubkey,
-  //   paymentInfoIsNull: event.payment_info === null,
-  //   myNodePubkey,
-  //   tlvSenderId,
-  //   tlvReplyAddress,
-  //   myLightningAddress,
-  //   paymentPubkeyMatch: event.payment_info?.pubkey === myNodePubkey,
-  //   senderIdMatch: tlvSenderId === myLightningAddress,
-  //   replyAddressMatch: tlvReplyAddress === myNodePubkey,
-  //   nullPaymentExternalSender: event.payment_info === null && event.sender !== 'ChadF'
-  // });
-  // 
-  // // Sent boost: payment FROM your node, detected by:
-  // // 1. sender is 'ChadF' (your username) - this covers both direct sends and split payments
-  // // Note: Split payments from your sends will have payment_info === null but sender === 'ChadF'
-  // const isSentBoost = event.sender === 'ChadF';
-  // 
-  // // Received boost: payment TO your node, detected by:
-  // // 1. payment_info.pubkey matches your node pubkey (direct payment)
-  // // 2. TLV sender_id matches your lightning address 
-  // // 3. TLV reply_address matches your node pubkey
-  // // 4. payment_info is null AND sender is external (split payments from apps like Fountain)
-  // const isReceivedBoost = !isSentBoost && (
-  //   (event.payment_info?.pubkey === myNodePubkey) || 
-  //   (tlvSenderId === myLightningAddress) ||
-  //   (tlvReplyAddress === myNodePubkey) ||
-  //   (event.payment_info === null && event.sender !== 'ChadF')
-  // );
-  // 
-  // if (isSentBoost) {
-  //   logger.info(`✅ Processing SENT boost (outgoing from your node)`, { 
-  //     sender: event.sender, 
-  //     amount: event.value_msat_total / 1000,
-  //     recipientPubkey: event.payment_info?.pubkey,
-  //     tlvSenderId,
-  //     tlvReplyAddress
-  //   });
-  // } else {
-  //   logger.info(`📨 Processing RECEIVED boost (incoming to your node)`, { 
-  //     sender: event.sender, 
-  //     amount: event.value_msat_total / 1000,
-  //     recipientPubkey: event.payment_info?.pubkey,
-  //     tlvSenderId,
-  //     tlvReplyAddress,
-  //     detectionReason: event.payment_info?.pubkey === myNodePubkey ? 'pubkey_match' : 
-  //                     tlvSenderId === myLightningAddress ? 'sender_id_match' :
-  //                     tlvReplyAddress === myNodePubkey ? 'reply_address_match' : 'unknown'
-  //   });
-  // }
-  
-  // SIMPLIFIED LOGIC: Only process sent boosts (sender === 'ChadF')
-  const isSentBoost = event.sender === 'ChadF';
-  
-  // Log ALL boosts for debugging
-  logger.info(`🔍 Boost received - checking sender`, { 
+  // Only post boosts that were SENT (not received)
+  // Sent boosts typically have payment fees, received boosts don't
+  if (!event.payment_info || !event.payment_info.fee_msat || event.payment_info.fee_msat <= 0) {
+    logger.info(`Skipping received boost (no outgoing fees)`, { 
+      sender: event.sender, 
+      amount: event.value_msat_total / 1000,
+      hasFee: !!event.payment_info?.fee_msat,
+      feeAmount: event.payment_info?.fee_msat || 0
+    });
+    return; // Skip received boosts - only post sent boosts
+  }
+
+  logger.info(`Processing sent boost (has outgoing fees)`, { 
     sender: event.sender, 
-    expectedSender: 'ChadF',
-    isSentBoost: isSentBoost,
-    amount: event.value_msat_total / 1000
-  } as any);
-  
-  // Skip all non-sent boosts for now
-  if (!isSentBoost) {
-    logger.info(`⏭️  Skipping non-sent boost (will be handled by separate webhook)`, { 
+    amount: event.value_msat_total / 1000,
+    feeAmount: event.payment_info.fee_msat
+  });
+
+  // Only post boosts from ChadF to avoid posting pseudonymous boosts
+  if (event.sender !== 'ChadF') {
+    logger.info(`Skipping boost from different sender`, { 
       sender: event.sender, 
       amount: event.value_msat_total / 1000
-    } as any);
-    return;
-  }
-  
-  logger.info(`✅ Processing SENT boost (outgoing from your node)`, { 
-    sender: event.sender, 
-    amount: event.value_msat_total / 1000
-  } as any);
-
-  // Boost direction now determined by recipient pubkey/address, not sender name
-
-  // For sent boosts, blocklist of bot accounts - don't repost boosts sent to these accounts
-  if (isSentBoost) {
-    const blockedBotPubkeys = [
-      'npub1x9txy0vttevqznkzfrl8f8u950lpy70tesd0hg7lfswmcfff9uasat8dz9', // Bot account
-    ];
-    
-    // Check if boost was sent to a blocked bot account
-    if (event.payment_info?.pubkey) {
-      try {
-        // Convert hex pubkey to npub for comparison
-        const recipientNpub = nip19.npubEncode(event.payment_info.pubkey);
-        if (blockedBotPubkeys.includes(recipientNpub)) {
-          logger.info(`Skipping sent boost to blocked bot account`, { 
-            sender: event.sender, 
-            recipient: recipientNpub,
-            amount: event.value_msat_total / 1000
-          } as any);
-          return; // Skip sent boosts to blocked bot accounts
-        }
-      } catch (error) {
-        logger.debug(
-          'Error checking recipient pubkey against blocklist',
-          error instanceof Error
-            ? { error: error.message, stack: error.stack }
-            : { error: String(error) }
-        );
-      }
-    }
+    });
+    return; // Skip boosts not from ChadF
   }
 
   // Group splits by a wider time window to catch all splits from the same boost
   const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
-  // Only handling sent boosts now
-  const boostType = 'sent';
-  
-  // For sent boosts, include message content to deduplicate identical boosts across time windows
-  const messageHash = event.message ? event.message.slice(0, 50) : 'nomsg'; // First 50 chars for uniqueness
-  const sessionId = `${boostType}-${event.sender}-${event.episode}-${event.podcast}-${messageHash}`;
+  const sessionId = `${timeWindow}-${event.sender}-${event.episode}-${event.podcast}`;
   
   logger.info(`Processing payment`, { 
     amount: event.value_msat / 1000, 
     total: event.value_msat_total / 1000, 
     session: sessionId 
-  } as any);
+  });
   
   // Check if we already posted for this boost session
   if (postedBoosts.has(sessionId)) {
@@ -1194,11 +993,11 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
       logger.info(`Updated largest split for session ${sessionId}`, { 
         amount: event.value_msat / 1000, 
         total: event.value_msat_total / 1000 
-      } as any);
+      });
     } else {
       logger.info(`Keeping existing largest split for session ${sessionId}`, { 
         amount: existingSession.largestSplit.value_msat / 1000 
-      } as any);
+      });
     }
   } else {
     // First split for this session
@@ -1206,7 +1005,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     logger.info(`New boost session ${sessionId}`, { 
       amount: event.value_msat / 1000, 
       total: event.value_msat_total / 1000 
-    } as any);
+    });
   }
 
   // Set a timeout to post the largest payment after 30 seconds of no new payments
@@ -1216,72 +1015,22 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     logger.info(`Posting largest payment for session ${sessionId}`, { 
       amount: session.largestSplit.value_msat / 1000, 
       total: session.largestSplit.value_msat_total / 1000 
-    } as any);
+    });
     
     // Mark this session as posted
     postedBoosts.add(sessionId);
     boostSessions.delete(sessionId);
     
-    // Post the largest payment from this session (only sent boosts)
+    // Post the largest payment from this session
     try {
-      // RECEIVING BOOST HANDLING COMMENTED OUT - ONLY HANDLE SENT BOOSTS
-      // TODO: Remove this comment when setting up separate webhook for receiving
-      
-      // // Re-check boost type using recipient pubkey/address logic
-      // const sessionMyNodePubkey = '032870511bfa0309bab3ca1832ead69eed848a4abddbc4d50e55bb2157f9525e51';
-      // const sessionMyLightningAddress = 'chadf@getalby.com';
-      // 
-      // let sessionTlvSenderId = '';
-      // let sessionTlvReplyAddress = '';
-      // try {
-      //   if (session.largestSplit.tlv) {
-      //     const tlvData = JSON.parse(session.largestSplit.tlv);
-      //     sessionTlvSenderId = tlvData.sender_id || '';
-      //     sessionTlvReplyAddress = tlvData.reply_address || '';
-      //   }
-      // } catch (error) {
-      //   logger.debug('Failed to parse session TLV data', { error: error.message });
-      // }
-      // 
-      // const isSessionReceivedBoost = (session.largestSplit.payment_info?.pubkey === sessionMyNodePubkey) || 
-      //                              (sessionTlvSenderId === sessionMyLightningAddress) ||
-      //                              (sessionTlvReplyAddress === sessionMyNodePubkey) ||
-      //                              (session.largestSplit.payment_info === null && session.largestSplit.sender !== 'ChadF');
-      // 
-      // const isSessionSentBoost = !isSessionReceivedBoost;
-      // 
-      // // Debug logging to trace the conditional logic
-      // logger.info('Conditional logic debug', {
-      //   sessionId,
-      //   sender: session.largestSplit.sender,
-      //   recipientPubkey: session.largestSplit.payment_info?.pubkey,
-      //   sessionTlvSenderId,
-      //   sessionTlvReplyAddress,
-      //   isSessionSentBoost,
-      //   willCallFunction: isSessionSentBoost ? 'postBoostToNostr' : 'postReceivedBoostToNostr'
-      // });
-      // 
-      // if (isSessionSentBoost) {
-      //   await postBoostToNostr(session.largestSplit, bot);
-      // } else {
-      //   await postReceivedBoostToNostr(session.largestSplit, bot);
-      // }
-      
-      // SIMPLIFIED: Only handle sent boosts
-      logger.info('Posting sent boost to Nostr', {
-        sessionId,
-        sender: session.largestSplit.sender,
-        amount: session.largestSplit.value_msat_total / 1000
-      } as any);
-      
       await postBoostToNostr(session.largestSplit, bot);
     } catch (error) {
       logger.error('Error in postBoostToNostr', { 
-        error: error instanceof Error ? error.message : String(error), 
-        stack: error instanceof Error ? error.stack : undefined,
+        error: error.message, 
+        stack: error.stack,
         session: sessionId,
         amount: session.largestSplit.value_msat_total / 1000
-      } as any);
+      });
     }
     await saveBoostSessions(); // Clean up persisted sessions
   }, 30000);
@@ -1312,28 +1061,6 @@ const showToNpubMap: Record<string, string[]> = {
     'npub15zt29ma0q2je90u6tzjse4q9md4jn84x44uwze0mj03uvrd2puksq8w9sh', // Kevin Bae
   ],
   'Ungovernable Misfits': [
-    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
-  ],
-  'THE BITCOIN BRIEF': [
-    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
-    'npub15c88nc8d44gsp4658dnfu5fahswzzu8gaxm5lkuwjud068swdqfspxssvx', // QnA
-  ],
-  'MONERO MONTHLY': [
-    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
-    'npub1tr4dstaptd2sp98h7hlysp8qle6mw7wmauhfkgz3rmxdd8ndprusnw2y5g', // Seth for Privacy
-  ],
-  'Pleb Miner Monthly': [
-    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
-    'npub1luwkteu2eq2e97n7hw0tlj03vvgguzl0srm3vkxz2jt75wpaf9tspt9cqr', // Jon
-  ],
-  'ACTION NEWS': [
-    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
-    'npub1luwkteu2eq2e97n7hw0tlj03vvgguzl0srm3vkxz2jt75wpaf9tspt9cqr', // Jon
-  ],
-  'The Confab': [
-    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
-  ],
-  'ASHIGARU': [
     'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
   ],
   'UpBEATS': [
@@ -1371,11 +1098,6 @@ const showToNpubMap: Record<string, string[]> = {
   ],
   'Radio bitpunk.fm': [
     'npub1f49twdlzlw667r74jz6t06xxlemd8gp2j7g77l76easpl8jsltvqvlzpez', // bitpunk_fm
-  ],
-  'FREEDOM TECH FRIDAY': [
-    'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r', // Max
-    'npub15c88nc8d44gsp4658dnfu5fahswzzu8gaxm5lkuwjud068swdqfspxssvx', // QnA
-    'npub1tr4dstaptd2sp98h7hlysp8qle6mw7wmauhfkgz3rmxdd8ndprusnw2y5g', // Seth for Privacy
   ],
   // Add more shows and their associated npubs
 };
@@ -1511,16 +1233,7 @@ function normalizeShowName(name: string): string {
 }
 
 // Utility to get npubs for a show, handling exact and partial matches
-function getShowNpubs(showName: string, episodeName?: string): string[] {
-  // Check episode name for special cases first
-  if (episodeName) {
-    const lowerEpisodeName = normalizeShowName(episodeName);
-    if (lowerEpisodeName.includes('freedom tech friday')) {
-      logger.info(`🎪 Matched episode "${episodeName}" to FREEDOM TECH FRIDAY`);
-      return showToNpubMap['FREEDOM TECH FRIDAY'] || [];
-    }
-  }
-  
+function getShowNpubs(showName: string): string[] {
   let showNpubs = showToNpubMap[showName];
   if (!showNpubs) {
     const lowerShowName = normalizeShowName(showName);
@@ -1537,15 +1250,14 @@ function getShowNpubs(showName: string, episodeName?: string): string[] {
       }
     }
   }
-  
   return showNpubs || [];
 }
 
 // Refactored: getShowBasedTags uses getShowNpubs
-function getShowBasedTags(showName: string, episodeName?: string): string[][] {
+function getShowBasedTags(showName: string): string[][] {
   const tags: string[][] = [];
   const addedPubkeys = new Set<string>();
-  const showNpubs = getShowNpubs(showName, episodeName);
+  const showNpubs = getShowNpubs(showName);
   if (showNpubs.length > 0) {
     logger.info(`🎪 Found ${showNpubs.length} npubs for show: ${showName}`);
     showNpubs.forEach(npub => {
@@ -1557,7 +1269,7 @@ function getShowBasedTags(showName: string, episodeName?: string): string[][] {
         } else if (data instanceof Uint8Array) {
           hexPubkey = Array.from(data, byte => byte.toString(16).padStart(2, '0')).join('');
         } else {
-          const uint8Array = new Uint8Array(data as unknown as ArrayBufferLike);
+          const uint8Array = new Uint8Array(data as ArrayBufferLike);
           hexPubkey = Array.from(uint8Array, byte => byte.toString(16).padStart(2, '0')).join('');
         }
         if (hexPubkey.length === 128) {
@@ -1621,7 +1333,7 @@ function processMessageForTags(message: string): { processedMessage: string; tag
           hexPubkey = Array.from(data, byte => byte.toString(16).padStart(2, '0')).join('');
         } else {
           // Try to convert to Uint8Array first
-          const uint8Array = new Uint8Array(data as unknown as ArrayBufferLike);
+          const uint8Array = new Uint8Array(data as ArrayBufferLike);
           hexPubkey = Array.from(uint8Array, byte => byte.toString(16).padStart(2, '0')).join('');
         }
         
@@ -1650,127 +1362,6 @@ function processMessageForTags(message: string): { processedMessage: string; tag
   
   return { processedMessage, tags };
 }
-
-// COMMENTED OUT - RECEIVED BOOST FUNCTIONALITY DISABLED
-// TODO: Uncomment and modify for separate webhook handling received boosts
-/*
-async function postReceivedBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<void> {
-  logger.info('Starting to post received boost to Nostr', { 
-    sender: event.sender, 
-    amount: event.value_msat_total / 1000, 
-    podcast: event.podcast, 
-    episode: event.episode 
-  });
-  
-  // Process message for auto-tagging
-  let messageTags: string[][] = [];
-  let displayMessage = event.message;
-  
-  if (event.message && event.message.trim()) {
-    const { processedMessage, tags } = processMessageForTags(event.message);
-    displayMessage = processedMessage;
-    messageTags = tags;
-  }
-
-  // Get show-based tags for automatic tagging
-  let showTags: string[][] = [];
-  if (event.podcast) {
-    showTags = getShowBasedTags(event.podcast, event.episode);
-  }
-
-  // Build app info with link if available
-  const appName = event.app || '';
-  const appConfig = podcastAppLinks[appName];
-  const appInfo = appConfig 
-    ? `📱 Via: ${appConfig.url}`
-    : `📱 Via: ${appName}`;
-
-  // Format the content for received boost
-  const contentParts = [
-    '🎉 Thank you for the boost!',
-    '',
-  ];
-
-  if (displayMessage && displayMessage.trim()) {
-    contentParts.push(`💬 "${displayMessage}"`, '');
-  }
-
-  contentParts.push(`👤 From: ${event.sender || 'Unknown'}`);
-  
-  // Add show info
-  if (event.podcast && event.podcast.trim() && event.podcast.trim().toLowerCase() !== 'nameless') {
-    contentParts.push(`🎧 Show: ${event.podcast}`);
-  }
-  if (event.episode && event.episode.trim() && event.episode.trim().toLowerCase() !== 'nameless') {
-    contentParts.push(`📻 Episode: ${event.episode}`);
-  }
-
-  // Parse TLV data to build show link
-  let showLink = '';
-  try {
-    if (event.tlv) {
-      const tlvData = JSON.parse(event.tlv);
-      const feedID = tlvData.feedID;
-      
-      // Link to show page (has all episodes + app chooser + episodes.fm button)
-      if (feedID) {
-        showLink = `https://podcastindex.org/podcast/${feedID}`;
-      }
-    }
-  } catch (error) {
-    console.warn('⚠️ Failed to parse TLV data for show link:', error);
-  }
-
-  // Show split amount vs total for received boosts
-  const splitAmount = Math.floor(event.value_msat / 1000);
-  const totalAmount = Math.floor(event.value_msat_total / 1000);
-  const amountText = splitAmount === totalAmount 
-    ? `💸 Amount: ${totalAmount.toLocaleString()} sats`
-    : `💸 Split: ${splitAmount.toLocaleString()} sats (of ${totalAmount.toLocaleString()} total)`;
-
-  contentParts.push(amountText);
-
-  // Add show link if available
-  if (showLink) {
-    contentParts.push(`🎧 Listen: ${showLink}`);
-  }
-
-  contentParts.push(
-    appInfo,
-    '',
-    '#ThankYou #BoostReceived #Podcasting20 #V4V'
-  );
-
-  const content = contentParts.join('\n');
-
-  // Combine hashtags with mention tags and show tags
-  const allTags = [
-    ['t', 'thankyou'],
-    ['t', 'boostreceived'],
-    ['t', 'podcasting20'],
-    ['t', 'v4v'],
-    ['t', 'podcast'],
-    ...messageTags,
-    ...showTags
-  ];
-
-  const nostrEvent = finalizeEvent({
-    kind: 1,
-    content,
-    tags: allTags,
-    created_at: Math.floor(Date.now() / 1000),
-  }, bot.getSecretKey());
-
-  await bot.publishToRelays(nostrEvent);
-  
-  logger.info('Successfully posted received boost to Nostr', { 
-    sender: event.sender, 
-    amount: event.value_msat_total / 1000, 
-    contentLength: content.length,
-    tagsCount: allTags.length
-  } as any);
-}
-*/
 
 async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<void> {
   logger.info('Starting to post boost to Nostr', { 
@@ -1821,15 +1412,15 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
   let showHostMentions: string[] = [];
   if (isMusic && event.podcast) {
     // For music, tag based on the hosting show
-    showTags = getShowBasedTags(event.podcast, event.episode);
+    showTags = getShowBasedTags(event.podcast);
   } else if (event.podcast) {
     // For regular podcasts, tag based on podcast name
-    showTags = getShowBasedTags(event.podcast, event.episode);
+    showTags = getShowBasedTags(event.podcast);
   }
 
   // Build visible host mentions (e.g., nostr:npub1... nostr:npub1...)
   if (event.podcast) {
-    const showNpubs = getShowNpubs(event.podcast, event.episode);
+    const showNpubs = getShowNpubs(event.podcast);
     for (const npub of showNpubs) {
       showHostMentions.push(`nostr:${npub}`);
     }
@@ -1839,18 +1430,16 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
   const contentParts = [
     actionText,
     '',
+    `${senderLabel}: ${senderDisplay || 'Unknown'}`,
   ];
 
   if (displayMessage && displayMessage.trim()) {
-    contentParts.push(`💬 Message: ${displayMessage}`, '');
+    contentParts.push(`💬 Message: ${displayMessage}`);
   }
-
-  contentParts.push(`${senderLabel}: ${senderDisplay || 'Unknown'}`);
 
   // Add visible host mentions if any
   if (showHostMentions.length > 0) {
-    const hostLabel = showHostMentions.length === 1 ? '👤 Host:' : '👥 Hosts:';
-    contentParts.push(`${hostLabel} ${showHostMentions.join(' ')}`);
+    contentParts.push(`👥 Hosts: ${showHostMentions.join(' ')}`);
   }
 
   // Build app info with link if available
@@ -1922,27 +1511,5 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
     amount: event.value_msat_total / 1000, 
     contentLength: content.length,
     tagsCount: allTags.length
-  } as any);
-}
-
-// Initialize summary scheduling at bot startup
-export async function initializeSummaryScheduling(): Promise<void> {
-  logger.info('Initializing summary scheduling...');
-  
-  // Load existing stats
-  await loadDailyStats();
-  await loadWeeklyStats();
-  await loadBoostSessions();
-  await loadSupportedCreators();
-  
-  // Ensure current day is in weekly breakdown
-  updateWeeklyDailyBreakdown();
-  await saveWeeklyStats();
-  
-  // Start scheduling
-  scheduleDailySummary();
-  scheduleWeeklySummary();
-  scheduleHourlySave();
-  
-  logger.info('Summary scheduling initialized');
+  });
 }

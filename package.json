@@ -1,11 +1,11 @@
 {
   "name": "helipad-to-nostr-boostbot",
   "version": "1.0.0",
-  "description": "Helipad webhook integration for posting boosts to Nostr",
+  "description": "A webhook receiver to connect Helipad to a Nostr bot.",
   "main": "helipad-webhook.js",
   "type": "module",
   "scripts": {
-    "start": "node dist/helipad-webhook.js",
+    "start": "tsx helipad-webhook.js",
     "dev": "tsx --watch helipad-webhook.js",
     "status": "node scripts/status.js",
     "stop": "node scripts/stop.js",
@@ -22,15 +22,7 @@
     "uninstall-service": "node scripts/install-launch-agent.js uninstall",
     "service-status": "node scripts/install-launch-agent.js status",
     "service-logs": "tail -f logs/launch-agent.log",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "docker:setup": "./scripts/docker-setup.sh",
-    "docker:build": "docker build -t helipad-boostbot .",
-    "docker:run": "docker compose up -d",
-    "docker:stop": "docker compose down",
-    "docker:logs": "docker compose logs -f",
-    "docker:restart": "docker compose restart",
-    "docker:status": "docker compose ps"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
@@ -38,13 +30,10 @@
     "body-parser": "^1.20.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "nostr-tools": "^2.7.0",
-    "ws": "^8.18.0"
+    "nostr-tools": "^2.7.0"
   },
   "devDependencies": {
-    "@types/node": "^20.19.4",
-    "@types/ws": "^8.5.12",
-    "tsx": "^4.16.2",
-    "typescript": "^5.8.3"
+    "@types/node": "^20.14.10",
+    "tsx": "^4.20.3"
   }
 }
