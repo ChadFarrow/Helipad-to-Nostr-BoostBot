@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary, initializeSummaryScheduling } from './lib/nostr-bot.ts';
+import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary } from './lib/nostr-bot.ts';
 import { logger } from './lib/logger.js';
 
 // Store active monitor connections
@@ -100,31 +100,8 @@ app.use(bodyParser.json());
 // Serve static files from public directory
 app.use(express.static('public'));
 
-const AUTH_TOKEN = process.env.HELIPAD_WEBHOOK_TOKEN;
-
-// Middleware for authentication
-const authenticate = (req, res, next) => {
-  if (!AUTH_TOKEN) {
-    // If no token is set in the environment, skip auth
-    return next();
-  }
-
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    logger.warn('Missing or invalid Authorization header');
-    return res.status(401).send('Unauthorized: Missing or invalid token');
-  }
-
-  const token = authHeader.substring(7); // Remove 'Bearer '
-  if (token !== AUTH_TOKEN) {
-    logger.warn('Invalid token received');
-    return res.status(403).send('Forbidden: Invalid token');
-  }
-
-  next();
-};
-
-app.post('/helipad-webhook', authenticate, async (req, res) => {
+// Authentication disabled - webhook is now open
+app.post('/helipad-webhook', async (req, res) => {
   try {
     const event = req.body;
     logger.info('Received Helipad webhook', { event });
@@ -436,7 +413,7 @@ function startPeriodicMonitoring() {
   }, 5000); // Update every 5 seconds
 }
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3333;
 app.listen(PORT, () => {
   logger.info(`Helipad webhook receiver started`, { port: PORT });
   logger.info(`Webhook URL: http://localhost:${PORT}/helipad-webhook`);
