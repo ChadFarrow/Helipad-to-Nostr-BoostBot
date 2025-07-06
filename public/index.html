@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoostBot Management Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: white;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        .stat-card h3 {
+            color: #333;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        .stat-subtext {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .section-title {
+            color: #2d3748;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        button {
+            padding: 18px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        button:active {
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-success { 
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        .btn-warning { 
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+        .btn-danger { 
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+        .btn-info { 
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2d3748;
+        }
+        .btn-secondary { 
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+            color: #2d3748;
+        }
+        
+        .status-display {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 25px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .status-display h3 {
+            margin-top: 0;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+        }
+        .output {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #64ff64;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            max-height: 350px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid rgba(100, 255, 100, 0.2);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-running { background: #34C759; }
+        .status-stopped { background: #FF3B30; }
+        .status-unknown { background: #8E8E93; }
+        .live-monitor {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #64ff64;
+            padding: 25px;
+            border-radius: 12px;
+            font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            max-height: 450px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid rgba(100, 255, 100, 0.2);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .monitor-line {
+            margin: 5px 0;
+            padding: 3px 0;
+        }
+        .monitor-timestamp {
+            color: #888;
+            margin-right: 10px;
+        }
+        .monitor-status-running {
+            color: #00ff00;
+        }
+        .monitor-status-stopped {
+            color: #ff4444;
+        }
+        .monitor-warning {
+            color: #ffaa00;
+        }
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+            .main-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>🤖 BoostBot</h1>
+            <p>Nostr Boost Management Dashboard</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <h3>Bot Status</h3>
+                <div class="stat-value" id="botStatus">🔍 Checking...</div>
+                <div class="stat-subtext">Current state</div>
+            </div>
+            <div class="stat-card">
+                <h3>Health Check</h3>
+                <div class="stat-value" id="healthStatus">🔍 Checking...</div>
+                <div class="stat-subtext">System health</div>
+            </div>
+            <div class="stat-card">
+                <h3>Uptime</h3>
+                <div class="stat-value" id="uptimeStatus">🔍 Checking...</div>
+                <div class="stat-subtext">Time running</div>
+            </div>
+            <div class="stat-card">
+                <h3>Last Activity</h3>
+                <div class="stat-value" id="lastActivity">🔍 Checking...</div>
+                <div class="stat-subtext">Recent events</div>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <h2 class="section-title">🎛️ Bot Controls</h2>
+            
+            <div class="button-grid">
+                <button class="btn-success" onclick="performAction('status')">
+                    <span>📊</span> Check Status
+                </button>
+                <button class="btn-primary" onclick="performAction('restart')">
+                    <span>🔄</span> Restart Bot
+                </button>
+                <button class="btn-danger" onclick="performAction('stop')">
+                    <span>⏹️</span> Stop Bot
+                </button>
+                <button class="btn-warning" onclick="performAction('logs')">
+                    <span>📋</span> View Logs
+                </button>
+                <button class="btn-info" onclick="performAction('service-status')">
+                    <span>🔧</span> Service Status
+                </button>
+                <button class="btn-info" onclick="toggleLiveMonitor()" id="liveMonitorBtn">
+                    <span>📊</span> Start Live Monitor
+                </button>
+                <button class="btn-secondary" onclick="toggleLiveLogs()" id="liveLogsBtn">
+                    <span>📋</span> Start Live Logs
+                </button>
+            </div>
+
+            <div class="status-display" id="statusDisplay" style="display: none;">
+                <h3 id="statusTitle">Status</h3>
+                <div id="statusContent" class="output"></div>
+            </div>
+
+            <div class="status-display" id="liveMonitorDisplay" style="display: none;">
+                <h3 id="liveMonitorTitle">🔴 Live BoostBot Monitor</h3>
+                <div id="liveMonitorContent" class="live-monitor"></div>
+            </div>
+
+            <div class="status-display" id="liveLogsDisplay" style="display: none;">
+                <h3 id="liveLogsTitle">🔴 Live Application Logs</h3>
+                <div id="liveLogsContent" class="live-monitor"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDashboardStats();
+            // Update stats every 30 seconds
+            setInterval(updateDashboardStats, 30000);
+        });
+
+        async function updateDashboardStats() {
+            try {
+                // Update bot status
+                const statusResponse = await fetch('/manage/status', { method: 'POST' });
+                const statusData = await statusResponse.json();
+                updateStatCard('botStatus', statusData.success ? '🟢 Running' : '🔴 Stopped');
+
+                // Update health check
+                const healthResponse = await fetch('/manage/health', { method: 'POST' });
+                const healthData = await healthResponse.json();
+                updateStatCard('healthStatus', healthData.success ? '✅ Healthy' : '❌ Issues');
+
+                // Update uptime with real data
+                const uptimeResponse = await fetch('/uptime');
+                const uptimeData = await uptimeResponse.json();
+                const uptimeDisplay = uptimeData.isRunning ? 
+                    `🕐 ${uptimeData.uptime || 'Unknown'}` : 
+                    '⏹️ Stopped';
+                updateStatCard('uptimeStatus', uptimeDisplay);
+
+                // Update last activity with real data
+                const activityResponse = await fetch('/last-activity');
+                const activityData = await activityResponse.json();
+                const activityDisplay = activityData.type === 'none' ? 
+                    '📭 No activity' : 
+                    `📥 ${activityData.timeAgo}`;
+                updateStatCard('lastActivity', activityDisplay);
+
+            } catch (error) {
+                updateStatCard('botStatus', '❓ Unknown');
+                updateStatCard('healthStatus', '❓ Unknown');
+                updateStatCard('uptimeStatus', '❓ Unknown');
+                updateStatCard('lastActivity', '❓ Unknown');
+            }
+        }
+
+        function updateStatCard(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+
+        async function performAction(action) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.disabled = true;
+            button.innerHTML = '<div class="loading"></div>' + originalText.split(' ').slice(1).join(' ');
+            
+            const statusDisplay = document.getElementById('statusDisplay');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusContent = document.getElementById('statusContent');
+            
+            statusDisplay.style.display = 'block';
+            statusTitle.textContent = `${action.charAt(0).toUpperCase() + action.slice(1)} - Running...`;
+            statusContent.textContent = 'Executing command...';
+            
+            try {
+                const response = await fetch(`/manage/${action}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                statusTitle.innerHTML = `${getActionIcon(action)} ${action.charAt(0).toUpperCase() + action.slice(1)} - ${data.success ? 'Success' : 'Error'}`;
+                statusContent.textContent = data.output || data.error || 'No output';
+                
+                // Auto-scroll to bottom
+                statusContent.scrollTop = statusContent.scrollHeight;
+                
+            } catch (error) {
+                statusTitle.innerHTML = `❌ ${action.charAt(0).toUpperCase() + action.slice(1)} - Error`;
+                statusContent.textContent = `Error: ${error.message}`;
+            } finally {
+                // Restore button
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        }
+        
+        function getActionIcon(action) {
+            const icons = {
+                'status': '📊',
+                'restart': '🔄',
+                'stop': '⏹️',
+                'logs': '📋',
+                'service-status': '🔧',
+                'health': '💚'
+            };
+            return icons[action] || '🤖';
+        }
+        
+        // Live monitor functionality
+        let eventSource = null;
+        let isMonitoring = false;
+        
+        // Live logs functionality
+        let logsEventSource = null;
+        let isLogging = false;
+        
+        function toggleLiveMonitor() {
+            const button = document.getElementById('liveMonitorBtn');
+            const display = document.getElementById('liveMonitorDisplay');
+            const title = document.getElementById('liveMonitorTitle');
+            const content = document.getElementById('liveMonitorContent');
+            
+            if (!isMonitoring) {
+                // Start monitoring
+                isMonitoring = true;
+                button.innerHTML = '⏹️ Stop Live Monitor';
+                button.className = 'btn-danger';
+                display.style.display = 'block';
+                title.innerHTML = '🟢 Live BoostBot Monitor - Connected';
+                content.innerHTML = 'Connecting to live monitor...\n';
+                
+                // Start Server-Sent Events connection
+                eventSource = new EventSource('/monitor/live');
+                
+                eventSource.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    addMonitorLine(data);
+                };
+                
+                eventSource.onerror = function(event) {
+                    title.innerHTML = '🔴 Live BoostBot Monitor - Connection Error';
+                    addMonitorLine({
+                        timestamp: new Date().toISOString(),
+                        message: 'Connection lost. Retrying...',
+                        type: 'error'
+                    });
+                };
+                
+            } else {
+                // Stop monitoring
+                stopLiveMonitor();
+            }
+        }
+        
+        function stopLiveMonitor() {
+            const button = document.getElementById('liveMonitorBtn');
+            const title = document.getElementById('liveMonitorTitle');
+            
+            isMonitoring = false;
+            button.innerHTML = '📊 Start Live Monitor';
+            button.className = 'btn-info';
+            title.innerHTML = '🔴 Live BoostBot Monitor - Disconnected';
+            
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            
+            addMonitorLine({
+                timestamp: new Date().toISOString(),
+                message: 'Monitor stopped by user',
+                type: 'info'
+            });
+        }
+        
+        function toggleLiveLogs() {
+            const button = document.getElementById('liveLogsBtn');
+            const display = document.getElementById('liveLogsDisplay');
+            const title = document.getElementById('liveLogsTitle');
+            const content = document.getElementById('liveLogsContent');
+            
+            if (!isLogging) {
+                // Start logging
+                isLogging = true;
+                button.innerHTML = '⏹️ Stop Live Logs';
+                button.className = 'btn-danger';
+                display.style.display = 'block';
+                title.innerHTML = '🟢 Live Application Logs - Connected';
+                content.innerHTML = 'Connecting to application logs stream...\n';
+                
+                // Start Server-Sent Events connection
+                logsEventSource = new EventSource('/logs/stream');
+                
+                logsEventSource.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        addLogLine(data);
+                    } catch (error) {
+                        addLogLine({
+                            timestamp: new Date().toISOString(),
+                            message: `Error parsing message: ${event.data}`,
+                            type: 'error'
+                        });
+                    }
+                };
+                
+                logsEventSource.onerror = function(event) {
+                    title.innerHTML = '🔴 Live Application Logs - Connection Error';
+                    addLogLine({
+                        timestamp: new Date().toISOString(),
+                        message: 'Connection lost. Retrying...',
+                        type: 'error'
+                    });
+                    
+                    // Close the connection to prevent automatic retries
+                    logsEventSource.close();
+                    
+                    // Try to reconnect after a delay
+                    setTimeout(() => {
+                        if (isLogging) {
+                            addLogLine({
+                                timestamp: new Date().toISOString(),
+                                message: 'Attempting to reconnect...',
+                                type: 'info'
+                            });
+                            toggleLiveLogs(); // Restart the connection
+                        }
+                    }, 3000);
+                };
+                
+            } else {
+                // Stop logging
+                stopLiveLogs();
+            }
+        }
+        
+        function stopLiveLogs() {
+            const button = document.getElementById('liveLogsBtn');
+            const title = document.getElementById('liveLogsTitle');
+            
+            isLogging = false;
+            button.innerHTML = '📋 Start Live Logs';
+            button.className = 'btn-secondary';
+            title.innerHTML = '🔴 Live Application Logs - Disconnected';
+            
+            if (logsEventSource) {
+                logsEventSource.close();
+                logsEventSource = null;
+            }
+            
+            addLogLine({
+                timestamp: new Date().toISOString(),
+                message: 'Logs stream stopped by user',
+                type: 'info'
+            });
+        }
+        
+        function addLogLine(data) {
+            const content = document.getElementById('liveLogsContent');
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            
+            let statusClass = '';
+            let statusIcon = '';
+            
+            if (data.type === 'log') {
+                statusClass = '';
+                statusIcon = '📋';
+            } else if (data.type === 'error') {
+                statusClass = 'monitor-status-stopped';
+                statusIcon = '❌';
+            } else if (data.type === 'info') {
+                statusClass = '';
+                statusIcon = 'ℹ️';
+            } else {
+                statusIcon = '📋';
+            }
+            
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<span class="monitor-timestamp">[${timestamp}]</span>${statusIcon} <span class="${statusClass}">${data.message}</span>`;
+            
+            content.appendChild(line);
+            
+            // Auto-scroll to bottom
+            content.scrollTop = content.scrollHeight;
+            
+            // Keep only last 200 lines for logs
+            while (content.children.length > 200) {
+                content.removeChild(content.firstChild);
+            }
+        }
+        
+        function addMonitorLine(data) {
+            const content = document.getElementById('liveMonitorContent');
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            
+            let statusClass = '';
+            let statusIcon = '';
+            
+            if (data.type === 'status') {
+                statusClass = data.isRunning ? 'monitor-status-running' : 'monitor-status-stopped';
+                statusIcon = data.isRunning ? '✅' : '❌';
+            } else if (data.type === 'error') {
+                statusClass = 'monitor-status-stopped';
+                statusIcon = '❌';
+            } else if (data.type === 'warning') {
+                statusClass = 'monitor-warning';
+                statusIcon = '⚠️';
+            } else if (data.type === 'activity') {
+                statusClass = 'monitor-status-running';
+                statusIcon = '💰';
+            } else if (data.type === 'info') {
+                statusClass = '';
+                statusIcon = 'ℹ️';
+            } else {
+                statusIcon = '📊';
+            }
+            
+            const line = document.createElement('div');
+            line.className = 'monitor-line';
+            line.innerHTML = `<span class="monitor-timestamp">[${timestamp}]</span>${statusIcon} <span class="${statusClass}">${data.message}</span>`;
+            
+            content.appendChild(line);
+            
+            // Auto-scroll to bottom
+            content.scrollTop = content.scrollHeight;
+            
+            // Keep only last 100 lines
+            while (content.children.length > 100) {
+                content.removeChild(content.firstChild);
+            }
+        }
+        
+        // Auto-refresh status every 30 seconds when status is visible
+        setInterval(() => {
+            const statusDisplay = document.getElementById('statusDisplay');
+            if (statusDisplay.style.display !== 'none') {
+                // Auto-refresh can be added here if needed
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
