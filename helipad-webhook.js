@@ -4,13 +4,10 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
-import { exec, execSync, spawn } from 'child_process';
-import { promisify } from 'util';
+import { execSync } from 'child_process';
 import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary, initializeSummaryScheduling } from './lib/nostr-bot.ts';
 import { logger } from './lib/logger.js';
 import { karmaSystem } from './lib/karma-system.ts';
-
-const execAsync = promisify(exec);
 
 // Store active monitor connections
 const monitorClients = new Set();
@@ -296,20 +293,26 @@ app.post('/manage/:action', async (req, res) => {
     let result;
     const workingDir = process.cwd(); // Get current working directory
     
-    // Helper function to add timeout to execAsync
-    const execWithTimeout = async (command, timeoutMs = 10000) => {
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Command timed out')), timeoutMs);
-      });
-      
-      const execPromise = execAsync(command, { cwd: workingDir });
-      
-      return Promise.race([execPromise, timeoutPromise]);
+    // Helper function to execute commands with timeout
+    const execWithTimeout = (command, timeoutMs = 10000) => {
+      try {
+        const result = execSync(command, { 
+          cwd: workingDir, 
+          encoding: 'utf8',
+          timeout: timeoutMs 
+        });
+        return { stdout: result, stderr: '' };
+      } catch (error) {
+        return { 
+          stdout: '', 
+          stderr: error.message || 'Command failed' 
+        };
+      }
     };
     
     switch (action) {
       case 'status':
-        result = await execWithTimeout('npm run status', 10000);
+        result = execWithTimeout('npm run status', 10000);
         break;
         
       case 'restart':
@@ -347,7 +350,7 @@ app.post('/manage/:action', async (req, res) => {
         break;
         
       case 'stop':
-        result = await execWithTimeout('npm run stop', 10000);
+        result = execWithTimeout('npm run stop', 10000);
         break;
         
       case 'logs':
@@ -439,11 +442,11 @@ app.post('/manage/:action', async (req, res) => {
         break;
         
       case 'service-status':
-        result = await execWithTimeout('npm run service-status', 10000);
+        result = execWithTimeout('npm run service-status', 10000);
         break;
         
       case 'health':
-        result = await execWithTimeout('npm run health', 5000);
+        result = execWithTimeout('npm run health', 5000);
         break;
         
       default:
