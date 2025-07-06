@@ -1,0 +1,82 @@
+{
+  "podcast:bitpunk.fm unwound": {
+    "name": "bitpunk.fm unwound",
+    "type": "podcast",
+    "firstSupported": "2025-06-25",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 11,
+    "totalSats": 2964
+  },
+  "podcast:Love In Its Purest Form": {
+    "name": "Love In Its Purest Form",
+    "type": "podcast",
+    "firstSupported": "2025-06-26",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 10,
+    "totalSats": 210
+  },
+  "podcast:Ungovernable Misfits": {
+    "name": "Ungovernable Misfits",
+    "type": "podcast",
+    "firstSupported": "2025-06-26",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 19,
+    "totalSats": 6327
+  },
+  "podcast:The Sunday Morning Two Hour Folk Hour": {
+    "name": "The Sunday Morning Two Hour Folk Hour",
+    "type": "podcast",
+    "firstSupported": "2025-06-26",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 3,
+    "totalSats": 6666
+  },
+  "podcast:Breathe EP": {
+    "name": "Breathe EP",
+    "type": "podcast",
+    "firstSupported": "2025-06-26",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 2,
+    "totalSats": 42
+  },
+  "podcast:You and Me": {
+    "name": "You and Me",
+    "type": "podcast",
+    "firstSupported": "2025-06-26",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 2,
+    "totalSats": 42
+  },
+  "podcast:The Heycitizen Experience": {
+    "name": "The Heycitizen Experience",
+    "type": "podcast",
+    "firstSupported": "2025-06-26",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 5,
+    "totalSats": 105
+  },
+  "podcast:Mejor Versión - Single": {
+    "name": "Mejor Versión - Single",
+    "type": "podcast",
+    "firstSupported": "2025-06-26",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 3,
+    "totalSats": 63
+  },
+  "podcast:The Sheer Magnitude Of it All": {
+    "name": "The Sheer Magnitude Of it All",
+    "type": "podcast",
+    "firstSupported": "2025-06-26",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 15,
+    "totalSats": 552
+  },
+  "podcast:Tinderbox": {
+    "name": "Tinderbox",
+    "type": "podcast",
+    "firstSupported": "2025-06-26",
+    "lastSupported": "2025-06-26",
+    "totalBoosts": 29,
+    "totalSats": 846
+  }
+}

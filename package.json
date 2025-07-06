@@ -1,0 +1,39 @@
+{
+  "name": "helipad-to-nostr-boostbot",
+  "version": "1.0.0",
+  "description": "A webhook receiver to connect Helipad to a Nostr bot.",
+  "main": "helipad-webhook.js",
+  "type": "module",
+  "scripts": {
+    "start": "tsx helipad-webhook.js",
+    "dev": "tsx --watch helipad-webhook.js",
+    "status": "node scripts/status.js",
+    "stop": "node scripts/stop.js",
+    "restart": "node scripts/restart.js",
+    "logs": "node scripts/logs.js",
+    "monitor-logs": "node scripts/monitor-logs.js",
+    "monitor-logs-simple": "node scripts/monitor-logs-simple.js",
+    "health": "curl -s --max-time 5 http://localhost:3333/health || echo 'Bot is not running'",
+    "monitor": "node monitor.js",
+    "watch": "while true; do node monitor.js; sleep 30; done",
+    "auto-restart": "node scripts/auto-restart.js",
+    "dashboard": "node scripts/dashboard.js",
+    "install-service": "node scripts/install-launch-agent.js install",
+    "uninstall-service": "node scripts/install-launch-agent.js uninstall",
+    "service-status": "node scripts/install-launch-agent.js status",
+    "service-logs": "tail -f logs/launch-agent.log",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nostr-tools": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "tsx": "^4.20.3"
+  }
+}
