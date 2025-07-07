@@ -56,6 +56,14 @@ class MusicShowBot {
     try {
       const { remote_podcast, remote_episode, action, value_sat, timestamp } = event;
       
+      console.log('🎵 Processing music show event:', { 
+        remote_podcast, 
+        remote_episode, 
+        action, 
+        value_sat,
+        currentSong: this.currentSong ? this.currentSong.song + ' - ' + this.currentSong.track : 'none'
+      });
+      
       // If we have song information, process it
       if (remote_podcast && remote_episode) {
         await this.handleSongEvent(event);
@@ -168,11 +176,11 @@ class MusicShowBot {
     // Clean artist name by removing "via Wavlake" and similar suffixes
     const cleanArtist = (song.artist || 'Unknown Artist').replace(/\s+via\s+\w+/i, '').trim();
     
-    let post = `🎵 Just listened to ${song.song} by ${cleanArtist} on ${song.showName} - ${song.episodeName}\n`;
+    let post = `🎵 Just listened to ${song.song} by ${cleanArtist} on ${song.showName} - ${song.episodeName}\n\n`;
     if (song.remote_feed_guid) {
-      post += `🎵 Listen: https://lnbeats.com/album/${song.remote_feed_guid}`;
+      post += `🎵 Listen: https://lnbeats.com/album/${song.remote_feed_guid}\n\n`;
     }
-    post += `\n\n#V4Vmusic #PC20 #ValueVerse #LNBeats`;
+    post += `#V4Vmusic #PC20 #ValueVerse #LNBeats`;
     return post;
   }
 

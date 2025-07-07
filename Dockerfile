@@ -22,8 +22,8 @@ COPY . .
 # Copy entrypoint script
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 
-# Create data directory for persistent files
-RUN mkdir -p /app/data && chown -R boostbot:nodejs /app/data /app/public
+# Create data directory for persistent files and fix permissions
+RUN mkdir -p /app/data && chown -R boostbot:nodejs /app
 
 # Switch to non-root user
 USER boostbot

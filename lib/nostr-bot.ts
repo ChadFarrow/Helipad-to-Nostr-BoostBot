@@ -91,10 +91,37 @@ class NostrBot {
     const publishPromises = this.relays.map(async (relayUrl) => {
       try {
         logger.debug(`Connecting to ${relayUrl}`);
-        const relay = await Relay.connect(relayUrl);
-        logger.debug(`Publishing to ${relayUrl}`);
-        await relay.publish(event);
-        relay.close();
+        
+        // Add timeout wrapper for relay operations with retry
+        let lastError;
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            const timeoutPromise = new Promise((_, reject) => {
+              setTimeout(() => reject(new Error('connection timed out')), 30000); // 30 second timeout
+            });
+            
+            const relayPromise = (async () => {
+              const relay = await Relay.connect(relayUrl);
+              logger.debug(`Publishing to ${relayUrl} (attempt ${attempt})`);
+              await relay.publish(event);
+              relay.close();
+              return true;
+            })();
+            
+            await Promise.race([relayPromise, timeoutPromise]);
+            break; // Success, exit retry loop
+          } catch (error) {
+            lastError = error;
+            if (attempt === 1) {
+              logger.debug(`First attempt failed for ${relayUrl}, retrying...`);
+              await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay before retry
+            }
+          }
+        }
+        
+        if (lastError) {
+          throw lastError;
+        }
         logger.info(`Successfully published to ${relayUrl}`);
       } catch (error) {
         logger.error(`Failed to publish to ${relayUrl}`, { error: error?.message || error });
