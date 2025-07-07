@@ -1,6 +1,11 @@
 // Server-side only - Nostr bot for posting fundraiser updates
 // NOTE: This will only work if you deploy to a server environment (not static hosting)
 // For static hosting, you'll need to set up a separate server/API for bot posting
+
+// WebSocket polyfill for Node.js
+import WebSocket from 'ws';
+globalThis.WebSocket = WebSocket as any;
+
 import { finalizeEvent, nip19 } from 'nostr-tools';
 import { Relay } from 'nostr-tools/relay';
 import { promises as fs } from 'fs';

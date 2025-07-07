@@ -30,7 +30,8 @@
     "body-parser": "^1.20.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "nostr-tools": "^2.7.0"
+    "nostr-tools": "^2.7.0",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",

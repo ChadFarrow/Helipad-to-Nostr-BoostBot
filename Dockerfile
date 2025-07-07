@@ -1,18 +1,3 @@
-# Build stage
-FROM node:20-alpine AS build
-
-WORKDIR /app
-
-# Copy package files first for better caching
-COPY package*.json ./
-RUN npm ci
-
-# Copy source code
-COPY . .
-
-# Build TypeScript
-RUN npm run build
-
 # Production stage
 FROM node:20-alpine
 
@@ -28,19 +13,14 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install dependencies (including devDependencies for tsx)
+RUN npm ci && npm cache clean --force
 
-# Copy built application from build stage
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/lib ./lib
-COPY --from=build /app/scripts ./scripts
-COPY --from=build /app/*.js ./
-COPY --from=build /app/public ./public
+# Copy application files
+COPY . .
+
 # Copy entrypoint script
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-# Make compiled lib available as lib for imports
-RUN ln -sf /app/dist/lib /app/lib
 
 # Create data directory for persistent files
 RUN mkdir -p /app/data && chown -R boostbot:nodejs /app/data /app/public
