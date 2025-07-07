@@ -18,8 +18,9 @@ function getProcessInfo() {
 }
 
 function getHealthStatus() {
+  const serverIP = process.env.SERVER_IP || '192.168.0.243';
   try {
-    const response = execSync('curl -s http://127.0.0.1:3333/health', { encoding: 'utf8', timeout: 5000 });
+    const response = execSync(`curl -s http://${serverIP}:3333/health`, { encoding: 'utf8', timeout: 5000 });
     return { statusCode: 200, body: response.trim() };
   } catch (error) {
     return { statusCode: 0, body: 'Connection failed or timed out' };
@@ -105,11 +106,12 @@ function main() {
   console.log('');
   
   // Show webhook URL
+  const serverIP = process.env.SERVER_IP || '192.168.0.243';
   console.log('🌐 Webhook Information:');
-  console.log('  📡 Webhook URL: http://localhost:3333/helipad-webhook');
-  console.log('  💚 Health Check: http://localhost:3333/health');
-  console.log('  🧪 Test Daily Summary: http://localhost:3333/test-daily-summary');
-  console.log('  📊 Test Weekly Summary: http://localhost:3333/test-weekly-summary');
+  console.log(`  📡 Webhook URL: http://${serverIP}:3333/helipad-webhook`);
+  console.log(`  💚 Health Check: http://${serverIP}:3333/health`);
+  console.log(`  🧪 Test Daily Summary: http://${serverIP}:3333/test-daily-summary`);
+  console.log(`  📊 Test Weekly Summary: http://${serverIP}:3333/test-weekly-summary`);
   console.log('');
   
   console.log('💡 Management Commands:');

@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import { execSync } from 'child_process';
 import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary } from './lib/nostr-bot.ts';
+import { musicShowBot } from './lib/music-show-bot.ts';
 import { logger } from './lib/logger.js';
 
 // Store active monitor connections
@@ -143,6 +144,48 @@ app.post('/helipad-webhook', async (req, res) => {
     
     await announceHelipadPayment(event);
     
+    // Process music show events for song tracking (any show with song data)
+    if (event.remote_podcast && event.remote_episode) {
+      try {
+        let artist = undefined;
+        let feedID = undefined;
+        let remote_feed_guid = undefined;
+        if (event.tlv) {
+          try {
+            const tlvObj = typeof event.tlv === 'string' ? JSON.parse(event.tlv) : event.tlv;
+            if (tlvObj && typeof tlvObj.name === 'string') {
+              artist = tlvObj.name;
+            }
+            if (tlvObj && typeof tlvObj.feedID === 'number') {
+              feedID = tlvObj.feedID;
+            }
+            if (tlvObj && typeof tlvObj.remote_feed_guid === 'string') {
+              remote_feed_guid = tlvObj.remote_feed_guid;
+            }
+          } catch (e) {
+            logger.error('Failed to parse tlv JSON', { tlv: event.tlv, error: e.message });
+          }
+        }
+        await musicShowBot.processMusicShowEvent({
+          timestamp: new Date(event.time * 1000).toISOString(),
+          podcast: event.podcast,
+          episode: event.episode,
+          remote_podcast: event.remote_podcast,
+          remote_episode: event.remote_episode,
+          action: event.action,
+          value_sat: Math.floor(event.value_msat / 1000),
+          sender: event.sender,
+          message: event.message,
+          app: event.app,
+          artist,
+          feedID,
+          remote_feed_guid
+        });
+      } catch (error) {
+        logger.error('Error processing music show event:', error);
+      }
+    }
+    
     res.status(200).send('OK');
   } catch (err) {
     logger.error('Error posting to Nostr', { error: err.message, stack: err.stack });
@@ -174,6 +217,8 @@ app.get('/uptime', (req, res) => {
     timestamp: status.timestamp
   });
 });
+
+
 
 // Last activity endpoint
 app.get('/last-activity', (req, res) => {
@@ -413,12 +458,13 @@ function startPeriodicMonitoring() {
   }, 5000); // Update every 5 seconds
 }
 
-const PORT = process.env.PORT || 3333;
+const PORT = process.env.PORT || 4444;
+const SERVER_IP = process.env.SERVER_IP || '192.168.0.243';
 app.listen(PORT, () => {
   logger.info(`Helipad webhook receiver started`, { port: PORT });
-  logger.info(`Webhook URL: http://localhost:${PORT}/helipad-webhook`);
-  logger.info(`Health check: http://localhost:${PORT}/health`);
-  logger.info(`Management UI: http://localhost:${PORT}/`);
+  logger.info(`Webhook URL: http://${SERVER_IP}:${PORT}/helipad-webhook`);
+  logger.info(`Health check: http://${SERVER_IP}:${PORT}/health`);
+  logger.info(`Management UI: http://${SERVER_IP}:${PORT}/`);
   
   // Start periodic monitoring
   startPeriodicMonitoring();
