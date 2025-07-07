@@ -153,6 +153,7 @@ app.post('/helipad-webhook', async (req, res) => {
         if (event.tlv) {
           try {
             const tlvObj = typeof event.tlv === 'string' ? JSON.parse(event.tlv) : event.tlv;
+            console.log('🎵 TLV Debug:', JSON.stringify(tlvObj, null, 2));
             if (tlvObj && typeof tlvObj.name === 'string') {
               artist = tlvObj.name;
             }

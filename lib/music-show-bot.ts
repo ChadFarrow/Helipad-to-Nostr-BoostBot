@@ -61,6 +61,7 @@ class MusicShowBot {
         remote_episode, 
         action, 
         value_sat,
+        artist: event.artist,
         currentSong: this.currentSong ? this.currentSong.song + ' - ' + this.currentSong.track : 'none'
       });
       
@@ -173,14 +174,19 @@ class MusicShowBot {
    * Create the Nostr post content for a finished song
    */
   private createSongPost(song: SongPlay): string {
-    // Clean artist name by removing "via Wavlake" and similar suffixes
-    const cleanArtist = (song.artist || 'Unknown Artist').replace(/\s+via\s+\w+/i, '').trim();
+    // Prefer the TLV artist field when available, as it's usually the most accurate
+    let artistName = song.artist || 'Unknown Artist';
     
-    let post = `🎵 Just listened to ${song.song} by ${cleanArtist} on ${song.showName} - ${song.episodeName}\n\n`;
+    // Clean artist name by removing "via Wavlake" and similar suffixes
+    const cleanArtist = artistName.replace(/\s+via\s+\w+/i, '').trim();
+    
+    let post = `🎵 Just listened to: ${song.track}\n\n`;
+    post += `🎤 Artist: ${cleanArtist}\n\n`;
+    post += `📻 Show: ${song.showName} - ${song.episodeName}\n\n`;
     if (song.remote_feed_guid) {
       post += `🎵 Listen: https://lnbeats.com/album/${song.remote_feed_guid}\n\n`;
     }
-    post += `#V4Vmusic #PC20 #ValueVerse #LNBeats`;
+    post += `#v4vmusic #pc20 #valueverse #lnbeats`;
     return post;
   }
 
