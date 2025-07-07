@@ -22,7 +22,8 @@
     "uninstall-service": "node scripts/install-launch-agent.js uninstall",
     "service-status": "node scripts/install-launch-agent.js status",
     "service-logs": "tail -f logs/launch-agent.log",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker-check": "tsx scripts/docker-preflight-check.js"
   },
   "author": "",
   "license": "MIT",
