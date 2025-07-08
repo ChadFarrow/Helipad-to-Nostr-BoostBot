@@ -270,6 +270,104 @@ export async function announceFundraiserEnded(options: FundraiserUpdateOptions &
 const boostSessions = new Map<string, { largestSplit: HelipadPaymentEvent, timeout: NodeJS.Timeout }>();
 const postedBoosts = new Set<string>();
 
+// Track recent boost post contents to prevent duplicates
+interface RecentBoostPost {
+  content: string;
+  timestamp: number;
+  sessionId: string;
+}
+const recentBoostPosts: RecentBoostPost[] = [];
+const MAX_RECENT_POSTS = 5; // Keep last 5 posts for duplicate checking
+
+// Function to check if content is similar to recent posts
+function isDuplicateContent(content: string, sessionId: string): boolean {
+  const now = Date.now();
+  const fiveMinutesAgo = now - (5 * 60 * 1000); // 5 minutes
+  
+  // Remove old posts (older than 5 minutes)
+  while (recentBoostPosts.length > 0 && recentBoostPosts[0].timestamp < fiveMinutesAgo) {
+    recentBoostPosts.shift();
+  }
+  
+  // Check last 2 posts for similarity (as requested)
+  const recentPosts = recentBoostPosts.slice(-2);
+  
+  for (const post of recentPosts) {
+    // Skip if it's the same session (already handled by postedBoosts)
+    if (post.sessionId === sessionId) {
+      continue;
+    }
+    
+    // Check if content is very similar (allowing for minor differences)
+    const similarity = calculateContentSimilarity(content, post.content);
+    if (similarity > 0.9) { // 90% similarity threshold
+      logger.info(`Duplicate content detected (${Math.round(similarity * 100)}% similarity)`, {
+        currentSession: sessionId,
+        previousSession: post.sessionId,
+        similarity: similarity
+      });
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+// Simple similarity calculation based on common words and structure
+function calculateContentSimilarity(content1: string, content2: string): number {
+  // Normalize content by removing extra whitespace and converting to lowercase
+  const normalize = (str: string) => str.toLowerCase().replace(/\s+/g, ' ').trim();
+  const norm1 = normalize(content1);
+  const norm2 = normalize(content2);
+  
+  // If they're exactly the same, return 1.0
+  if (norm1 === norm2) {
+    return 1.0;
+  }
+  
+  // Split into words and find common words
+  const words1 = norm1.split(' ');
+  const words2 = norm2.split(' ');
+  const set1 = new Set(words1);
+  const set2 = new Set(words2);
+  
+  // Count common words
+  let commonWords = 0;
+  for (const word of set1) {
+    if (set2.has(word)) {
+      commonWords++;
+    }
+  }
+  
+  // Calculate Jaccard similarity
+  const union = set1.size + set2.size - commonWords;
+  if (union === 0) return 0;
+  
+  return commonWords / union;
+}
+
+// Function to add a post to recent posts tracking
+function addToRecentPosts(content: string, sessionId: string): void {
+  const now = Date.now();
+  
+  // Add new post
+  recentBoostPosts.push({
+    content,
+    timestamp: now,
+    sessionId
+  });
+  
+  // Keep only the most recent posts
+  while (recentBoostPosts.length > MAX_RECENT_POSTS) {
+    recentBoostPosts.shift();
+  }
+  
+  logger.info(`Added post to recent tracking`, {
+    sessionId,
+    totalRecentPosts: recentBoostPosts.length
+  });
+}
+
 // Interface for persisting session data
 interface PersistedSession {
   sessionId: string;
@@ -520,7 +618,7 @@ async function loadBoostSessions(): Promise<void> {
             postedBoosts.add(session.sessionId);
             boostSessions.delete(session.sessionId);
             try {
-              await postBoostToNostr(session.largestSplit, bot);
+              await postBoostToNostr(session.largestSplit, bot, session.sessionId);
             } catch (error) {
               logger.error('Error in postBoostToNostr during session restoration', { 
                 error: error.message, 
@@ -1055,7 +1153,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     
     // Post the largest payment from this session
     try {
-      await postBoostToNostr(session.largestSplit, bot);
+      await postBoostToNostr(session.largestSplit, bot, sessionId);
     } catch (error) {
       logger.error('Error in postBoostToNostr', { 
         error: error.message, 
@@ -1131,6 +1229,12 @@ const showToNpubMap: Record<string, string[]> = {
   'Radio bitpunk.fm': [
     'npub1f49twdlzlw667r74jz6t06xxlemd8gp2j7g77l76easpl8jsltvqvlzpez', // bitpunk_fm
   ],
+  'Monero Monthly': [
+    'npub1tr4dstaptd2sp98h7hlysp8qle6mw7wmauhfkgz3rmxdd8ndprusnw2y5g', // Seth for Privacy
+  ],
+  'The HeyCitizen Experience': [
+    'npub109pc6vlklws9k5f8vahq2yrdgap7uyqyt7zqknetd5tjzche8t2qvr5aaj', // Heycitizen
+  ],
   // Add more shows and their associated npubs
 };
 
@@ -1180,6 +1284,8 @@ const nameToNpubMap: Record<string, string> = {
   'max': 'npub1lqvv69u549atefvcyfht30lemlyvl9jnz4l7c6ejs20yzpq7hh7sjjfx0r',
   'kevin bae': 'npub15zt29ma0q2je90u6tzjse4q9md4jn84x44uwze0mj03uvrd2puksq8w9sh',
   'kevinbae': 'npub15zt29ma0q2je90u6tzjse4q9md4jn84x44uwze0mj03uvrd2puksq8w9sh',
+  'seth for privacy': 'npub1tr4dstaptd2sp98h7hlysp8qle6mw7wmauhfkgz3rmxdd8ndprusnw2y5g', // Seth for Privacy
+  'sethforprivacy': 'npub1tr4dstaptd2sp98h7hlysp8qle6mw7wmauhfkgz3rmxdd8ndprusnw2y5g', // Seth for Privacy
   
   // Your following list - Add names as you mention them:
   // 'name': 'npub1hkxnvny5c7w23y8xg5r8rhq5frqujr2hk4xqy0pv9d6luwt3njpqyxfnyv',
@@ -1395,7 +1501,7 @@ function processMessageForTags(message: string): { processedMessage: string; tag
   return { processedMessage, tags };
 }
 
-async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<void> {
+async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?: string): Promise<void> {
   logger.info('Starting to post boost to Nostr', { 
     sender: event.sender, 
     amount: event.value_msat_total / 1000, 
@@ -1518,6 +1624,16 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
 
   const content = contentParts.join('\n');
 
+  // Check for duplicate content if sessionId is provided
+  if (sessionId && isDuplicateContent(content, sessionId)) {
+    logger.info('Skipping duplicate boost post', { 
+      sessionId,
+      sender: event.sender,
+      amount: event.value_msat_total / 1000
+    });
+    return;
+  }
+
   // Combine hashtags with mention tags and show tags
   const allTags = [
     ['t', 'boostagram'],
@@ -1537,6 +1653,11 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any): Promise<v
   }, bot.getSecretKey());
 
   await bot.publishToRelays(nostrEvent);
+  
+  // Add to recent posts tracking if sessionId is provided
+  if (sessionId) {
+    addToRecentPosts(content, sessionId);
+  }
   
   logger.info('Successfully posted boost to Nostr', { 
     sender: event.sender, 
