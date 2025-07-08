@@ -86,5 +86,15 @@
     "lastSupported": "2025-07-06",
     "totalBoosts": 2,
     "totalSats": 66
+  },
+  "podcast:AMERICAPLUS": {
+    "name": "AMERICAPLUS",
+    "type": "podcast",
+    "host": "Cole",
+    "npub": "npub10uny07qd2l25adka6rve92t40g6pa4ya6sr5e3u0cqwaagg2rtvswtmwyn",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 0,
+    "totalSats": 0
   }
 }

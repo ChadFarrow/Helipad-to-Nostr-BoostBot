@@ -1,5 +1,6 @@
 import { nip19 } from 'nostr-tools';
 
+// NPUB LIST - Main Nostr npub list for DeMu/V4V creators
 // The Nostr kind 30000 event JSON
 const event = {
   "id": "4302f768f75c4b121eeef3b23f397cfc41d1934caed423ff7e8e4c45971b8275",
