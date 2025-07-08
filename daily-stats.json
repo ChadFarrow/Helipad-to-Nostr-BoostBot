@@ -1,22 +1,13 @@
 {
-  "date": "2025-06-26",
-  "streamSats": 417,
-  "boostSats": 17349,
+  "date": "2025-07-08",
+  "streamSats": 1160,
+  "boostSats": 6004,
   "streamShows": [
-    "Ungovernable Misfits",
-    "The Future of Podcasting",
-    "bitpunk.fm unwound"
+    "Mike's Mix Tape"
   ],
   "boostShows": [
-    "Ungovernable Misfits",
-    "The Sunday Morning Two Hour Folk Hour",
-    "bitpunk.fm unwound",
-    "Breathe EP",
-    "Unknown",
-    "You and Me",
-    "The Heycitizen Experience",
-    "Mejor Versión - Single",
-    "The Sheer Magnitude Of it All",
-    "Tinderbox"
+    "Mike's Mix Tape",
+    "Tinderbox",
+    "AMERICAPLUS"
   ]
 }

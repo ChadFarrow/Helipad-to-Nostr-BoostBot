@@ -19,9 +19,9 @@
     "name": "Ungovernable Misfits",
     "type": "podcast",
     "firstSupported": "2025-06-26",
-    "lastSupported": "2025-06-26",
-    "totalBoosts": 19,
-    "totalSats": 6327
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 29,
+    "totalSats": 7327
   },
   "podcast:The Sunday Morning Two Hour Folk Hour": {
     "name": "The Sunday Morning Two Hour Folk Hour",
@@ -51,9 +51,9 @@
     "name": "The Heycitizen Experience",
     "type": "podcast",
     "firstSupported": "2025-06-26",
-    "lastSupported": "2025-06-26",
-    "totalBoosts": 5,
-    "totalSats": 105
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 8,
+    "totalSats": 405
   },
   "podcast:Mejor Versión - Single": {
     "name": "Mejor Versión - Single",
@@ -75,9 +75,9 @@
     "name": "Tinderbox",
     "type": "podcast",
     "firstSupported": "2025-06-26",
-    "lastSupported": "2025-06-26",
-    "totalBoosts": 29,
-    "totalSats": 846
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 53,
+    "totalSats": 1350
   },
   "podcast:Samurai Holiday": {
     "name": "Samurai Holiday",
@@ -86,5 +86,165 @@
     "lastSupported": "2025-07-06",
     "totalBoosts": 2,
     "totalSats": 66
+  },
+  "podcast:UpBEATs": {
+    "name": "UpBEATs",
+    "type": "podcast",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-06",
+    "totalBoosts": 13,
+    "totalSats": 12987
+  },
+  "musician:They Ride (single)": {
+    "name": "They Ride (single)",
+    "type": "musician",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-06",
+    "totalBoosts": 2,
+    "totalSats": 666
+  },
+  "musician:UpBEATs": {
+    "name": "UpBEATs",
+    "type": "musician",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-06",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "podcast:They Ride (single)": {
+    "name": "They Ride (single)",
+    "type": "podcast",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-06",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:Lost Summer": {
+    "name": "Lost Summer",
+    "type": "musician",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-07",
+    "totalBoosts": 8,
+    "totalSats": 1965
+  },
+  "musician:Through The Mic - Single": {
+    "name": "Through The Mic - Single",
+    "type": "musician",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-06",
+    "totalBoosts": 10,
+    "totalSats": 2198
+  },
+  "musician:Bloodshot Lies - The Album": {
+    "name": "Bloodshot Lies - The Album",
+    "type": "musician",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-06",
+    "totalBoosts": 7,
+    "totalSats": 350
+  },
+  "musician:Samurai Holiday": {
+    "name": "Samurai Holiday",
+    "type": "musician",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-06",
+    "totalBoosts": 3,
+    "totalSats": 150
+  },
+  "musician:Biased Love and Shame": {
+    "name": "Biased Love and Shame",
+    "type": "musician",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-06",
+    "totalBoosts": 3,
+    "totalSats": 150
+  },
+  "musician:Halfway To Somwhere": {
+    "name": "Halfway To Somwhere",
+    "type": "musician",
+    "firstSupported": "2025-07-06",
+    "lastSupported": "2025-07-06",
+    "totalBoosts": 4,
+    "totalSats": 400
+  },
+  "podcast:Mike's Mix Tape": {
+    "name": "Mike's Mix Tape",
+    "type": "podcast",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "musician:Gossip Queen": {
+    "name": "Gossip Queen",
+    "type": "musician",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 5,
+    "totalSats": 500
+  },
+  "musician:Thankful (feat. Witt Lowry)": {
+    "name": "Thankful (feat. Witt Lowry)",
+    "type": "musician",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:Ring That Bell": {
+    "name": "Ring That Bell",
+    "type": "musician",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 8,
+    "totalSats": 800
+  },
+  "musician:Handle it": {
+    "name": "Handle it",
+    "type": "musician",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "musician:Room For Error": {
+    "name": "Room For Error",
+    "type": "musician",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:Abandoned": {
+    "name": "Abandoned",
+    "type": "musician",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 6,
+    "totalSats": 600
+  },
+  "musician:Settle Down": {
+    "name": "Settle Down",
+    "type": "musician",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:Dat Beat": {
+    "name": "Dat Beat",
+    "type": "musician",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "podcast:AMERICAPLUS": {
+    "name": "AMERICAPLUS",
+    "type": "podcast",
+    "firstSupported": "2025-07-08",
+    "lastSupported": "2025-07-08",
+    "totalBoosts": 2,
+    "totalSats": 2000
   }
 }
