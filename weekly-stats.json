@@ -1,24 +1,31 @@
 {
-  "weekStart": "2025-07-07",
-  "streamSats": 1662,
-  "boostSats": 7604,
+  "weekStart": "2025-07-28",
+  "streamSats": 7008,
+  "boostSats": 25746,
   "streamShows": [
-    "UpBEATs",
-    "Mike's Mix Tape"
+    "It's A Mood",
+    "Into The Doerfel-Verse",
+    "bitpunk.fm",
+    "Ungovernable Misfits"
   ],
   "boostShows": [
-    "UpBEATs",
-    "Ungovernable Misfits",
-    "The Heycitizen Experience",
-    "Mike's Mix Tape",
-    "Tinderbox",
-    "AMERICAPLUS"
+    "It's A Mood",
+    "No Agenda Show",
+    "Into The Doerfel-Verse",
+    "Bowl After Bowl",
+    "bitpunk.fm",
+    "Ungovernable Misfits"
   ],
   "dailyBreakdown": [
     {
-      "date": "2025-07-07",
-      "streamSats": 0,
-      "boostSats": 1300
+      "date": "2025-07-28",
+      "streamSats": 4069,
+      "boostSats": 3064
+    },
+    {
+      "date": "2025-07-29",
+      "streamSats": 50,
+      "boostSats": 523
     }
   ]
 }

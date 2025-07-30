@@ -1235,6 +1235,9 @@ const showToNpubMap: Record<string, string[]> = {
   'The HeyCitizen Experience': [
     'npub109pc6vlklws9k5f8vahq2yrdgap7uyqyt7zqknetd5tjzche8t2qvr5aaj', // Heycitizen
   ],
+  'AMERICAPLUS': [
+    'npub10uny07qd2l25adka6rve92t40g6pa4ya6sr5e3u0cqwaagg2rtvswtmwyn', // Cole
+  ],
   // Add more shows and their associated npubs
 };
 
@@ -1286,6 +1289,8 @@ const nameToNpubMap: Record<string, string> = {
   'kevinbae': 'npub15zt29ma0q2je90u6tzjse4q9md4jn84x44uwze0mj03uvrd2puksq8w9sh',
   'seth for privacy': 'npub1tr4dstaptd2sp98h7hlysp8qle6mw7wmauhfkgz3rmxdd8ndprusnw2y5g', // Seth for Privacy
   'sethforprivacy': 'npub1tr4dstaptd2sp98h7hlysp8qle6mw7wmauhfkgz3rmxdd8ndprusnw2y5g', // Seth for Privacy
+  'cole': 'npub10uny07qd2l25adka6rve92t40g6pa4ya6sr5e3u0cqwaagg2rtvswtmwyn', // Cole (AMERICAPLUS)
+  'americaplus': 'npub10uny07qd2l25adka6rve92t40g6pa4ya6sr5e3u0cqwaagg2rtvswtmwyn', // Cole (AMERICAPLUS)
   
   // Your following list - Add names as you mention them:
   // 'name': 'npub1hkxnvny5c7w23y8xg5r8rhq5frqujr2hk4xqy0pv9d6luwt3njpqyxfnyv',

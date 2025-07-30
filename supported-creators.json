@@ -3,9 +3,9 @@
     "name": "bitpunk.fm unwound",
     "type": "podcast",
     "firstSupported": "2025-06-25",
-    "lastSupported": "2025-06-26",
-    "totalBoosts": 11,
-    "totalSats": 2964
+    "lastSupported": "2025-07-20",
+    "totalBoosts": 23,
+    "totalSats": 14752
   },
   "podcast:Love In Its Purest Form": {
     "name": "Love In Its Purest Form",
@@ -19,25 +19,25 @@
     "name": "Ungovernable Misfits",
     "type": "podcast",
     "firstSupported": "2025-06-26",
-    "lastSupported": "2025-07-08",
-    "totalBoosts": 29,
-    "totalSats": 7327
+    "lastSupported": "2025-07-30",
+    "totalBoosts": 41,
+    "totalSats": 13324
   },
   "podcast:The Sunday Morning Two Hour Folk Hour": {
     "name": "The Sunday Morning Two Hour Folk Hour",
     "type": "podcast",
     "firstSupported": "2025-06-26",
-    "lastSupported": "2025-06-26",
-    "totalBoosts": 3,
-    "totalSats": 6666
+    "lastSupported": "2025-07-24",
+    "totalBoosts": 10,
+    "totalSats": 16665
   },
   "podcast:Breathe EP": {
     "name": "Breathe EP",
     "type": "podcast",
     "firstSupported": "2025-06-26",
-    "lastSupported": "2025-06-26",
-    "totalBoosts": 2,
-    "totalSats": 42
+    "lastSupported": "2025-07-18",
+    "totalBoosts": 7,
+    "totalSats": 384
   },
   "podcast:You and Me": {
     "name": "You and Me",
@@ -51,9 +51,9 @@
     "name": "The Heycitizen Experience",
     "type": "podcast",
     "firstSupported": "2025-06-26",
-    "lastSupported": "2025-07-08",
-    "totalBoosts": 8,
-    "totalSats": 405
+    "lastSupported": "2025-07-18",
+    "totalBoosts": 10,
+    "totalSats": 505
   },
   "podcast:Mejor Versión - Single": {
     "name": "Mejor Versión - Single",
@@ -91,9 +91,9 @@
     "name": "UpBEATs",
     "type": "podcast",
     "firstSupported": "2025-07-06",
-    "lastSupported": "2025-07-06",
-    "totalBoosts": 13,
-    "totalSats": 12987
+    "lastSupported": "2025-07-27",
+    "totalBoosts": 38,
+    "totalSats": 27273
   },
   "musician:They Ride (single)": {
     "name": "They Ride (single)",
@@ -107,9 +107,9 @@
     "name": "UpBEATs",
     "type": "musician",
     "firstSupported": "2025-07-06",
-    "lastSupported": "2025-07-06",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-07-23",
+    "totalBoosts": 8,
+    "totalSats": 3998
   },
   "podcast:They Ride (single)": {
     "name": "They Ride (single)",
@@ -123,25 +123,25 @@
     "name": "Lost Summer",
     "type": "musician",
     "firstSupported": "2025-07-06",
-    "lastSupported": "2025-07-07",
-    "totalBoosts": 8,
-    "totalSats": 1965
+    "lastSupported": "2025-07-23",
+    "totalBoosts": 23,
+    "totalSats": 14763
   },
   "musician:Through The Mic - Single": {
     "name": "Through The Mic - Single",
     "type": "musician",
     "firstSupported": "2025-07-06",
-    "lastSupported": "2025-07-06",
-    "totalBoosts": 10,
-    "totalSats": 2198
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 20,
+    "totalSats": 3198
   },
   "musician:Bloodshot Lies - The Album": {
     "name": "Bloodshot Lies - The Album",
     "type": "musician",
     "firstSupported": "2025-07-06",
-    "lastSupported": "2025-07-06",
-    "totalBoosts": 7,
-    "totalSats": 350
+    "lastSupported": "2025-07-25",
+    "totalBoosts": 16,
+    "totalSats": 3347
   },
   "musician:Samurai Holiday": {
     "name": "Samurai Holiday",
@@ -248,5 +248,453 @@
     "lastSupported": "2025-07-08",
     "totalBoosts": 2,
     "totalSats": 2000
+  },
+  "musician:a gathering of batteries": {
+    "name": "a gathering of batteries",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:Same Sun Going Down": {
+    "name": "Same Sun Going Down",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:Jetty": {
+    "name": "Jetty",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 6,
+    "totalSats": 600
+  },
+  "musician:Ordinary Day": {
+    "name": "Ordinary Day",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:You and Me": {
+    "name": "You and Me",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:Going Gold Single": {
+    "name": "Going Gold Single",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 6,
+    "totalSats": 600
+  },
+  "podcast:The Wait Is Over": {
+    "name": "The Wait Is Over",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 25,
+    "totalSats": 825
+  },
+  "musician:Originals": {
+    "name": "Originals",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 4,
+    "totalSats": 400
+  },
+  "musician:Mejor Versión - Single": {
+    "name": "Mejor Versión - Single",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 5,
+    "totalSats": 500
+  },
+  "podcast:Talking For The Rest Of The World": {
+    "name": "Talking For The Rest Of The World",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 1,
+    "totalSats": 33
+  },
+  "musician:Hippies Raised a Cowgirl": {
+    "name": "Hippies Raised a Cowgirl",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 6,
+    "totalSats": 600
+  },
+  "musician:Live at the Fickle Pickle - Into the Valueverse": {
+    "name": "Live at the Fickle Pickle - Into the Valueverse",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 7,
+    "totalSats": 700
+  },
+  "podcast:It's A Mood": {
+    "name": "It's A Mood",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-28",
+    "totalBoosts": 7,
+    "totalSats": 1632
+  },
+  "podcast:Here For You": {
+    "name": "Here For You",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 6,
+    "totalSats": 198
+  },
+  "musician:Against All Love": {
+    "name": "Against All Love",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:Fear": {
+    "name": "Fear",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "podcast:Lost Summer": {
+    "name": "Lost Summer",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-19",
+    "totalBoosts": 11,
+    "totalSats": 792
+  },
+  "podcast:Ice Statues": {
+    "name": "Ice Statues",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 9,
+    "totalSats": 663
+  },
+  "podcast:Cool Summer": {
+    "name": "Cool Summer",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 99
+  },
+  "podcast:Bowl After Bowl": {
+    "name": "Bowl After Bowl",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-30",
+    "totalBoosts": 62,
+    "totalSats": 16945
+  },
+  "musician:Leather Diamond": {
+    "name": "Leather Diamond",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 6,
+    "totalSats": 600
+  },
+  "musician:Headache Song": {
+    "name": "Headache Song",
+    "type": "musician",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 5,
+    "totalSats": 500
+  },
+  "podcast:Ring That Bell": {
+    "name": "Ring That Bell",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 63
+  },
+  "podcast:Through The Mic - Single": {
+    "name": "Through The Mic - Single",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 63
+  },
+  "podcast:Originals": {
+    "name": "Originals",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 2,
+    "totalSats": 42
+  },
+  "podcast:Going Gold Single": {
+    "name": "Going Gold Single",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 2,
+    "totalSats": 42
+  },
+  "podcast:it can be erased": {
+    "name": "it can be erased",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 4,
+    "totalSats": 84
+  },
+  "podcast:The Inner Voice": {
+    "name": "The Inner Voice",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 3,
+    "totalSats": 63
+  },
+  "podcast:Entire Discography": {
+    "name": "Entire Discography",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-17",
+    "totalBoosts": 2,
+    "totalSats": 42
+  },
+  "podcast:Homegrown Hits": {
+    "name": "Homegrown Hits",
+    "type": "podcast",
+    "firstSupported": "2025-07-17",
+    "lastSupported": "2025-07-25",
+    "totalBoosts": 33,
+    "totalSats": 10990
+  },
+  "musician:The Ultimate Album": {
+    "name": "The Ultimate Album",
+    "type": "musician",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-18",
+    "totalBoosts": 6,
+    "totalSats": 1998
+  },
+  "musician:Spectral Hiding": {
+    "name": "Spectral Hiding",
+    "type": "musician",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-18",
+    "totalBoosts": 6,
+    "totalSats": 1998
+  },
+  "musician:Self​-​Titled": {
+    "name": "Self​-​Titled",
+    "type": "musician",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-18",
+    "totalBoosts": 6,
+    "totalSats": 1998
+  },
+  "musician:Pony Up Daddy": {
+    "name": "Pony Up Daddy",
+    "type": "musician",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-18",
+    "totalBoosts": 6,
+    "totalSats": 1998
+  },
+  "podcast:Poetry on Tape": {
+    "name": "Poetry on Tape",
+    "type": "podcast",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-18",
+    "totalBoosts": 19,
+    "totalSats": 6664
+  },
+  "podcast:Mutton, Mead & Music": {
+    "name": "Mutton, Mead & Music",
+    "type": "podcast",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-25",
+    "totalBoosts": 20,
+    "totalSats": 6660
+  },
+  "musician:Street Clones": {
+    "name": "Street Clones",
+    "type": "musician",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-25",
+    "totalBoosts": 21,
+    "totalSats": 42993
+  },
+  "podcast:Into The Doerfel-Verse": {
+    "name": "Into The Doerfel-Verse",
+    "type": "podcast",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-29",
+    "totalBoosts": 68,
+    "totalSats": 77824
+  },
+  "podcast:Alone in a Coffin": {
+    "name": "Alone in a Coffin",
+    "type": "podcast",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-18",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "podcast:Burn Away": {
+    "name": "Burn Away",
+    "type": "podcast",
+    "firstSupported": "2025-07-18",
+    "lastSupported": "2025-07-18",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "podcast:Too Angry Cunts": {
+    "name": "Too Angry Cunts",
+    "type": "podcast",
+    "firstSupported": "2025-07-19",
+    "lastSupported": "2025-07-26",
+    "totalBoosts": 11,
+    "totalSats": 2964
+  },
+  "musician:it can be erased": {
+    "name": "it can be erased",
+    "type": "musician",
+    "firstSupported": "2025-07-20",
+    "lastSupported": "2025-07-20",
+    "totalBoosts": 6,
+    "totalSats": 1998
+  },
+  "musician:Sad Songs": {
+    "name": "Sad Songs",
+    "type": "musician",
+    "firstSupported": "2025-07-20",
+    "lastSupported": "2025-07-20",
+    "totalBoosts": 5,
+    "totalSats": 1665
+  },
+  "podcast:Sad Songs": {
+    "name": "Sad Songs",
+    "type": "podcast",
+    "firstSupported": "2025-07-21",
+    "lastSupported": "2025-07-21",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "musician:Get Abused": {
+    "name": "Get Abused",
+    "type": "musician",
+    "firstSupported": "2025-07-23",
+    "lastSupported": "2025-07-23",
+    "totalBoosts": 4,
+    "totalSats": 4000
+  },
+  "podcast:LNURL Testing Podcast": {
+    "name": "LNURL Testing Podcast",
+    "type": "podcast",
+    "firstSupported": "2025-07-24",
+    "lastSupported": "2025-07-24",
+    "totalBoosts": 10,
+    "totalSats": 116
+  },
+  "musician:44": {
+    "name": "44",
+    "type": "musician",
+    "firstSupported": "2025-07-25",
+    "lastSupported": "2025-07-25",
+    "totalBoosts": 2,
+    "totalSats": 666
+  },
+  "musician:Stay Awhile": {
+    "name": "Stay Awhile",
+    "type": "musician",
+    "firstSupported": "2025-07-25",
+    "lastSupported": "2025-07-25",
+    "totalBoosts": 2,
+    "totalSats": 6666
+  },
+  "musician:The Heycitizen Experience": {
+    "name": "The Heycitizen Experience",
+    "type": "musician",
+    "firstSupported": "2025-07-25",
+    "lastSupported": "2025-07-25",
+    "totalBoosts": 5,
+    "totalSats": 1665
+  },
+  "musician:Grey State": {
+    "name": "Grey State",
+    "type": "musician",
+    "firstSupported": "2025-07-25",
+    "lastSupported": "2025-07-25",
+    "totalBoosts": 4,
+    "totalSats": 1332
+  },
+  "musician:Bowl Covers": {
+    "name": "Bowl Covers",
+    "type": "musician",
+    "firstSupported": "2025-07-25",
+    "lastSupported": "2025-07-25",
+    "totalBoosts": 3,
+    "totalSats": 999
+  },
+  "podcast:Citadel Dispatch": {
+    "name": "Citadel Dispatch",
+    "type": "podcast",
+    "firstSupported": "2025-07-26",
+    "lastSupported": "2025-07-26",
+    "totalBoosts": 32,
+    "totalSats": 3899
+  },
+  "podcast:No Agenda Show": {
+    "name": "No Agenda Show",
+    "type": "podcast",
+    "firstSupported": "2025-07-28",
+    "lastSupported": "2025-07-28",
+    "totalBoosts": 8,
+    "totalSats": 1732
+  },
+  "podcast:bitpunk.fm": {
+    "name": "bitpunk.fm",
+    "type": "podcast",
+    "firstSupported": "2025-07-30",
+    "lastSupported": "2025-07-30",
+    "totalBoosts": 16,
+    "totalSats": 5328
+  },
+  "musician:The View": {
+    "name": "The View",
+    "type": "musician",
+    "firstSupported": "2025-07-30",
+    "lastSupported": "2025-07-30",
+    "totalBoosts": 6,
+    "totalSats": 1998
+  },
+  "musician:Think EP": {
+    "name": "Think EP",
+    "type": "musician",
+    "firstSupported": "2025-07-30",
+    "lastSupported": "2025-07-30",
+    "totalBoosts": 9,
+    "totalSats": 6997
   }
 }
