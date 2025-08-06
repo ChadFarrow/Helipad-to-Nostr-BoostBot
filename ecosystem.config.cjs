@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     name: 'boostbot',
     script: 'helipad-webhook.js',
-    cwd: '/opt/boostbot',
+    cwd: '/home/server/bots/BoostBot',
     instances: 1,
     autorestart: true,
     watch: false,
