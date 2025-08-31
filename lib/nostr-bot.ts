@@ -1035,12 +1035,24 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     // Track supported creators for boosts
     if (showName && showName !== 'Unknown') {
       // Check if this is a music boost
-      const isMusic = event.remote_podcast && event.remote_podcast.trim() && 
+      const isMusicBoost = event.remote_podcast && event.remote_podcast.trim() && 
                       event.remote_episode && event.remote_episode.trim();
       
-      if (isMusic) {
-        // Track the musician
-        await trackSupportedCreator(event.remote_podcast, 'musician', satsAmount);
+      if (isMusicBoost) {
+        // Extract artist name from TLV data if available
+        let musicianName = event.remote_podcast; // Default fallback
+        if (event.tlv) {
+          try {
+            const tlvData = typeof event.tlv === 'string' ? JSON.parse(event.tlv) : event.tlv;
+            if (tlvData.name && typeof tlvData.name === 'string') {
+              musicianName = tlvData.name; // This is the actual artist name
+            }
+          } catch (error) {
+            logger.warn('Failed to parse TLV for musician tracking', { error: error?.message });
+          }
+        }
+        // Track the musician with corrected name
+        await trackSupportedCreator(musicianName, 'musician', satsAmount);
       } else {
         // Track the podcast
         await trackSupportedCreator(showName, 'podcast', satsAmount);
@@ -1539,6 +1551,24 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
   // Check if this is a music boost (has remote_podcast and remote_episode)
   const isMusic = event.remote_podcast && event.remote_podcast.trim() && 
                   event.remote_episode && event.remote_episode.trim();
+  
+  // Extract artist name from TLV data if available (more accurate than remote_podcast)
+  let artistName = event.remote_podcast; // Default fallback
+  let musicFeedGuid: string | undefined;
+  if (isMusic && event.tlv) {
+    try {
+      const tlvData = typeof event.tlv === 'string' ? JSON.parse(event.tlv) : event.tlv;
+      if (tlvData.name && typeof tlvData.name === 'string') {
+        artistName = tlvData.name; // This is the actual artist name
+        logger.info(`🎵 Using artist name from TLV: ${artistName}`);
+      }
+      if (tlvData.remote_feed_guid) {
+        musicFeedGuid = tlvData.remote_feed_guid;
+      }
+    } catch (error) {
+      logger.warn('Failed to parse TLV for artist name', { error: error?.message });
+    }
+  }
 
   // Process message for auto-tagging
   let messageTags: string[][] = [];
@@ -1600,7 +1630,13 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
         : event.podcast;
       contentParts.push(`🎧 Show: ${showInfo}`);
     }
-    contentParts.push(`🎵 Now Playing: "${event.remote_episode}" by ${event.remote_podcast}`);
+    // Use the corrected artist name from TLV data
+    contentParts.push(`🎵 Now Playing: "${event.remote_episode}" by ${artistName}`);
+    
+    // Add music link if we have the feed GUID
+    if (musicFeedGuid) {
+      contentParts.push(`🎵 Listen on LNBeats: https://lnbeats.com/album/${musicFeedGuid}`);
+    }
   } else {
     // Regular podcast boost - show podcast and episode info
     if (event.podcast && event.podcast.trim() && event.podcast.trim().toLowerCase() !== 'nameless') {
