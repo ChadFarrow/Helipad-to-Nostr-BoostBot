@@ -107,6 +107,11 @@ app.post('/helipad-webhook', async (req, res) => {
     const event = req.body;
     logger.info('Received Helipad webhook', { event });
     
+    // Log the full event structure for debugging music shows
+    if (event.remote_item_guid || event.remote_feed_guid || event.name) {
+      console.log('🎵 Full music webhook data:', JSON.stringify(event, null, 2));
+    }
+    
     // Broadcast webhook activity to live monitors
     const satsAmount = Math.floor(event.value_msat_total / 1000);
     const actionName = {
@@ -144,17 +149,45 @@ app.post('/helipad-webhook', async (req, res) => {
     
     await announceHelipadPayment(event);
     
-    // Process music show events for song tracking (any show with song data)
-    if (event.remote_podcast && event.remote_episode) {
+    // Process music show events for song tracking
+    // Check for both old format (remote_podcast/remote_episode) and new format (remote_item_guid/remote_feed_guid)
+    if ((event.remote_podcast && event.remote_episode) || (event.remote_item_guid && event.remote_feed_guid)) {
       try {
         let artist = undefined;
         let feedID = undefined;
-        let remote_feed_guid = undefined;
+        let remote_feed_guid = event.remote_feed_guid;
+        let songTitle = undefined;
+        let albumOrShow = undefined;
+        
+        // Handle different webhook formats
+        if (event.remote_podcast && event.remote_episode) {
+          // Old format: remote_podcast is artist/channel, remote_episode is song
+          albumOrShow = event.remote_podcast;
+          songTitle = event.remote_episode;
+        } else if (event.remote_item_guid && event.name) {
+          // New format: name is artist, remote_item might have song info
+          artist = event.name;  // Direct field contains artist
+          // For music streaming, we need to fetch song title from somewhere
+          // The guid or remote_item_guid might contain song identifier
+          // For now, use a placeholder - this needs more investigation
+          songTitle = "Track from " + artist;  // Temporary until we find the song title source
+          
+          // Log to help debug where song title should come from
+          console.log('🎵 Music event data:', {
+            name: event.name,
+            episode: event.episode,
+            remote_item_guid: event.remote_item_guid,
+            guid: event.guid,
+            url: event.url
+          });
+        }
+        
+        // Check TLV data for additional info (if present)
         if (event.tlv) {
           try {
             const tlvObj = typeof event.tlv === 'string' ? JSON.parse(event.tlv) : event.tlv;
             console.log('🎵 TLV Debug:', JSON.stringify(tlvObj, null, 2));
-            if (tlvObj && typeof tlvObj.name === 'string') {
+            if (tlvObj && typeof tlvObj.name === 'string' && !artist) {
               artist = tlvObj.name;
             }
             if (tlvObj && typeof tlvObj.feedID === 'number') {
@@ -167,17 +200,30 @@ app.post('/helipad-webhook', async (req, res) => {
             logger.error('Failed to parse tlv JSON', { tlv: event.tlv, error: e.message });
           }
         }
+        
+        // Handle different time formats (time vs ts)
+        const timestamp = event.time 
+          ? new Date(event.time * 1000).toISOString()
+          : event.ts 
+          ? new Date(Date.now()).toISOString()  // ts is position in track, not timestamp
+          : new Date().toISOString();
+        
+        // Handle different value formats (value_msat vs value_msat_total)
+        const valueMsat = event.value_msat || event.value_msat_total || 0;
+        
         await musicShowBot.processMusicShowEvent({
-          timestamp: new Date(event.time * 1000).toISOString(),
+          timestamp,
           podcast: event.podcast,
           episode: event.episode,
-          remote_podcast: event.remote_podcast,
-          remote_episode: event.remote_episode,
-          action: event.action,
-          value_sat: Math.floor(event.value_msat / 1000),
-          sender: event.sender,
+          remote_podcast: albumOrShow || artist,  // Use artist as fallback
+          remote_episode: songTitle || 'Unknown Track',
+          action: typeof event.action === 'string' 
+            ? (event.action === 'stream' ? 1 : 2)  // Convert string action to number
+            : (event.action || 1),
+          value_sat: Math.floor(valueMsat / 1000),
+          sender: event.sender || event.sender_name,
           message: event.message,
-          app: event.app,
+          app: event.app_name || event.app,
           artist,
           feedID,
           remote_feed_guid
