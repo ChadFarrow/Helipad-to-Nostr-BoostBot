@@ -184,12 +184,26 @@ class MusicShowBot {
    * Create the Nostr post content for a finished song
    */
   private createSongPost(song: SongPlay): string {
+    console.log('🔍 DEBUG: createSongPost called with song data:', {
+      artist: song.artist,
+      song: song.song, 
+      track: song.track,
+      listeningPlatform: song.listeningPlatform,
+      showName: song.showName
+    });
+    
     // Priority for artist name:
     // 1. Use the TLV artist field if available (most accurate) 
     // 2. Otherwise use remote_podcast as fallback
     // 3. NEVER use app_name or similar
     let artistName = song.artist || song.song || 'Unknown Artist';
     let trackName = song.track || 'Unknown Track';
+    
+    console.log('🔍 DEBUG: Initial artist selection:', {
+      songArtist: song.artist,
+      songSong: song.song,
+      selectedArtist: artistName
+    });
     
     // CRITICAL: Make sure we never show app names as artists
     if (artistName === 'PodcastGuru' || artistName === 'Podcast Guru' || 
@@ -201,6 +215,11 @@ class MusicShowBot {
     // Clean artist name by removing "via Wavlake" and similar suffixes
     const cleanArtist = artistName.replace(/\s+via\s+\w+/i, '').trim();
     
+    console.log('🔍 DEBUG: After cleaning:', {
+      originalArtist: artistName,
+      cleanedArtist: cleanArtist
+    });
+    
     // For PodcastGuru format, if track name is a placeholder, just say we're listening to the artist
     if (trackName.startsWith('Playing from')) {
       if (cleanArtist !== 'Unknown Artist') {
@@ -211,11 +230,11 @@ class MusicShowBot {
     }
     
     // Log what we're posting
-    console.log('🎯 Creating post with artist:', {
-      originalArtist: song.artist,
-      cleanArtist: cleanArtist,
+    console.log('🎯 FINAL POST DATA:', {
       trackName: trackName,
-      app: song.listeningPlatform
+      artistName: cleanArtist,
+      originalArtistField: song.artist,
+      originalSongField: song.song
     });
     
     let post = `🎵 Just listened to: ${trackName}\n\n`;

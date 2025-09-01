@@ -380,31 +380,62 @@ app.get('/test-weekly-summary', async (req, res) => {
   }
 });
 
+// Test artist extraction directly
+app.get('/test-artist', async (req, res) => {
+  try {
+    const testName = "Nate Johnivan via Wavlake";
+    console.log('🧪 Testing artist extraction for:', testName);
+    
+    let artist;
+    if (testName.includes('@')) {
+      const username = testName.split('@')[0];
+      artist = username
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/[_-]/g, ' ')
+        .trim()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      console.log('🎵 Extracted artist from identifier:', testName, '->', artist);
+    } else if (!testName.includes('via')) {
+      artist = testName;
+      console.log('🎵 Found artist in name field:', artist);
+    } else {
+      artist = testName.split(' via ')[0].trim();
+      console.log('🎵 Extracted artist before "via":', artist);
+    }
+    
+    res.json({ testName, extractedArtist: artist });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Test music show endpoint
 app.get('/test-music-show', async (req, res) => {
   try {
     logger.info('Test music show requested');
-    // Simulate PodcastGuru webhook format
+    // Simulate the "No Way Back" webhook that shows Unknown Artist
     const testEvent = {
-      sender_id: "791B666C-3FF7-4EE5-BD06-223BE1CF9F99",
-      value_msat: 18000,
-      value_msat_total: 20000,
+      action: "stream",
+      boost_link: "https://app.podcastguru.io/podcast/X68747470733a2f2f697473616d6f6f642e6f72672f697473616d6f6f647273732e786d6c/episode/4482e38af39fe0840715aa726a9db9dc?t=434",
       guid: "469b403f-db2d-574c-9db9-96dbb3f6561c",
-      name: "Herbivore via Wavlake",
+      episode_guid: "933784bc-1711-4f69-a228-20370812ecaf",
+      remote_feed_guid: "0bc8103c-7e22-5a59-b152-04af80746b49",
+      episode: "Cycles",
       speed: "2",
       app_version: "1.0.34 (119)",
-      uuid: "C0CB627F-5A81-4363-9E7E-A9BC8F20BE55",
-      sender_name: "ChadF",
-      ts: 681,
-      remote_item_guid: "cd90267a-bbfd-4065-9f45-372b9ec6b170",
-      episode: "Cycles",
-      episode_guid: "933784bc-1711-4f69-a228-20370812ecaf",
-      url: "https://itsamood.org/itsamoodrss.xml",
       podcast: "It's A Mood",
-      remote_feed_guid: "64253f63-9ad6-570c-8f76-455fb7ac2a42",
+      ts: 434,
       app_name: "PodcastGuru",
-      boost_link: "https://app.podcastguru.io/podcast/X68747470733a2f2f697473616d6f6f642e6f72672f697473616d6f6f647273732e786d6c/episode/4482e38af39fe0840715aa726a9db9dc?t=681",
-      action: "stream"
+      remote_item_guid: "b93c4a1f-5c84-482c-9ac3-b841405c20b0",
+      sender_name: "ChadF",
+      value_msat: 13000,
+      url: "https://itsamood.org/itsamoodrss.xml",
+      sender_id: "791B666C-3FF7-4EE5-BD06-223BE1CF9F99",
+      value_msat_total: 18000,
+      name: "Middle Season",
+      uuid: "F50AEBB3-D761-4708-BE5E-CC21F9227D03"
     };
     
     // Process through the webhook handler by making a local request
