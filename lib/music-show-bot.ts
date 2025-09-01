@@ -115,7 +115,14 @@ class MusicShowBot {
         artist: this.currentSong.artist,
         app: event.app,
         song: remote_podcast,
-        track: remote_episode
+        track: remote_episode,
+        originalArtistValue: artist,
+        eventData: {
+          remote_podcast: event.remote_podcast,
+          remote_episode: event.remote_episode,
+          podcast: event.podcast,
+          episode: event.episode
+        }
       });
 
       logger.info(`🎵 Started listening to: ${remote_episode} by ${remote_podcast} (TLV Artist: ${artist || 'Not provided'})`);
@@ -189,14 +196,33 @@ class MusicShowBot {
       song: song.song, 
       track: song.track,
       listeningPlatform: song.listeningPlatform,
-      showName: song.showName
+      showName: song.showName,
+      fullSongObject: JSON.stringify(song, null, 2)
     });
     
     // Priority for artist name:
     // 1. Use the TLV artist field if available (most accurate) 
-    // 2. Otherwise use remote_podcast as fallback
-    // 3. NEVER use app_name or similar
-    let artistName = song.artist || song.song || 'Unknown Artist';
+    // 2. Try to extract from song.song if it contains "via"
+    // 3. Otherwise use remote_podcast as fallback
+    // 4. NEVER use app_name or similar
+    let artistName = song.artist;
+    
+    // If artist is missing but song.song has "via", extract artist from it
+    if (!artistName && song.song && song.song.includes(' via ')) {
+      artistName = song.song.split(' via ')[0].trim();
+      console.log('🎯 Extracted artist from song.song field:', artistName);
+    }
+    
+    // Final fallback
+    if (!artistName) {
+      artistName = 'Unknown Artist';
+    }
+    
+    // Clean any remaining "via" suffixes that weren't cleaned in webhook processing
+    if (artistName.includes(' via ')) {
+      artistName = artistName.split(' via ')[0].trim();
+      console.log('🧹 Cleaned via suffix from artist:', artistName);
+    }
     let trackName = song.track || 'Unknown Track';
     
     console.log('🔍 DEBUG: Initial artist selection:', {
@@ -212,8 +238,8 @@ class MusicShowBot {
       artistName = 'Unknown Artist';
     }
     
-    // Clean artist name by removing "via Wavlake" and similar suffixes
-    const cleanArtist = artistName.replace(/\s+via\s+\w+/i, '').trim();
+    // Clean artist name by removing "via Wavlake", "via fountain", etc.
+    const cleanArtist = artistName.replace(/\s+via\s+\w+/i, '').replace(/\s+via\s+[^,\s]+/i, '').trim();
     
     console.log('🔍 DEBUG: After cleaning:', {
       originalArtist: artistName,

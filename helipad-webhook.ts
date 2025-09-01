@@ -182,9 +182,28 @@ app.post('/helipad-webhook', async (req, res) => {
                 .join(' ');
               console.log('🎵 Extracted artist from identifier:', event.name, '->', artist);
             } else if (!event.name.includes('via')) {
-              // If it's not an email and doesn't have "via", use it as artist
-              artist = event.name;
-              console.log('🎵 Found artist in name field:', artist);
+              // If it's not an email and doesn't have "via", check if it looks like a username
+              if (/^[a-zA-Z][a-zA-Z0-9]*$/.test(event.name)) {
+                // Convert username to readable format (handle both camelCase and lowercase)
+                if (/[A-Z]/.test(event.name)) {
+                  // Has capitals - convert camelCase/PascalCase
+                  artist = event.name
+                    .replace(/([A-Z])/g, ' $1')  // Add spaces before capitals
+                    .trim()
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+                  console.log('🎵 Converted camelCase username to artist:', event.name, '->', artist);
+                } else {
+                  // All lowercase - just capitalize first letter
+                  artist = event.name.charAt(0).toUpperCase() + event.name.slice(1).toLowerCase();
+                  console.log('🎵 Converted lowercase username to artist:', event.name, '->', artist);
+                }
+              } else {
+                // Use as-is for complex names
+                artist = event.name;
+                console.log('🎵 Found artist in name field:', artist);
+              }
             } else {
               // Has "via" - extract the part before it
               artist = event.name.split(' via ')[0].trim();
@@ -268,7 +287,10 @@ app.post('/helipad-webhook', async (req, res) => {
           artist: artist || 'UNDEFINED',
           remote_podcast: albumOrShow || artist,
           remote_episode: songTitle || 'Unknown Track',
-          app: event.app_name || event.app
+          app: event.app_name || event.app,
+          originalName: event.name,
+          extractedArtist: artist,
+          willUseAsArtist: artist
         });
         
         await musicShowBot.processMusicShowEvent({
