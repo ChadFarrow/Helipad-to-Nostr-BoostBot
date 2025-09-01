@@ -1098,7 +1098,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
   });
 
   // Only post boosts from ChadF to avoid posting pseudonymous boosts
-  if (event.sender !== 'ChadF') {
+  if (event.sender?.trim() !== 'ChadF') {
     logger.info(`Skipping boost from different sender`, { 
       sender: event.sender, 
       amount: event.value_msat_total / 1000

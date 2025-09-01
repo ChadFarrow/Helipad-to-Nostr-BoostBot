@@ -1,31 +1,19 @@
 {
-  "weekStart": "2025-07-28",
-  "streamSats": 7008,
-  "boostSats": 25746,
+  "weekStart": "2025-09-01",
+  "streamSats": 8751,
+  "boostSats": 3999,
   "streamShows": [
     "It's A Mood",
-    "Into The Doerfel-Verse",
-    "bitpunk.fm",
-    "Ungovernable Misfits"
+    "bitpunk.fm"
   ],
   "boostShows": [
-    "It's A Mood",
-    "No Agenda Show",
-    "Into The Doerfel-Verse",
-    "Bowl After Bowl",
-    "bitpunk.fm",
-    "Ungovernable Misfits"
+    "It's A Mood"
   ],
   "dailyBreakdown": [
     {
-      "date": "2025-07-28",
-      "streamSats": 4069,
-      "boostSats": 3064
-    },
-    {
-      "date": "2025-07-29",
-      "streamSats": 50,
-      "boostSats": 523
+      "date": "2025-08-31",
+      "streamSats": 15462,
+      "boostSats": 7299
     }
   ]
 }

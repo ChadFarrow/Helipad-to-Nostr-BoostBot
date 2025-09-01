@@ -1,7 +1,8 @@
 module.exports = {
   apps: [{
     name: 'boostbot',
-    script: 'helipad-webhook.js',
+    script: 'npm',
+    args: 'start',
     cwd: '/home/server/bots/BoostBot',
     instances: 1,
     autorestart: true,
@@ -9,7 +10,7 @@ module.exports = {
     max_memory_restart: '1G',
     env: {
       NODE_ENV: 'production',
-      PORT: 3001
+      PORT: 3333
     },
     env_file: '.env',
     log_file: './logs/combined.log',

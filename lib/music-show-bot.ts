@@ -111,7 +111,7 @@ class MusicShowBot {
         remote_feed_guid: event.remote_feed_guid
       };
 
-      logger.info(`🎵 Started listening to: ${remote_podcast} - ${remote_episode} (Artist: ${artist || 'Unknown'})`);
+      logger.info(`🎵 Started listening to: ${remote_episode} by ${remote_podcast} (TLV Artist: ${artist || 'Not provided'})`);
     }
 
     // Update song statistics
@@ -157,10 +157,13 @@ class MusicShowBot {
       // Create the Nostr post
       const post = this.createSongPost(song);
       
+      // Log the post content for debugging
+      console.log('📝 Post content:', post);
+      
       // Post to Nostr
       await this.postToNostr(post);
       
-      logger.info(`✅ Posted about finished song: ${song.song} - ${song.track} (Artist: ${song.artist || 'Unknown'})`);
+      logger.info(`✅ Posted about finished song: ${song.track} by ${song.song}`);
       
       // Log song statistics
       logger.info(`📊 Song stats: ${song.totalSats} sats, ${song.boostCount} boosts, ${song.streamCount} streams`);
@@ -174,13 +177,16 @@ class MusicShowBot {
    * Create the Nostr post content for a finished song
    */
   private createSongPost(song: SongPlay): string {
-    // Prefer the TLV artist field when available, as it's usually the most accurate
-    let artistName = song.artist || 'Unknown Artist';
+    // Priority for artist name:
+    // 1. Use the TLV artist field if available (most accurate)
+    // 2. Otherwise use remote_podcast as fallback
+    let artistName = song.artist || song.song || 'Unknown Artist';
+    let trackName = song.track || 'Unknown Track';
     
     // Clean artist name by removing "via Wavlake" and similar suffixes
     const cleanArtist = artistName.replace(/\s+via\s+\w+/i, '').trim();
     
-    let post = `🎵 Just listened to: ${song.track}\n\n`;
+    let post = `🎵 Just listened to: ${trackName}\n\n`;
     post += `🎤 Artist: ${cleanArtist}\n\n`;
     post += `📻 Show: ${song.showName} - ${song.episodeName}\n\n`;
     if (song.remote_feed_guid) {

@@ -274,6 +274,52 @@ app.get('/test-weekly-summary', async (req, res) => {
   }
 });
 
+// Test music show endpoint
+app.get('/test-music-show', async (req, res) => {
+  try {
+    logger.info('Test music show requested');
+    // Simulate a music event with proper artist info
+    // remote_podcast often contains a username/channel, but actual artist is in TLV
+    const testEvent = {
+      timestamp: new Date().toISOString(),
+      podcast: "It's A Mood",
+      episode: "Cycles",
+      remote_podcast: "StevenB",  // This might be a channel/username
+      remote_episode: "Pixelated Smile",
+      action: 1, // Stream
+      value_sat: 100,
+      sender: "Test User",
+      message: "Testing music show",
+      app: "Test App",
+      artist: "Herbivore",  // The actual artist from TLV
+      feedID: 123456,
+      remote_feed_guid: "64253f63-9ad6-570c-8f76-455fb7ac2a42"
+    };
+    
+    // Process the event
+    await musicShowBot.processMusicShowEvent(testEvent);
+    
+    // Force finish the current song to trigger posting
+    const currentSong = musicShowBot.getCurrentSong();
+    if (currentSong) {
+      // Process another event with different song to trigger the finish
+      const endEvent = {
+        ...testEvent,
+        remote_podcast: "Different Channel",
+        remote_episode: "Different Song",
+        artist: "Different Artist",  // Different actual artist
+        timestamp: new Date(Date.now() + 1000).toISOString()
+      };
+      await musicShowBot.processMusicShowEvent(endEvent);
+    }
+    
+    res.status(200).send('Test music show event processed');
+  } catch (err) {
+    logger.error('Error processing test music show', { error: err.message, stack: err.stack });
+    res.status(500).send('Error processing test music show');
+  }
+});
+
 // Bot management endpoints
 app.post('/manage/:action', async (req, res) => {
   const { action } = req.params;
