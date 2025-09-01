@@ -106,10 +106,17 @@ class MusicShowBot {
         showName: event.podcast,
         episodeName: event.episode,
         listeningPlatform: event.app || 'Unknown',
-        artist: artist,
+        artist: artist,  // This should be the actual artist from the name field
         feedID: feedID,
         remote_feed_guid: event.remote_feed_guid
       };
+      
+      console.log('🎵 Stored song with artist:', {
+        artist: this.currentSong.artist,
+        app: event.app,
+        song: remote_podcast,
+        track: remote_episode
+      });
 
       logger.info(`🎵 Started listening to: ${remote_episode} by ${remote_podcast} (TLV Artist: ${artist || 'Not provided'})`);
     }
@@ -178,13 +185,38 @@ class MusicShowBot {
    */
   private createSongPost(song: SongPlay): string {
     // Priority for artist name:
-    // 1. Use the TLV artist field if available (most accurate)
+    // 1. Use the TLV artist field if available (most accurate) 
     // 2. Otherwise use remote_podcast as fallback
+    // 3. NEVER use app_name or similar
     let artistName = song.artist || song.song || 'Unknown Artist';
     let trackName = song.track || 'Unknown Track';
     
+    // CRITICAL: Make sure we never show app names as artists
+    if (artistName === 'PodcastGuru' || artistName === 'Podcast Guru' || 
+        artistName === song.listeningPlatform) {
+      console.log('❌ Detected app name as artist, using fallback');
+      artistName = 'Unknown Artist';
+    }
+    
     // Clean artist name by removing "via Wavlake" and similar suffixes
     const cleanArtist = artistName.replace(/\s+via\s+\w+/i, '').trim();
+    
+    // For PodcastGuru format, if track name is a placeholder, just say we're listening to the artist
+    if (trackName.startsWith('Playing from')) {
+      if (cleanArtist !== 'Unknown Artist') {
+        trackName = `Music by ${cleanArtist}`;
+      } else {
+        trackName = `Music from ${song.showName}`;
+      }
+    }
+    
+    // Log what we're posting
+    console.log('🎯 Creating post with artist:', {
+      originalArtist: song.artist,
+      cleanArtist: cleanArtist,
+      trackName: trackName,
+      app: song.listeningPlatform
+    });
     
     let post = `🎵 Just listened to: ${trackName}\n\n`;
     post += `🎤 Artist: ${cleanArtist}\n\n`;

@@ -404,8 +404,8 @@
     "type": "musician",
     "firstSupported": "2025-09-01",
     "lastSupported": "2025-09-01",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "totalBoosts": 2,
+    "totalSats": 383
   },
   "musician:Podcastindex.org": {
     "name": "Podcastindex.org",
@@ -414,5 +414,37 @@
     "lastSupported": "2025-09-01",
     "totalBoosts": 1,
     "totalSats": 333
+  },
+  "musician:Middle Season": {
+    "name": "Middle Season",
+    "type": "musician",
+    "firstSupported": "2025-09-01",
+    "lastSupported": "2025-09-01",
+    "totalBoosts": 1,
+    "totalSats": 50
+  },
+  "musician:DV Media": {
+    "name": "DV Media",
+    "type": "musician",
+    "firstSupported": "2025-09-01",
+    "lastSupported": "2025-09-01",
+    "totalBoosts": 1,
+    "totalSats": 50
+  },
+  "musician:Podcast Guru": {
+    "name": "Podcast Guru",
+    "type": "musician",
+    "firstSupported": "2025-09-01",
+    "lastSupported": "2025-09-01",
+    "totalBoosts": 1,
+    "totalSats": 50
+  },
+  "musician:Sovereign Feeds": {
+    "name": "Sovereign Feeds",
+    "type": "musician",
+    "firstSupported": "2025-09-01",
+    "lastSupported": "2025-09-01",
+    "totalBoosts": 1,
+    "totalSats": 50
   }
 }

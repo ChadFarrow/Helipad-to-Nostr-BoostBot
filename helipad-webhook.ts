@@ -164,21 +164,49 @@ app.post('/helipad-webhook', async (req, res) => {
           // Old format: remote_podcast is artist/channel, remote_episode is song
           albumOrShow = event.remote_podcast;
           songTitle = event.remote_episode;
-        } else if (event.remote_item_guid && event.name) {
-          // New format: name is artist, remote_item might have song info
-          artist = event.name;  // Direct field contains artist
-          // For music streaming, we need to fetch song title from somewhere
-          // The guid or remote_item_guid might contain song identifier
-          // For now, use a placeholder - this needs more investigation
-          songTitle = "Track from " + artist;  // Temporary until we find the song title source
+        } else if (event.remote_item_guid || event.remote_feed_guid) {
+          // New PodcastGuru format or similar
+          // CRITICAL: Parse the name field intelligently
+          if (event.name && typeof event.name === 'string') {
+            // Check if name looks like an email/identifier
+            if (event.name.includes('@')) {
+              // Extract artist from email format (e.g., "thetrustedband@fountain.fm" -> "The Trusted Band")
+              const username = event.name.split('@')[0];
+              // Convert username to readable format
+              artist = username
+                .replace(/([A-Z])/g, ' $1')  // Add spaces before capitals
+                .replace(/[_-]/g, ' ')  // Replace underscores and hyphens with spaces
+                .trim()
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+              console.log('🎵 Extracted artist from identifier:', event.name, '->', artist);
+            } else if (!event.name.includes('via')) {
+              // If it's not an email and doesn't have "via", use it as artist
+              artist = event.name;
+              console.log('🎵 Found artist in name field:', artist);
+            } else {
+              // Has "via" - extract the part before it
+              artist = event.name.split(' via ')[0].trim();
+              console.log('🎵 Extracted artist before "via":', artist);
+            }
+          }
           
-          // Log to help debug where song title should come from
-          console.log('🎵 Music event data:', {
-            name: event.name,
-            episode: event.episode,
+          // Use remote_item_guid as a unique song identifier if available
+          if (event.remote_item_guid) {
+            albumOrShow = event.remote_item_guid;  // Use GUID as unique identifier
+            songTitle = `Playing from ${event.podcast}`;  // Better placeholder
+          }
+          
+          // Log to help debug
+          console.log('🎵 Music streaming event:', {
+            artist: artist || 'NOT SET',
+            name_field: event.name,
             remote_item_guid: event.remote_item_guid,
-            guid: event.guid,
-            url: event.url
+            podcast: event.podcast,
+            episode: event.episode,
+            app_name: event.app_name,
+            app: event.app
           });
         }
         
@@ -211,6 +239,38 @@ app.post('/helipad-webhook', async (req, res) => {
         // Handle different value formats (value_msat vs value_msat_total)
         const valueMsat = event.value_msat || event.value_msat_total || 0;
         
+        // Final check: Make sure artist is set correctly
+        if (!artist && event.name) {
+          // Try to extract from name field again
+          if (event.name.includes('@')) {
+            const username = event.name.split('@')[0];
+            artist = username
+              .replace(/([A-Z])/g, ' $1')
+              .replace(/[_-]/g, ' ')
+              .trim()
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' ');
+          } else {
+            artist = event.name.split(' via ')[0].trim();
+          }
+          console.log('⚠️ Artist was not set, extracted from name field:', artist);
+        }
+        
+        // CRITICAL: Never use app_name as artist
+        if (artist === event.app_name) {
+          console.log('❌ ERROR: Artist was set to app_name, clearing it');
+          artist = undefined;
+        }
+        
+        // Log what we're about to send
+        console.log('📤 Sending to music bot:', {
+          artist: artist || 'UNDEFINED',
+          remote_podcast: albumOrShow || artist,
+          remote_episode: songTitle || 'Unknown Track',
+          app: event.app_name || event.app
+        });
+        
         await musicShowBot.processMusicShowEvent({
           timestamp,
           podcast: event.podcast,
@@ -224,7 +284,7 @@ app.post('/helipad-webhook', async (req, res) => {
           sender: event.sender || event.sender_name,
           message: event.message,
           app: event.app_name || event.app,
-          artist,
+          artist,  // This should contain the actual artist name
           feedID,
           remote_feed_guid
         });
@@ -324,42 +384,44 @@ app.get('/test-weekly-summary', async (req, res) => {
 app.get('/test-music-show', async (req, res) => {
   try {
     logger.info('Test music show requested');
-    // Simulate a music event with proper artist info
-    // remote_podcast often contains a username/channel, but actual artist is in TLV
+    // Simulate PodcastGuru webhook format
     const testEvent = {
-      timestamp: new Date().toISOString(),
-      podcast: "It's A Mood",
+      sender_id: "791B666C-3FF7-4EE5-BD06-223BE1CF9F99",
+      value_msat: 18000,
+      value_msat_total: 20000,
+      guid: "469b403f-db2d-574c-9db9-96dbb3f6561c",
+      name: "Herbivore via Wavlake",
+      speed: "2",
+      app_version: "1.0.34 (119)",
+      uuid: "C0CB627F-5A81-4363-9E7E-A9BC8F20BE55",
+      sender_name: "ChadF",
+      ts: 681,
+      remote_item_guid: "cd90267a-bbfd-4065-9f45-372b9ec6b170",
       episode: "Cycles",
-      remote_podcast: "StevenB",  // This might be a channel/username
-      remote_episode: "Pixelated Smile",
-      action: 1, // Stream
-      value_sat: 100,
-      sender: "Test User",
-      message: "Testing music show",
-      app: "Test App",
-      artist: "Herbivore",  // The actual artist from TLV
-      feedID: 123456,
-      remote_feed_guid: "64253f63-9ad6-570c-8f76-455fb7ac2a42"
+      episode_guid: "933784bc-1711-4f69-a228-20370812ecaf",
+      url: "https://itsamood.org/itsamoodrss.xml",
+      podcast: "It's A Mood",
+      remote_feed_guid: "64253f63-9ad6-570c-8f76-455fb7ac2a42",
+      app_name: "PodcastGuru",
+      boost_link: "https://app.podcastguru.io/podcast/X68747470733a2f2f697473616d6f6f642e6f72672f697473616d6f6f647273732e786d6c/episode/4482e38af39fe0840715aa726a9db9dc?t=681",
+      action: "stream"
     };
     
-    // Process the event
-    await musicShowBot.processMusicShowEvent(testEvent);
+    // Process through the webhook handler by making a local request
+    console.log('🎵 Test webhook data:', JSON.stringify(testEvent, null, 2));
     
-    // Force finish the current song to trigger posting
-    const currentSong = musicShowBot.getCurrentSong();
-    if (currentSong) {
-      // Process another event with different song to trigger the finish
-      const endEvent = {
-        ...testEvent,
-        remote_podcast: "Different Channel",
-        remote_episode: "Different Song",
-        artist: "Different Artist",  // Different actual artist
-        timestamp: new Date(Date.now() + 1000).toISOString()
-      };
-      await musicShowBot.processMusicShowEvent(endEvent);
+    // Make a request to our own webhook endpoint
+    const webhookResponse = await fetch(`http://localhost:${PORT}/helipad-webhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(testEvent)
+    });
+    
+    if (webhookResponse.ok) {
+      res.status(200).send('Test music show event processed');
+    } else {
+      res.status(500).send('Failed to process test event');
     }
-    
-    res.status(200).send('Test music show event processed');
   } catch (err) {
     logger.error('Error processing test music show', { error: err.message, stack: err.stack });
     res.status(500).send('Error processing test music show');
