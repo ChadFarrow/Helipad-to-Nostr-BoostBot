@@ -1,5 +1,73 @@
 import { createNostrBot } from './nostr-bot.js';
 import { logger } from './logger.js';
+import crypto from 'crypto';
+
+// Podcast Index API helper function (same as in nostr-bot.ts)
+async function lookupTrackNameByGUID(
+  guid: string,
+  feedId?: number,
+  podcastGuid?: string
+): Promise<string | null> {
+  const apiKey = process.env.PODCAST_INDEX_API_KEY;
+  const apiSecret = process.env.PODCAST_INDEX_API_SECRET;
+
+  if (!apiKey || !apiSecret) {
+    logger.warn('Podcast Index API credentials not configured');
+    return null;
+  }
+
+  try {
+    const apiTime = Math.floor(Date.now() / 1000);
+    const hash = crypto.createHash('sha1')
+      .update(apiKey + apiSecret + apiTime)
+      .digest('hex');
+
+    // Build URL with either feedid or podcastguid
+    let url: string;
+    if (podcastGuid) {
+      url = `https://api.podcastindex.org/api/1.0/episodes/byguid?guid=${encodeURIComponent(guid)}&podcastguid=${encodeURIComponent(podcastGuid)}`;
+      logger.info(`🔍 [Music Bot] Looking up track name: ${guid} (podcastGuid: ${podcastGuid})`);
+    } else if (feedId) {
+      url = `https://api.podcastindex.org/api/1.0/episodes/byguid?guid=${encodeURIComponent(guid)}&feedid=${feedId}`;
+      logger.info(`🔍 [Music Bot] Looking up track name: ${guid} (feedId: ${feedId})`);
+    } else {
+      logger.warn('[Music Bot] No feedId or podcastGuid provided for lookup');
+      return null;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'BoostBot/1.0',
+        'X-Auth-Date': apiTime.toString(),
+        'X-Auth-Key': apiKey,
+        'Authorization': hash
+      }
+    });
+
+    if (!response.ok) {
+      logger.warn(`[Music Bot] Podcast Index API error: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data = await response.json() as any;
+
+    if (data.status === 'true' && data.episode && data.episode.title) {
+      logger.info(`✅ [Music Bot] Found track name: ${data.episode.title}`);
+      return data.episode.title;
+    }
+
+    logger.warn(`[Music Bot] No episode found for GUID: ${guid}`);
+    return null;
+  } catch (error: any) {
+    logger.error('[Music Bot] Error looking up track name', {
+      error: error?.message,
+      guid,
+      feedId,
+      podcastGuid
+    });
+    return null;
+  }
+}
 
 interface MusicShowEvent {
   timestamp: string;
@@ -15,6 +83,7 @@ interface MusicShowEvent {
   artist?: string;
   feedID?: number;
   remote_feed_guid?: string;
+  remote_item_guid?: string;
 }
 
 interface SongPlay {
@@ -31,6 +100,7 @@ interface SongPlay {
   artist?: string;
   feedID?: number;
   remote_feed_guid?: string;
+  remote_item_guid?: string;
 }
 
 class MusicShowBot {
@@ -108,7 +178,8 @@ class MusicShowBot {
         listeningPlatform: event.app || 'Unknown',
         artist: artist,  // This should be the actual artist from the name field
         feedID: feedID,
-        remote_feed_guid: event.remote_feed_guid
+        remote_feed_guid: event.remote_feed_guid,
+        remote_item_guid: event.remote_item_guid
       };
       
       console.log('🎵 Stored song with artist:', {
@@ -168,12 +239,21 @@ class MusicShowBot {
       song.endTime = endTime;
       this.songHistory.push(song);
 
-      // Create the Nostr post
-      const post = this.createSongPost(song);
-      
+      // Debug log the song object before posting
+      console.log('🎵 DEBUG: About to post song with data:', {
+        artist: song.artist,
+        song: song.song,
+        track: song.track,
+        showName: song.showName,
+        episodeName: song.episodeName
+      });
+
+      // Create the Nostr post (now async for track lookup)
+      const post = await this.createSongPost(song);
+
       // Log the post content for debugging
       console.log('📝 Post content:', post);
-      
+
       // Post to Nostr
       await this.postToNostr(post);
       
@@ -190,40 +270,58 @@ class MusicShowBot {
   /**
    * Create the Nostr post content for a finished song
    */
-  private createSongPost(song: SongPlay): string {
+  private async createSongPost(song: SongPlay): Promise<string> {
     console.log('🔍 DEBUG: createSongPost called with song data:', {
       artist: song.artist,
-      song: song.song, 
+      song: song.song,
       track: song.track,
       listeningPlatform: song.listeningPlatform,
       showName: song.showName,
       fullSongObject: JSON.stringify(song, null, 2)
     });
-    
+
     // Priority for artist name:
-    // 1. Use the TLV artist field if available (most accurate) 
+    // 1. Use the TLV artist field if available (most accurate)
     // 2. Try to extract from song.song if it contains "via"
     // 3. Otherwise use remote_podcast as fallback
     // 4. NEVER use app_name or similar
     let artistName = song.artist;
-    
+
     // If artist is missing but song.song has "via", extract artist from it
     if (!artistName && song.song && song.song.includes(' via ')) {
       artistName = song.song.split(' via ')[0].trim();
       console.log('🎯 Extracted artist from song.song field:', artistName);
     }
-    
+
     // Final fallback
     if (!artistName) {
       artistName = 'Unknown Artist';
     }
-    
+
     // Clean any remaining "via" suffixes that weren't cleaned in webhook processing
     if (artistName.includes(' via ')) {
       artistName = artistName.split(' via ')[0].trim();
       console.log('🧹 Cleaned via suffix from artist:', artistName);
     }
+
+    // Track name - try API lookup if we have the GUIDs
     let trackName = song.track || 'Unknown Track';
+
+    // If track name might be the episode name, try to look it up from API
+    if (song.remote_item_guid && song.remote_feed_guid &&
+        (trackName === song.episodeName || trackName === song.showName)) {
+      console.log('🔍 [Music Bot] Attempting to lookup track name from API');
+      const lookedUpTrackName = await lookupTrackNameByGUID(
+        song.remote_item_guid,
+        song.feedID,
+        song.remote_feed_guid
+      );
+
+      if (lookedUpTrackName && lookedUpTrackName !== song.episodeName) {
+        trackName = lookedUpTrackName;
+        console.log(`✅ [Music Bot] Using track name from API: ${trackName}`);
+      }
+    }
     
     console.log('🔍 DEBUG: Initial artist selection:', {
       songArtist: song.artist,

@@ -148,10 +148,10 @@ app.post('/helipad-webhook', async (req, res) => {
     });
     
     await announceHelipadPayment(event);
-    
-    // Process music show events for song tracking
+
+    // Process music show events for song tracking - ONLY for streaming (action 1), not boosts (action 2)
     // Check for both old format (remote_podcast/remote_episode) and new format (remote_item_guid/remote_feed_guid)
-    if ((event.remote_podcast && event.remote_episode) || (event.remote_item_guid && event.remote_feed_guid)) {
+    if (event.action === 1 && ((event.remote_podcast && event.remote_episode) || (event.remote_item_guid && event.remote_feed_guid))) {
       try {
         let artist = undefined;
         let feedID = undefined;
@@ -213,8 +213,8 @@ app.post('/helipad-webhook', async (req, res) => {
           
           // Use remote_item_guid as a unique song identifier if available
           if (event.remote_item_guid) {
-            albumOrShow = event.remote_item_guid;  // Use GUID as unique identifier
-            songTitle = `Playing from ${event.podcast}`;  // Better placeholder
+            albumOrShow = event.remote_item_guid;  // Use GUID as unique identifier for the album/song
+            songTitle = event.remote_item_guid;  // Use GUID as unique track identifier too
           }
           
           // Log to help debug
@@ -236,6 +236,13 @@ app.post('/helipad-webhook', async (req, res) => {
             console.log('🎵 TLV Debug:', JSON.stringify(tlvObj, null, 2));
             if (tlvObj && typeof tlvObj.name === 'string' && !artist) {
               artist = tlvObj.name;
+
+              // Clean up platform suffixes from artist names
+              artist = artist
+                .replace(/\s+via\s+Wavlake$/i, '')
+                .replace(/\s+via\s+\w+$/i, '') // Remove any "via [Platform]"
+                .replace(/\s+on\s+\w+$/i, '') // Remove any "on [Platform]"
+                .trim();
             }
             if (tlvObj && typeof tlvObj.feedID === 'number') {
               feedID = tlvObj.feedID;

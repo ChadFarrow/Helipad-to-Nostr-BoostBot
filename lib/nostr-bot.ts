@@ -11,6 +11,74 @@ import { Relay } from 'nostr-tools/relay';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { logger } from './logger.js';
+import crypto from 'crypto';
+
+// Podcast Index API helper function
+async function lookupTrackNameByGUID(
+  guid: string,
+  feedId?: number,
+  podcastGuid?: string
+): Promise<string | null> {
+  const apiKey = process.env.PODCAST_INDEX_API_KEY;
+  const apiSecret = process.env.PODCAST_INDEX_API_SECRET;
+
+  if (!apiKey || !apiSecret) {
+    logger.warn('Podcast Index API credentials not configured');
+    return null;
+  }
+
+  try {
+    const apiTime = Math.floor(Date.now() / 1000);
+    const hash = crypto.createHash('sha1')
+      .update(apiKey + apiSecret + apiTime)
+      .digest('hex');
+
+    // Build URL with either feedid or podcastguid
+    let url: string;
+    if (podcastGuid) {
+      url = `https://api.podcastindex.org/api/1.0/episodes/byguid?guid=${encodeURIComponent(guid)}&podcastguid=${encodeURIComponent(podcastGuid)}`;
+      logger.info(`🔍 Looking up track name: ${guid} (podcastGuid: ${podcastGuid})`);
+    } else if (feedId) {
+      url = `https://api.podcastindex.org/api/1.0/episodes/byguid?guid=${encodeURIComponent(guid)}&feedid=${feedId}`;
+      logger.info(`🔍 Looking up track name: ${guid} (feedId: ${feedId})`);
+    } else {
+      logger.warn('No feedId or podcastGuid provided for lookup');
+      return null;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'BoostBot/1.0',
+        'X-Auth-Date': apiTime.toString(),
+        'X-Auth-Key': apiKey,
+        'Authorization': hash
+      }
+    });
+
+    if (!response.ok) {
+      logger.warn(`Podcast Index API error: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data = await response.json() as any;
+
+    if (data.status === 'true' && data.episode && data.episode.title) {
+      logger.info(`✅ Found track name: ${data.episode.title}`);
+      return data.episode.title;
+    }
+
+    logger.warn(`No episode found for GUID: ${guid}`);
+    return null;
+  } catch (error: any) {
+    logger.error('Error looking up track name', {
+      error: error?.message,
+      guid,
+      feedId,
+      podcastGuid
+    });
+    return null;
+  }
+}
 
 interface FundraiserUpdateOptions {
   title: string;
@@ -267,7 +335,7 @@ export async function announceFundraiserEnded(options: FundraiserUpdateOptions &
 }
 
 // Cache to track boost sessions and find the largest split
-const boostSessions = new Map<string, { largestSplit: HelipadPaymentEvent, timeout: NodeJS.Timeout }>();
+const boostSessions = new Map<string, { largestSplit: HelipadPaymentEvent, allSplits: HelipadPaymentEvent[], timeout: NodeJS.Timeout }>();
 const postedBoosts = new Set<string>();
 
 // Track recent boost post contents to prevent duplicates
@@ -372,6 +440,7 @@ function addToRecentPosts(content: string, sessionId: string): void {
 interface PersistedSession {
   sessionId: string;
   largestSplit: HelipadPaymentEvent;
+  allSplits: HelipadPaymentEvent[];
   expiresAt: number; // timestamp when session should timeout
 }
 
@@ -618,7 +687,7 @@ async function loadBoostSessions(): Promise<void> {
             postedBoosts.add(session.sessionId);
             boostSessions.delete(session.sessionId);
             try {
-              await postBoostToNostr(session.largestSplit, bot, session.sessionId);
+              await postBoostToNostr(session.largestSplit, bot, session.sessionId, session.allSplits);
             } catch (error) {
               logger.error('Error in postBoostToNostr during session restoration', { 
                 error: error.message, 
@@ -633,6 +702,7 @@ async function loadBoostSessions(): Promise<void> {
         
         boostSessions.set(session.sessionId, {
           largestSplit: session.largestSplit,
+          allSplits: session.allSplits || [session.largestSplit],
           timeout
         });
         loadedCount++;
@@ -664,6 +734,7 @@ async function saveBoostSessions(): Promise<void> {
         sessionsToSave.push({
           sessionId,
           largestSplit: session.largestSplit,
+          allSplits: session.allSplits,
           expiresAt: now + 30000 // Current time + 30 seconds
         });
       }
@@ -1079,28 +1150,10 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     return; // Skip individual posts for streams
   }
 
-  // Only post boosts that were SENT (not received)
-  // Sent boosts typically have payment fees, received boosts don't
-  if (!event.payment_info || !event.payment_info.fee_msat || event.payment_info.fee_msat <= 0) {
-    logger.info(`Skipping received boost (no outgoing fees)`, { 
-      sender: event.sender, 
-      amount: event.value_msat_total / 1000,
-      hasFee: !!event.payment_info?.fee_msat,
-      feeAmount: event.payment_info?.fee_msat || 0
-    });
-    return; // Skip received boosts - only post sent boosts
-  }
-
-  logger.info(`Processing sent boost (has outgoing fees)`, { 
-    sender: event.sender, 
-    amount: event.value_msat_total / 1000,
-    feeAmount: event.payment_info.fee_msat
-  });
-
   // Only post boosts from ChadF to avoid posting pseudonymous boosts
   if (event.sender?.trim() !== 'ChadF') {
-    logger.info(`Skipping boost from different sender`, { 
-      sender: event.sender, 
+    logger.info(`Skipping boost from different sender`, {
+      sender: event.sender,
       amount: event.value_msat_total / 1000
     });
     return; // Skip boosts not from ChadF
@@ -1109,76 +1162,94 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
   // Group splits by a wider time window to catch all splits from the same boost
   const timeWindow = Math.floor(event.time / 120); // 2-minute windows to prevent split sessions
   const sessionId = `${timeWindow}-${event.sender}-${event.episode}-${event.podcast}`;
-  
-  logger.info(`Processing payment`, { 
-    amount: event.value_msat / 1000, 
-    total: event.value_msat_total / 1000, 
-    session: sessionId 
+
+  logger.info(`Processing payment`, {
+    amount: event.value_msat / 1000,
+    total: event.value_msat_total / 1000,
+    session: sessionId,
+    hasFee: !!event.payment_info?.fee_msat,
+    feeAmount: event.payment_info?.fee_msat || 0
   });
-  
+
   // Check if we already posted for this boost session
   if (postedBoosts.has(sessionId)) {
     logger.info(`Already posted for boost session ${sessionId}, skipping`);
     return;
   }
 
+  // Determine if this split has fees (indicates it was sent, not received)
+  const hasFees = event.payment_info && event.payment_info.fee_msat && event.payment_info.fee_msat > 0;
+
   // Get or create session entry
   const existingSession = boostSessions.get(sessionId);
-  
+
   if (existingSession) {
-    // Clear the previous timeout
-    clearTimeout(existingSession.timeout);
-    
+    // Clear the previous timeout if this split has fees
+    if (hasFees) {
+      clearTimeout(existingSession.timeout);
+    }
+
+    // Add this split to the collection
+    existingSession.allSplits.push(event);
+
     // Update if this split is larger
     if (event.value_msat > existingSession.largestSplit.value_msat) {
       existingSession.largestSplit = event;
-      logger.info(`Updated largest split for session ${sessionId}`, { 
-        amount: event.value_msat / 1000, 
-        total: event.value_msat_total / 1000 
+      logger.info(`Updated largest split for session ${sessionId}`, {
+        amount: event.value_msat / 1000,
+        total: event.value_msat_total / 1000,
+        hasFees
       });
     } else {
-      logger.info(`Keeping existing largest split for session ${sessionId}`, { 
-        amount: existingSession.largestSplit.value_msat / 1000 
+      logger.info(`Keeping existing largest split for session ${sessionId}`, {
+        amount: existingSession.largestSplit.value_msat / 1000,
+        addedSplitHasFees: hasFees
       });
     }
   } else {
     // First split for this session
-    boostSessions.set(sessionId, { largestSplit: event, timeout: setTimeout(() => {}, 0) });
-    logger.info(`New boost session ${sessionId}`, { 
-      amount: event.value_msat / 1000, 
-      total: event.value_msat_total / 1000 
+    boostSessions.set(sessionId, { largestSplit: event, allSplits: [event], timeout: setTimeout(() => {}, 0) });
+    logger.info(`New boost session ${sessionId}`, {
+      amount: event.value_msat / 1000,
+      total: event.value_msat_total / 1000,
+      hasFees
     });
   }
 
-  // Set a timeout to post the largest payment after 30 seconds of no new payments
-  // Longer delay for streaming to collect more payments in the session
-  const session = boostSessions.get(sessionId)!;
-  session.timeout = setTimeout(async () => {
-    logger.info(`Posting largest payment for session ${sessionId}`, { 
-      amount: session.largestSplit.value_msat / 1000, 
-      total: session.largestSplit.value_msat_total / 1000 
-    });
-    
-    // Mark this session as posted
-    postedBoosts.add(sessionId);
-    boostSessions.delete(sessionId);
-    
-    // Post the largest payment from this session
-    try {
-      await postBoostToNostr(session.largestSplit, bot, sessionId);
-    } catch (error) {
-      logger.error('Error in postBoostToNostr', { 
-        error: error.message, 
-        stack: error.stack,
-        session: sessionId,
-        amount: session.largestSplit.value_msat_total / 1000
+  // Only set timeout to post if this split has fees (indicates sent boost)
+  // Splits without fees are still collected but don't trigger posting
+  if (hasFees) {
+    const session = boostSessions.get(sessionId)!;
+    session.timeout = setTimeout(async () => {
+      logger.info(`Posting boost for session ${sessionId} with ${session.allSplits.length} splits`, {
+        amount: session.largestSplit.value_msat / 1000,
+        total: session.largestSplit.value_msat_total / 1000
       });
-    }
-    await saveBoostSessions(); // Clean up persisted sessions
-  }, 30000);
-  
-  // Save sessions to disk after any changes
-  await saveBoostSessions();
+
+      // Mark this session as posted
+      postedBoosts.add(sessionId);
+      const allSplits = session.allSplits;
+      boostSessions.delete(sessionId);
+
+      // Post the largest payment from this session, passing all splits for metadata collection
+      try {
+        await postBoostToNostr(session.largestSplit, bot, sessionId, allSplits);
+      } catch (error) {
+        logger.error('Error in postBoostToNostr', {
+          error: error.message,
+          stack: error.stack,
+          session: sessionId,
+          amount: session.largestSplit.value_msat_total / 1000
+        });
+      }
+      await saveBoostSessions(); // Clean up persisted sessions
+    }, 30000);
+
+    // Save sessions to disk after any changes
+    await saveBoostSessions();
+  } else {
+    logger.info(`Split without fees added to session ${sessionId}, waiting for fee-bearing split to trigger post`);
+  }
 }
 
 // Mapping of show names to npubs for automatic tagging
@@ -1518,12 +1589,13 @@ function processMessageForTags(message: string): { processedMessage: string; tag
   return { processedMessage, tags };
 }
 
-async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?: string): Promise<void> {
-  logger.info('Starting to post boost to Nostr', { 
-    sender: event.sender, 
-    amount: event.value_msat_total / 1000, 
-    podcast: event.podcast, 
-    episode: event.episode 
+async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?: string, allSplits?: HelipadPaymentEvent[]): Promise<void> {
+  logger.info('Starting to post boost to Nostr', {
+    sender: event.sender,
+    amount: event.value_msat_total / 1000,
+    podcast: event.podcast,
+    episode: event.episode,
+    totalSplits: allSplits?.length || 1
   });
   
   const actionText = "📤 Boost Sent!";
@@ -1553,20 +1625,60 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
                   event.remote_episode && event.remote_episode.trim();
   
   // Extract artist name from TLV data if available (more accurate than remote_podcast)
+  // Search through all splits to find the artist (usually in a split with "via Wavlake" or similar)
   let artistName = event.remote_podcast; // Default fallback
   let musicFeedGuid: string | undefined;
-  if (isMusic && event.tlv) {
-    try {
-      const tlvData = typeof event.tlv === 'string' ? JSON.parse(event.tlv) : event.tlv;
-      if (tlvData.name && typeof tlvData.name === 'string') {
-        artistName = tlvData.name; // This is the actual artist name
-        logger.info(`🎵 Using artist name from TLV: ${artistName}`);
+  if (isMusic) {
+    const splitsToCheck = allSplits && allSplits.length > 0 ? allSplits : [event];
+
+    for (const split of splitsToCheck) {
+      if (!split.tlv) continue;
+
+      try {
+        const tlvData = typeof split.tlv === 'string' ? JSON.parse(split.tlv) : split.tlv;
+
+        // Look for artist name in TLV (check for "via Wavlake" pattern or remote_feed_guid mismatch)
+        if (tlvData.name && typeof tlvData.name === 'string') {
+          const nameValue = tlvData.name;
+
+          // This is likely an artist if it contains "via Wavlake" or similar platform indicators
+          if (nameValue.match(/\s+via\s+\w+/i)) {
+            artistName = nameValue
+              .replace(/\s+via\s+Wavlake$/i, '')
+              .replace(/\s+via\s+\w+$/i, '')
+              .replace(/\s+on\s+\w+$/i, '')
+              .trim();
+            logger.info(`🎵 Found artist from split: ${artistName} (from "${nameValue}")`);
+
+            if (tlvData.remote_feed_guid) {
+              musicFeedGuid = tlvData.remote_feed_guid;
+            }
+            break; // Found the artist, stop searching
+          }
+        }
+      } catch (error) {
+        logger.warn('Failed to parse TLV for artist name', { error: error?.message });
       }
-      if (tlvData.remote_feed_guid) {
-        musicFeedGuid = tlvData.remote_feed_guid;
+    }
+
+    // If no artist found with "via" pattern, use the first TLV name we find
+    if (artistName === event.remote_podcast && event.tlv) {
+      try {
+        const tlvData = typeof event.tlv === 'string' ? JSON.parse(event.tlv) : event.tlv;
+        if (tlvData.name && typeof tlvData.name === 'string') {
+          artistName = tlvData.name
+            .replace(/\s+via\s+Wavlake$/i, '')
+            .replace(/\s+via\s+\w+$/i, '')
+            .replace(/\s+on\s+\w+$/i, '')
+            .trim();
+          logger.info(`🎵 Using artist name from first split: ${artistName}`);
+        }
+        if (tlvData.remote_feed_guid && !musicFeedGuid) {
+          musicFeedGuid = tlvData.remote_feed_guid;
+        }
+      } catch (error) {
+        logger.warn('Failed to parse TLV for artist name', { error: error?.message });
       }
-    } catch (error) {
-      logger.warn('Failed to parse TLV for artist name', { error: error?.message });
     }
   }
 
@@ -1596,6 +1708,91 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     const showNpubs = getShowNpubs(event.podcast);
     for (const npub of showNpubs) {
       showHostMentions.push(`nostr:${npub}`);
+    }
+  }
+
+  // Find the actual track name from all splits (if music boost)
+  let actualTrackName = event.remote_episode; // Default to current event
+  if (isMusic && allSplits && allSplits.length > 0) {
+    // First, try to find track name in splits where remote_podcast === remote_episode
+    for (const split of allSplits) {
+      // Look for a split where remote_podcast and remote_episode are the same (usually indicates track info)
+      if (split.remote_podcast && split.remote_episode &&
+          split.remote_podcast === split.remote_episode &&
+          split.remote_podcast !== event.podcast && // Not the show name
+          split.remote_episode !== event.episode) { // Not the episode name
+        actualTrackName = split.remote_episode;
+        logger.info(`🎵 Found actual track name from split: ${actualTrackName}`);
+        break;
+      }
+    }
+
+    // If we didn't find the track name in the splits, try looking it up via Podcast Index API
+    if (actualTrackName === event.remote_episode || actualTrackName === event.episode) {
+      logger.info(`🔍 Attempting to lookup track name from Podcast Index API`);
+
+      // First, try to find a split that's NOT the artist split (e.g., UpBEATS Music Podcast)
+      // This split often has the remote_feed_guid for the track feed
+      for (const split of allSplits) {
+        if (!split.tlv) continue;
+
+        try {
+          const tlvData = typeof split.tlv === 'string' ? JSON.parse(split.tlv) : split.tlv;
+
+          // Look for splits that are NOT the artist (don't have "via Wavlake") but have remote_item_guid
+          if (tlvData.name && !tlvData.name.match(/\s+via\s+\w+/i) &&
+              tlvData.remote_item_guid && tlvData.remote_feed_guid) {
+            logger.info(`🔍 Trying lookup with music feed split: ${tlvData.name}`);
+
+            // Try to fetch the track name from Podcast Index API using podcast GUID
+            const lookedUpTrackName = await lookupTrackNameByGUID(
+              tlvData.remote_item_guid,
+              undefined, // no feedID
+              tlvData.remote_feed_guid // use podcast GUID instead
+            );
+
+            if (lookedUpTrackName && lookedUpTrackName !== event.episode) {
+              actualTrackName = lookedUpTrackName;
+              logger.info(`✅ Using track name from API (music feed): ${actualTrackName}`);
+              break;
+            }
+          }
+        } catch (error) {
+          logger.warn('Failed to parse TLV for track name lookup', { error: error?.message });
+        }
+      }
+
+      // If still not found, try the artist split as fallback
+      if (actualTrackName === event.remote_episode || actualTrackName === event.episode) {
+        for (const split of allSplits) {
+          if (!split.tlv) continue;
+
+          try {
+            const tlvData = typeof split.tlv === 'string' ? JSON.parse(split.tlv) : split.tlv;
+
+            // Look for the artist split (has "via Wavlake" pattern) with remote_item_guid
+            if (tlvData.name && tlvData.name.match(/\s+via\s+\w+/i) &&
+                tlvData.remote_item_guid && tlvData.remote_feed_guid) {
+              logger.info(`🔍 Trying lookup with artist split: ${tlvData.name}`);
+
+              // Try to fetch the track name from Podcast Index API using podcast GUID
+              const lookedUpTrackName = await lookupTrackNameByGUID(
+                tlvData.remote_item_guid,
+                undefined,
+                tlvData.remote_feed_guid
+              );
+
+              if (lookedUpTrackName && lookedUpTrackName !== event.episode) {
+                actualTrackName = lookedUpTrackName;
+                logger.info(`✅ Using track name from API (artist feed): ${actualTrackName}`);
+                break;
+              }
+            }
+          } catch (error) {
+            logger.warn('Failed to parse TLV for track name lookup', { error: error?.message });
+          }
+        }
+      }
     }
   }
 
@@ -1630,8 +1827,8 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
         : event.podcast;
       contentParts.push(`🎧 Show: ${showInfo}`);
     }
-    // Use the corrected artist name from TLV data
-    contentParts.push(`🎵 Now Playing: "${event.remote_episode}" by ${artistName}`);
+    // Use the actual track name and corrected artist name
+    contentParts.push(`🎵 Now Playing: "${actualTrackName}" by ${artistName}`);
     
     // Add music link if we have the feed GUID
     if (musicFeedGuid) {
@@ -1675,7 +1872,86 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     return;
   }
 
-  // Combine hashtags with mention tags and show tags
+  // Extract metadata tags from TLV - merge data from all splits
+  const metadataTags: string[][] = [];
+  const seenGuids = new Set<string>(); // Track unique GUIDs to avoid duplicates
+
+  try {
+    // Process all splits to collect all unique metadata
+    const splitsToProcess = allSplits && allSplits.length > 0 ? allSplits : [event];
+
+    for (const split of splitsToProcess) {
+      if (!split.tlv) continue;
+
+      const tlvData = typeof split.tlv === 'string' ? JSON.parse(split.tlv) : split.tlv;
+
+      // Add podcast:item:guid (episode)
+      if (tlvData.itemID || tlvData.episode_guid) {
+        const itemGuid = tlvData.itemID || tlvData.episode_guid;
+        const guidKey = `item:${itemGuid}`;
+        if (!seenGuids.has(guidKey)) {
+          const itemUrl = tlvData.url || '';
+          metadataTags.push(['k', 'podcast:item:guid']);
+          metadataTags.push(['i', `podcast:item:guid:${itemGuid}`, itemUrl]);
+          seenGuids.add(guidKey);
+        }
+      }
+
+      // Add podcast:guid (feed GUID)
+      if (tlvData.feedID || tlvData.podcast_guid) {
+        const feedGuid = tlvData.feedID || tlvData.podcast_guid;
+        const guidKey = `feed:${feedGuid}`;
+        if (!seenGuids.has(guidKey)) {
+          const feedUrl = tlvData.url || '';
+          metadataTags.push(['k', 'podcast:guid']);
+          metadataTags.push(['i', `podcast:guid:${feedGuid}`, feedUrl]);
+          seenGuids.add(guidKey);
+        }
+      }
+
+      // Add podcast:publisher:guid
+      if (tlvData.publisher_guid) {
+        const guidKey = `publisher:${tlvData.publisher_guid}`;
+        if (!seenGuids.has(guidKey)) {
+          const publisherUrl = tlvData.url || '';
+          metadataTags.push(['k', 'podcast:publisher:guid']);
+          metadataTags.push(['i', `podcast:publisher:guid:${tlvData.publisher_guid}`, publisherUrl]);
+          seenGuids.add(guidKey);
+        }
+      }
+
+      // Add image tag if available (use first one found)
+      if (tlvData.image && !metadataTags.some(tag => tag[0] === 'image')) {
+        metadataTags.push(['image', tlvData.image]);
+      }
+
+      // Add remote feed GUID for music
+      if (tlvData.remote_feed_guid) {
+        const guidKey = `remote_feed:${tlvData.remote_feed_guid}`;
+        if (!seenGuids.has(guidKey)) {
+          metadataTags.push(['k', 'podcast:guid']);
+          metadataTags.push(['i', `podcast:guid:${tlvData.remote_feed_guid}`, tlvData.url || '']);
+          seenGuids.add(guidKey);
+        }
+      }
+
+      // Add remote item GUID for music tracks
+      if (tlvData.remote_item_guid) {
+        const guidKey = `remote_item:${tlvData.remote_item_guid}`;
+        if (!seenGuids.has(guidKey)) {
+          metadataTags.push(['k', 'podcast:item:guid']);
+          metadataTags.push(['i', `podcast:item:guid:${tlvData.remote_item_guid}`, tlvData.url || '']);
+          seenGuids.add(guidKey);
+        }
+      }
+    }
+
+    logger.info(`📋 Collected metadata from ${splitsToProcess.length} splits: ${seenGuids.size} unique GUIDs`);
+  } catch (error) {
+    logger.warn('Failed to extract metadata tags from TLV', { error: error?.message });
+  }
+
+  // Combine hashtags with mention tags, show tags, and metadata tags
   const allTags = [
     ['t', 'boostagram'],
     ['t', 'podcasting20'],
@@ -1683,8 +1959,15 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     ['t', 'v4v'],
     ['t', 'podcast'],
     ...messageTags,
-    ...showTags
+    ...showTags,
+    ...metadataTags
   ];
+
+  logger.info('📋 Tags being added to boost post', {
+    totalTags: allTags.length,
+    metadataTagsCount: metadataTags.length,
+    metadataTags: JSON.stringify(metadataTags, null, 2)
+  });
 
   const nostrEvent = finalizeEvent({
     kind: 1,
