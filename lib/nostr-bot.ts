@@ -1796,71 +1796,32 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     }
   }
 
-  // Format the content for Nostr - original detailed format
-  const contentParts = [
-    actionText,
-    '',
-    `${senderLabel}: ${senderDisplay || 'Unknown'}`,
-  ];
+  // Format the content for Nostr - minimal style
+  const satsAmount = Math.floor(event.value_msat_total / 1000);
+  let content = '';
 
+  // Build the message part
   if (displayMessage && displayMessage.trim()) {
-    contentParts.push(`💬 Message: ${displayMessage}`);
-  }
-
-  // Add visible host mentions if any
-  if (showHostMentions.length > 0) {
-    contentParts.push(`👥 Hosts: ${showHostMentions.join(' ')}`);
-  }
-
-  // Build app info with link if available
-  const appName = event.app || '';
-  const appConfig = podcastAppLinks[appName];
-  const appInfo = appConfig
-    ? `📱 App: ${appConfig.url}`
-    : `📱 App: ${appName}`;
-
-  if (isMusic) {
-    // Music boost - show the hosting show and the music track
-    if (event.podcast && event.podcast.trim() && event.podcast.trim().toLowerCase() !== 'nameless') {
-      const showInfo = event.episode && event.episode.trim() && event.episode.trim().toLowerCase() !== 'nameless'
-        ? `${event.podcast} - ${event.episode}`
-        : event.podcast;
-      contentParts.push(`🎧 Show: ${showInfo}`);
-    }
-    // Use the actual track name and corrected artist name
-    contentParts.push(`🎵 Now Playing: "${actualTrackName}" by ${artistName}`);
-
-    // Add music link if we have the feed GUID
-    if (musicFeedGuid) {
-      contentParts.push(`🎵 Listen on LNBeats: https://lnbeats.com/album/${musicFeedGuid}`);
-    }
+    content = displayMessage;
   } else {
-    // Regular podcast boost - show podcast and episode info
-    if (event.podcast && event.podcast.trim() && event.podcast.trim().toLowerCase() !== 'nameless') {
-      contentParts.push(`🎧 Podcast: ${event.podcast}`);
-    }
-    if (event.episode && event.episode.trim() && event.episode.trim().toLowerCase() !== 'nameless') {
-      contentParts.push(`📻 Episode: ${event.episode}`);
-    }
+    // Default message if no boostagram message
+    const showName = event.podcast && event.podcast.trim() && event.podcast.trim().toLowerCase() !== 'nameless'
+      ? event.podcast
+      : 'Unknown';
+    content = `⚡ ${satsAmount} sats`;
   }
 
-  contentParts.push(
-    `💸 Amount: ${(event.value_msat_total / 1000).toLocaleString()} sats`
-  );
-
-  // Add show link if available
-  if (showLink) {
-    contentParts.push(`🎧 Listen: ${showLink}`);
+  // Add link on new line
+  if (isMusic && musicFeedGuid) {
+    content += `\n\nhttps://lnbeats.com/album/${musicFeedGuid}`;
+  } else if (showLink) {
+    content += `\n\n${showLink}`;
   }
 
-  contentParts.push(appInfo);
-
-  contentParts.push(
-    '',
-    '#Boostagram #Podcasting20 #PC20 #V4V'
-  );
-
-  const content = contentParts.join('\n');
+  // Add host mentions on new line if present
+  if (showHostMentions.length > 0) {
+    content += `\n\n${showHostMentions.join(' ')}`;
+  }
 
   // Check for duplicate content if sessionId is provided
   if (sessionId && isDuplicateContent(content, sessionId)) {
@@ -1881,31 +1842,37 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     const splitsToProcess = allSplits && allSplits.length > 0 ? allSplits : [event];
 
     for (const split of splitsToProcess) {
-      if (!split.tlv) continue;
+      if (!split.tlv) {
+        logger.debug('Split has no TLV data');
+        continue;
+      }
 
       const tlvData = typeof split.tlv === 'string' ? JSON.parse(split.tlv) : split.tlv;
+      logger.info('🔍 TLV data fields:', Object.keys(tlvData));
 
       // Add podcast:item:guid (episode)
-      if (tlvData.itemID || tlvData.episode_guid) {
-        const itemGuid = tlvData.itemID || tlvData.episode_guid;
+      if (tlvData.itemID || tlvData.episode_guid || tlvData.guid) {
+        const itemGuid = tlvData.itemID || tlvData.episode_guid || tlvData.guid;
         const guidKey = `item:${itemGuid}`;
         if (!seenGuids.has(guidKey)) {
-          const itemUrl = tlvData.url || '';
+          const itemUrl = tlvData.url || tlvData.boost_link || '';
           metadataTags.push(['k', 'podcast:item:guid']);
           metadataTags.push(['i', `podcast:item:guid:${itemGuid}`, itemUrl]);
           seenGuids.add(guidKey);
+          logger.info(`✅ Added podcast:item:guid tag: ${itemGuid}`);
         }
       }
 
-      // Add podcast:guid (feed GUID)
-      if (tlvData.feedID || tlvData.podcast_guid) {
-        const feedGuid = tlvData.feedID || tlvData.podcast_guid;
+      // Add podcast:guid (feed GUID) - note: PodcastGuru doesn't send feed GUID in TLV
+      if (tlvData.feedID || tlvData.podcast_guid || tlvData.feed_guid) {
+        const feedGuid = tlvData.feedID || tlvData.podcast_guid || tlvData.feed_guid;
         const guidKey = `feed:${feedGuid}`;
         if (!seenGuids.has(guidKey)) {
-          const feedUrl = tlvData.url || '';
+          const feedUrl = tlvData.url || tlvData.boost_link || '';
           metadataTags.push(['k', 'podcast:guid']);
           metadataTags.push(['i', `podcast:guid:${feedGuid}`, feedUrl]);
           seenGuids.add(guidKey);
+          logger.info(`✅ Added podcast:guid tag: ${feedGuid}`);
         }
       }
 
@@ -1951,8 +1918,7 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     logger.warn('Failed to extract metadata tags from TLV', { error: error?.message });
   }
 
-  // Combine hashtags with mention tags, show tags, and metadata tags
-  // Add zap receipt tags for compatibility
+  // Add zap receipt tags
   const zapTags: string[][] = [];
 
   // Get recipient pubkey (the bot itself)
@@ -1988,12 +1954,8 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     zapTags.push(['payment_hash', event.payment_info.payment_hash]);
   }
 
+  // Combine tags - minimal style with zap receipt data
   const allTags = [
-    ['t', 'boostagram'],
-    ['t', 'podcasting20'],
-    ['t', 'pc20'],
-    ['t', 'v4v'],
-    ['t', 'podcast'],
     ...messageTags,
     ...showTags,
     ...metadataTags,
