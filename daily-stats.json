@@ -1,9 +1,9 @@
 {
-  "date": "2025-09-01",
-  "streamSats": 10,
-  "boostSats": 0,
-  "streamShows": [
-    "bitpunk.fm"
-  ],
-  "boostShows": []
+  "date": "2025-10-06",
+  "streamSats": 0,
+  "boostSats": 1665,
+  "streamShows": [],
+  "boostShows": [
+    "Bowl After Bowl"
+  ]
 }

@@ -6,7 +6,7 @@
 import WebSocket from 'ws';
 globalThis.WebSocket = WebSocket as any;
 
-import { finalizeEvent, nip19 } from 'nostr-tools';
+import { finalizeEvent, nip19, getPublicKey } from 'nostr-tools';
 import { Relay } from 'nostr-tools/relay';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -689,8 +689,8 @@ async function loadBoostSessions(): Promise<void> {
             try {
               await postBoostToNostr(session.largestSplit, bot, session.sessionId, session.allSplits);
             } catch (error) {
-              logger.error('Error in postBoostToNostr during session restoration', { 
-                error: error.message, 
+              logger.error('Error in postBoostToNostr during session restoration', {
+                error: error.message,
                 stack: error.stack,
                 session: session.sessionId,
                 amount: session.largestSplit.value_msat_total / 1000
@@ -1796,7 +1796,7 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     }
   }
 
-  // Format the content for Nostr
+  // Format the content for Nostr - original detailed format
   const contentParts = [
     actionText,
     '',
@@ -1815,21 +1815,21 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
   // Build app info with link if available
   const appName = event.app || '';
   const appConfig = podcastAppLinks[appName];
-  const appInfo = appConfig 
+  const appInfo = appConfig
     ? `📱 App: ${appConfig.url}`
     : `📱 App: ${appName}`;
 
   if (isMusic) {
     // Music boost - show the hosting show and the music track
     if (event.podcast && event.podcast.trim() && event.podcast.trim().toLowerCase() !== 'nameless') {
-      const showInfo = event.episode && event.episode.trim() && event.episode.trim().toLowerCase() !== 'nameless' 
-        ? `${event.podcast} - ${event.episode}` 
+      const showInfo = event.episode && event.episode.trim() && event.episode.trim().toLowerCase() !== 'nameless'
+        ? `${event.podcast} - ${event.episode}`
         : event.podcast;
       contentParts.push(`🎧 Show: ${showInfo}`);
     }
     // Use the actual track name and corrected artist name
     contentParts.push(`🎵 Now Playing: "${actualTrackName}" by ${artistName}`);
-    
+
     // Add music link if we have the feed GUID
     if (musicFeedGuid) {
       contentParts.push(`🎵 Listen on LNBeats: https://lnbeats.com/album/${musicFeedGuid}`);
@@ -1852,7 +1852,7 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
   if (showLink) {
     contentParts.push(`🎧 Listen: ${showLink}`);
   }
-  
+
   contentParts.push(appInfo);
 
   contentParts.push(
@@ -1952,6 +1952,42 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
   }
 
   // Combine hashtags with mention tags, show tags, and metadata tags
+  // Add zap receipt tags for compatibility
+  const zapTags: string[][] = [];
+
+  // Get recipient pubkey (the bot itself)
+  const recipientPubkey = getPublicKey(bot.getSecretKey());
+
+  // Get sender pubkey if available from payment_info
+  let senderPubkey = recipientPubkey; // Default to bot pubkey if sender unknown
+  if (event.payment_info?.pubkey) {
+    senderPubkey = event.payment_info.pubkey;
+  }
+
+  // Create a simplified zap request event (kind 9734) as description
+  const zapRequest = {
+    kind: 9734,
+    pubkey: senderPubkey,
+    created_at: event.time,
+    tags: [
+      ['relays', ...bot.relays.slice(0, 3)],
+      ['amount', (event.value_msat_total).toString()],
+      ['p', recipientPubkey],
+    ],
+    content: event.message || '',
+  };
+
+  const zapRequestJson = JSON.stringify(zapRequest);
+
+  // Add zap-compatible tags
+  zapTags.push(['amount', (event.value_msat_total).toString()]); // Amount in millisats
+  zapTags.push(['description', zapRequestJson]); // Zap request
+
+  // Add payment_hash as a reference tag
+  if (event.payment_info?.payment_hash) {
+    zapTags.push(['payment_hash', event.payment_info.payment_hash]);
+  }
+
   const allTags = [
     ['t', 'boostagram'],
     ['t', 'podcasting20'],
@@ -1960,12 +1996,14 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     ['t', 'podcast'],
     ...messageTags,
     ...showTags,
-    ...metadataTags
+    ...metadataTags,
+    ...zapTags
   ];
 
   logger.info('📋 Tags being added to boost post', {
     totalTags: allTags.length,
     metadataTagsCount: metadataTags.length,
+    zapTagsCount: zapTags.length,
     metadataTags: JSON.stringify(metadataTags, null, 2)
   });
 
@@ -1983,9 +2021,9 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     addToRecentPosts(content, sessionId);
   }
   
-  logger.info('Successfully posted boost to Nostr', { 
-    sender: event.sender, 
-    amount: event.value_msat_total / 1000, 
+  logger.info('Successfully posted boost to Nostr', {
+    sender: event.sender,
+    amount: event.value_msat_total / 1000,
     contentLength: content.length,
     tagsCount: allTags.length
   });

@@ -1,19 +1,16 @@
 {
-  "weekStart": "2025-09-01",
-  "streamSats": 8751,
-  "boostSats": 3999,
+  "weekStart": "2025-10-06",
+  "streamSats": 12728,
+  "boostSats": 26227,
   "streamShows": [
-    "It's A Mood",
-    "bitpunk.fm"
+    "bitpunk.fm",
+    "Lightning Thrashes"
   ],
   "boostShows": [
-    "It's A Mood"
+    "Lightning Thrashes",
+    "The Satellite Skirmish",
+    "The Doerfels",
+    "Bowl After Bowl"
   ],
-  "dailyBreakdown": [
-    {
-      "date": "2025-08-31",
-      "streamSats": 15462,
-      "boostSats": 7299
-    }
-  ]
+  "dailyBreakdown": []
 }
