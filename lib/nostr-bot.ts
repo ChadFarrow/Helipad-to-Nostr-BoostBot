@@ -143,6 +143,10 @@ class NostrBot {
     }
   }
 
+  public getRelays(): string[] {
+    return this.relays;
+  }
+
   public async publishToRelays(event: ReturnType<typeof finalizeEvent>): Promise<void> {
     // Test mode - just log what would be posted without actually posting
     if (process.env.TEST_MODE === 'true') {
@@ -1918,7 +1922,7 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     logger.warn('Failed to extract metadata tags from TLV', { error: error?.message });
   }
 
-  // Add zap receipt tags
+  // Add zap receipt tags for NIP-57 compatibility
   const zapTags: string[][] = [];
 
   // Get recipient pubkey (the bot itself)
@@ -1936,7 +1940,7 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     pubkey: senderPubkey,
     created_at: event.time,
     tags: [
-      ['relays', ...bot.relays.slice(0, 3)],
+      ['relays', ...bot.getRelays().slice(0, 3)],
       ['amount', (event.value_msat_total).toString()],
       ['p', recipientPubkey],
     ],
@@ -1945,14 +1949,19 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
 
   const zapRequestJson = JSON.stringify(zapRequest);
 
-  // Add zap-compatible tags
+  // Add NIP-57 zap receipt tags (making this kind 1 note also function as a zap receipt)
+  zapTags.push(['p', senderPubkey]); // Zap sender
+  zapTags.push(['P', recipientPubkey]); // Zap recipient (uppercase P)
   zapTags.push(['amount', (event.value_msat_total).toString()]); // Amount in millisats
-  zapTags.push(['description', zapRequestJson]); // Zap request
+  zapTags.push(['description', zapRequestJson]); // Zap request (kind 9734)
 
-  // Add payment_hash as a reference tag
+  // Add payment_hash as a reference tag if available
   if (event.payment_info?.payment_hash) {
     zapTags.push(['payment_hash', event.payment_info.payment_hash]);
   }
+
+  // Add relay hints
+  zapTags.push(['relays', ...bot.getRelays().slice(0, 3)]);
 
   // Combine tags - minimal style with zap receipt data
   const allTags = [
@@ -1962,10 +1971,11 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     ...zapTags
   ];
 
-  logger.info('📋 Tags being added to boost post', {
+  logger.info('📋 Tags being added to boost post (kind 1 with zap receipt tags)', {
     totalTags: allTags.length,
     metadataTagsCount: metadataTags.length,
     zapTagsCount: zapTags.length,
+    hasSenderPubkey: !!event.payment_info?.pubkey,
     metadataTags: JSON.stringify(metadataTags, null, 2)
   });
 
@@ -1977,12 +1987,12 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
   }, bot.getSecretKey());
 
   await bot.publishToRelays(nostrEvent);
-  
+
   // Add to recent posts tracking if sessionId is provided
   if (sessionId) {
     addToRecentPosts(content, sessionId);
   }
-  
+
   logger.info('Successfully posted boost to Nostr', {
     sender: event.sender,
     amount: event.value_msat_total / 1000,
