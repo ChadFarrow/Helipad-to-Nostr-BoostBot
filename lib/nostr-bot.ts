@@ -1928,13 +1928,12 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
   // Get recipient pubkey (the bot itself)
   const recipientPubkey = getPublicKey(bot.getSecretKey());
 
-  // Get sender pubkey if available from payment_info
-  let senderPubkey = recipientPubkey; // Default to bot pubkey if sender unknown
-  if (event.payment_info?.pubkey) {
-    senderPubkey = event.payment_info.pubkey;
-  }
+  // Use bot pubkey as sender since this is a single-user bot
+  // This is more honest than using Lightning node pubkeys from non-Nostr sources
+  const senderPubkey = recipientPubkey;
+  logger.info('Using bot pubkey as zap sender (single-user bot)');
 
-  // Create a simplified zap request event (kind 9734) as description
+  // Create proper zap request event (kind 9734) matching Fountain's format
   const zapRequest = {
     kind: 9734,
     pubkey: senderPubkey,
@@ -1942,18 +1941,22 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     tags: [
       ['relays', ...bot.getRelays().slice(0, 3)],
       ['amount', (event.value_msat_total).toString()],
+      ...metadataTags, // Include podcast k and i tags in zap request
       ['p', recipientPubkey],
     ],
     content: event.message || '',
   };
 
+  // Create zap request event and get its ID
+  const zapRequestEvent = finalizeEvent(zapRequest, bot.getSecretKey());
   const zapRequestJson = JSON.stringify(zapRequest);
 
-  // Add NIP-57 zap receipt tags (making this kind 1 note also function as a zap receipt)
+  // Create kind 9735 zap receipt tags (proper NIP-57 zap receipt)
   zapTags.push(['p', senderPubkey]); // Zap sender
   zapTags.push(['P', recipientPubkey]); // Zap recipient (uppercase P)
   zapTags.push(['amount', (event.value_msat_total).toString()]); // Amount in millisats
   zapTags.push(['description', zapRequestJson]); // Zap request (kind 9734)
+  zapTags.push(['e', zapRequestEvent.id]); // Reference to zap request event
 
   // Add payment_hash as a reference tag if available
   if (event.payment_info?.payment_hash) {
@@ -1971,32 +1974,68 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     ...zapTags
   ];
 
-  logger.info('📋 Tags being added to boost post (kind 1 with zap receipt tags)', {
+  logger.info('📋 Tags being added to zap receipt (kind 9735)', {
     totalTags: allTags.length,
     metadataTagsCount: metadataTags.length,
     zapTagsCount: zapTags.length,
     hasSenderPubkey: !!event.payment_info?.pubkey,
-    metadataTags: JSON.stringify(metadataTags, null, 2)
+    zapRequestId: zapRequestEvent.id
   });
 
-  const nostrEvent = finalizeEvent({
-    kind: 1,
+  // Publish the zap request first
+  await bot.publishToRelays(zapRequestEvent);
+
+  // Create and publish the zap receipt (kind 9735) for technical compliance
+  const zapReceiptEvent = finalizeEvent({
+    kind: 9735,
     content,
     tags: allTags,
     created_at: Math.floor(Date.now() / 1000),
   }, bot.getSecretKey());
 
-  await bot.publishToRelays(nostrEvent);
+  await bot.publishToRelays(zapReceiptEvent);
+
+  // Generate nevent reference to the zap receipt to show amount in social post
+  const zapReceiptNevent = nip19.neventEncode({
+    id: zapReceiptEvent.id,
+    relays: bot.getRelays().slice(0, 3),
+    kind: 9735
+  });
+
+  // Create social note content with nevent reference (like Fountain does)
+  const socialContent = `${content}\n\nnostr:${zapReceiptNevent}`;
+
+  // Create and publish a visible kind 1 note for social feeds
+  const socialNoteEvent = finalizeEvent({
+    kind: 1,
+    content: socialContent,
+    tags: [
+      ...messageTags,
+      ...showTags,
+      ...metadataTags,
+      // Add basic social tags without heavy zap metadata
+      ['t', 'boost'],
+      ['t', 'value4value'],
+      ['t', 'podcasting20']
+    ],
+    created_at: Math.floor(Date.now() / 1000),
+  }, bot.getSecretKey());
+
+  await bot.publishToRelays(socialNoteEvent);
 
   // Add to recent posts tracking if sessionId is provided
   if (sessionId) {
-    addToRecentPosts(content, sessionId);
+    addToRecentPosts(socialNoteEvent.content, sessionId);
   }
 
-  logger.info('Successfully posted boost to Nostr', {
+  logger.info('Successfully posted hybrid boost events to Nostr', {
     sender: event.sender,
     amount: event.value_msat_total / 1000,
-    contentLength: content.length,
-    tagsCount: allTags.length
+    contentLength: socialNoteEvent.content.length,
+    zapRequestId: zapRequestEvent.id,
+    zapReceiptId: zapReceiptEvent.id,
+    socialNoteId: socialNoteEvent.id,
+    zapReceiptNevent: zapReceiptNevent,
+    eventsPublished: 3
   });
 }
