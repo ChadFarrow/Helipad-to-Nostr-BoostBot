@@ -1094,6 +1094,7 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
   const hasMessage = event.message && event.message.trim() && event.message.trim() !== '';
   const isLargePayment = satsAmount >= 1000;
   
+  // For streams, always update stats (no duplicate issue)
   if (event.action === 1) { // Stream
     dailyStats.streamSats += satsAmount;
     dailyStats.streamShows.add(showName);
@@ -1101,11 +1102,23 @@ export async function announceHelipadPayment(event: HelipadPaymentEvent): Promis
     weeklyStats.streamShows.add(showName);
     logger.info(`Added ${satsAmount} stream sats to daily/weekly totals`);
   } else if (event.action === 2) { // Boost
-    dailyStats.boostSats += satsAmount;
-    dailyStats.boostShows.add(showName);
-    weeklyStats.boostSats += satsAmount;
-    weeklyStats.boostShows.add(showName);
-    logger.info(`Added ${satsAmount} boost sats to daily/weekly totals`);
+    // For boosts, only update stats if this is the first split we've seen for this session
+    // This prevents counting the same boost multiple times due to split payments
+    const timeWindow = Math.floor(event.time / 120); // Same 2-minute window as boost sessions
+    const sessionId = `${timeWindow}-${event.sender}-${event.episode}-${event.podcast}`;
+    
+    // Check if we've already counted stats for this boost session
+    const sessionKey = `stats-${sessionId}`;
+    if (!postedBoosts.has(sessionKey)) {
+      postedBoosts.add(sessionKey); // Mark as counted
+      dailyStats.boostSats += satsAmount;
+      dailyStats.boostShows.add(showName);
+      weeklyStats.boostSats += satsAmount;
+      weeklyStats.boostShows.add(showName);
+      logger.info(`Added ${satsAmount} boost sats to daily/weekly totals (session: ${sessionId})`);
+    } else {
+      logger.info(`Skipping duplicate stats for boost session ${sessionId}`);
+    }
     
     // Track supported creators for boosts
     if (showName && showName !== 'Unknown') {

@@ -1,6 +1,7 @@
 import { createNostrBot } from './nostr-bot.js';
 import { logger } from './logger.js';
 import crypto from 'crypto';
+import { lookupTrackInfoByGUID, lookupArtistName } from './podcast-index-lookup.js';
 
 // Podcast Index API helper function (same as in nostr-bot.ts)
 async function lookupTrackNameByGUID(
@@ -277,17 +278,35 @@ class MusicShowBot {
       track: song.track,
       listeningPlatform: song.listeningPlatform,
       showName: song.showName,
+      feedID: song.feedID,
+      remote_feed_guid: song.remote_feed_guid,
+      remote_item_guid: song.remote_item_guid,
       fullSongObject: JSON.stringify(song, null, 2)
     });
 
     // Priority for artist name:
     // 1. Use the TLV artist field if available (most accurate)
-    // 2. Try to extract from song.song if it contains "via"
-    // 3. Otherwise use remote_podcast as fallback
-    // 4. NEVER use app_name or similar
+    // 2. Try Podcast Index API lookup
+    // 3. Try to extract from song.song if it contains "via"
+    // 4. Otherwise use remote_podcast as fallback
+    // 5. NEVER use app_name or similar
     let artistName = song.artist;
 
-    // If artist is missing but song.song has "via", extract artist from it
+    // If artist is missing, try Podcast Index API
+    if (!artistName && (song.feedID || song.remote_feed_guid)) {
+      console.log('🔍 Attempting to lookup artist from Podcast Index API...');
+      const apiArtist = await lookupArtistName(
+        song.feedID, 
+        song.remote_feed_guid, 
+        song.remote_item_guid
+      );
+      if (apiArtist) {
+        artistName = apiArtist;
+        console.log('✅ Found artist from API:', artistName);
+      }
+    }
+
+    // If artist is still missing but song.song has "via", extract artist from it
     if (!artistName && song.song && song.song.includes(' via ')) {
       artistName = song.song.split(' via ')[0].trim();
       console.log('🎯 Extracted artist from song.song field:', artistName);
@@ -308,18 +327,25 @@ class MusicShowBot {
     let trackName = song.track || 'Unknown Track';
 
     // If track name might be the episode name, try to look it up from API
-    if (song.remote_item_guid && song.remote_feed_guid &&
+    if (song.remote_item_guid && (song.feedID || song.remote_feed_guid) &&
         (trackName === song.episodeName || trackName === song.showName)) {
-      console.log('🔍 [Music Bot] Attempting to lookup track name from API');
-      const lookedUpTrackName = await lookupTrackNameByGUID(
+      console.log('🔍 [Music Bot] Attempting to lookup track info from API');
+      const trackInfo = await lookupTrackInfoByGUID(
         song.remote_item_guid,
         song.feedID,
         song.remote_feed_guid
       );
 
-      if (lookedUpTrackName && lookedUpTrackName !== song.episodeName) {
-        trackName = lookedUpTrackName;
-        console.log(`✅ [Music Bot] Using track name from API: ${trackName}`);
+      if (trackInfo) {
+        if (trackInfo.title && trackInfo.title !== song.episodeName) {
+          trackName = trackInfo.title;
+          console.log(`✅ [Music Bot] Using track name from API: ${trackName}`);
+        }
+        // Also use artist if we didn't have one yet
+        if (trackInfo.artist && !artistName) {
+          artistName = trackInfo.artist;
+          console.log(`✅ [Music Bot] Also found artist from track lookup: ${artistName}`);
+        }
       }
     }
     
