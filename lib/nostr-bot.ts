@@ -1614,10 +1614,14 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
     if (event.tlv) {
       const tlvData = JSON.parse(event.tlv);
       const feedID = tlvData.feedID;
+      const showGuid = tlvData.guid;
       
       // Link to show page (has all episodes + app chooser + episodes.fm button)
       if (feedID) {
         showLink = `https://podcastindex.org/podcast/${feedID}`;
+      } else if (showGuid) {
+        // Use show GUID for lookup (some apps like PodcastGuru send this)
+        showLink = `https://podcastindex.org/podcast/guid/${showGuid}`;
       }
     }
   } catch (error) {
@@ -1804,15 +1808,30 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
   const satsAmount = Math.floor(event.value_msat_total / 1000);
   let content = '';
 
-  // Build the message part
+  // Build the message part with sats amount and app attribution
+  const satsDisplay = `⚡ ${satsAmount} sats`;
+  
+  // Extract app name from TLV data for attribution
+  let appAttribution = '';
+  try {
+    if (event.tlv) {
+      const tlvData = typeof event.tlv === 'string' ? JSON.parse(event.tlv) : event.tlv;
+      if (tlvData.app_name && typeof tlvData.app_name === 'string') {
+        appAttribution = `\n📱 via ${tlvData.app_name}`;
+      }
+    }
+  } catch (error) {
+    logger.debug('Failed to extract app_name from TLV', { error: error?.message });
+  }
+
   if (displayMessage && displayMessage.trim()) {
-    content = displayMessage;
+    content = `${displayMessage}\n\n${satsDisplay}${appAttribution}`;
   } else {
     // Default message if no boostagram message
     const showName = event.podcast && event.podcast.trim() && event.podcast.trim().toLowerCase() !== 'nameless'
       ? event.podcast
       : 'Unknown';
-    content = `⚡ ${satsAmount} sats`;
+    content = `${satsDisplay}${appAttribution}`;
   }
 
   // Add link on new line
