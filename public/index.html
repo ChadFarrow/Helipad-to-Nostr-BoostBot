@@ -307,6 +307,9 @@
                 <button class="btn-secondary" onclick="toggleLiveLogs()" id="liveLogsBtn">
                     <span>📋</span> Start Live Logs
                 </button>
+                <button class="btn-success" onclick="testBlockClock()">
+                    <span>📺</span> Test BlockClock
+                </button>
             </div>
 
             <div class="status-display" id="statusDisplay" style="display: none;">
@@ -653,6 +656,52 @@
             // Keep only last 100 lines
             while (content.children.length > 100) {
                 content.removeChild(content.firstChild);
+            }
+        }
+        
+        // Test BlockClock functionality
+        async function testBlockClock() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.disabled = true;
+            button.innerHTML = '<div class="loading"></div> Testing...';
+            
+            try {
+                const response = await fetch('/test-blockclock?message=DASH');
+                const result = await response.text();
+                
+                if (response.ok) {
+                    button.innerHTML = '<span>✅</span> BlockClock Updated!';
+                    button.className = 'btn-success';
+                    
+                    // Show success message for 3 seconds
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.className = 'btn-success';
+                        button.disabled = false;
+                    }, 3000);
+                } else {
+                    button.innerHTML = '<span>⚠️</span> Rate Limited';
+                    button.className = 'btn-warning';
+                    
+                    // Show rate limit for 3 seconds
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.className = 'btn-success';
+                        button.disabled = false;
+                    }, 3000);
+                }
+            } catch (error) {
+                button.innerHTML = '<span>❌</span> Failed';
+                button.className = 'btn-danger';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.className = 'btn-success';
+                    button.disabled = false;
+                }, 3000);
             }
         }
         

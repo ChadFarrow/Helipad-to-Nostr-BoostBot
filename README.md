@@ -6,6 +6,7 @@ A webhook receiver that connects Helipad payments to a Nostr bot for automatic p
 
 - **Webhook Receiver**: Listens for Helipad payment events on port 3333
 - **Nostr Integration**: Automatically posts boost events to multiple Nostr relays
+- **BlockClock Mini Integration**: Displays boost notifications on BlockClock Mini device
 - **Daily/Weekly Summaries**: Posts automated summaries of boost activity
 - **Music Show Support**: Special handling for music shows and artist boosts
 - **Comprehensive Monitoring**: Full suite of monitoring and management tools
@@ -104,6 +105,8 @@ Access the dashboard at `http://localhost:3333` for:
 - **GET** `/test-daily-summary` - Test daily summary posting
 - **GET** `/test-weekly-summary` - Test weekly summary posting
 - **GET** `/test-music-show` - Test music show functionality
+- **GET** `/test-blockclock?message=TEXT` - Test BlockClock Mini display
+- **GET** `/test-blockclock?amount=NUMBER` - Test BlockClock Mini with number
 
 ## Configuration
 
@@ -112,6 +115,13 @@ Access the dashboard at `http://localhost:3333` for:
 - `HELIPAD_WEBHOOK_TOKEN`: Optional authentication token
 - `PORT`: Webhook server port (default: 3333)
 - `TEST_MODE`: Set to 'true' for test mode (no actual Nostr posting)
+
+### BlockClock Mini Setup
+The bot automatically sends boost notifications to a BlockClock Mini device:
+- **Default IP**: 192.168.0.182 (configurable in `helipad-webhook.ts`)
+- **API Rate Limit**: ~1 request per minute (handled automatically)
+- **Display Format**: Shows boost amounts or "BOOST" text
+- **Test**: Use the "Test BlockClock" button in the web dashboard
 
 ### Nostr Relays
 Default relays (configurable in `lib/nostr-bot.ts`):

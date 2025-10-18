@@ -1,16 +1,64 @@
 {
-  "weekStart": "2025-10-06",
-  "streamSats": 12728,
-  "boostSats": 30557,
+  "weekStart": "2025-10-13",
+  "streamSats": 136217,
+  "boostSats": null,
   "streamShows": [
-    "bitpunk.fm",
-    "Lightning Thrashes"
+    "Bowl After Bowl",
+    "Soapbox Sessions",
+    "Homegrown Hits",
+    "Lightning Thrashes",
+    "Mutton, Mead & Music",
+    "SOUND COFFEE"
   ],
   "boostShows": [
-    "Lightning Thrashes",
-    "The Satellite Skirmish",
+    "Into The Doerfel-Verse",
     "The Doerfels",
-    "Bowl After Bowl"
+    "Delta OG",
+    "The Satellite Skirmish",
+    "Bowl After Bowl",
+    "Homegrown Hits",
+    "Podcasting 2.0",
+    "Mutton, Mead & Music",
+    "SOUND COFFEE",
+    "Test Podcast Show",
+    "The Heycitizen Experience",
+    "Test Podcast"
   ],
-  "dailyBreakdown": []
+  "dailyBreakdown": [
+    {
+      "date": "2025-10-12",
+      "streamSats": 10402,
+      "boostSats": 12475
+    },
+    {
+      "date": "2025-10-13",
+      "streamSats": 0,
+      "boostSats": 600
+    },
+    {
+      "date": "2025-10-14",
+      "streamSats": 0,
+      "boostSats": 1100
+    },
+    {
+      "date": "2025-10-15",
+      "streamSats": 15657,
+      "boostSats": 1332
+    },
+    {
+      "date": "2025-10-16",
+      "streamSats": 19008,
+      "boostSats": 2331
+    },
+    {
+      "date": "2025-10-17",
+      "streamSats": 89156,
+      "boostSats": 10656
+    },
+    {
+      "date": "2025-10-18",
+      "streamSats": 1994,
+      "boostSats": 78430
+    }
+  ]
 }

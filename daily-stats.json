@@ -1,9 +1,15 @@
 {
-  "date": "2025-10-06",
-  "streamSats": 0,
-  "boostSats": 1000,
-  "streamShows": [],
+  "date": "2025-10-18",
+  "streamSats": 1994,
+  "boostSats": null,
+  "streamShows": [
+    "Mutton, Mead & Music"
+  ],
   "boostShows": [
-    "Bowl After Bowl"
+    "Bowl After Bowl",
+    "Test Podcast Show",
+    "Mutton, Mead & Music",
+    "The Heycitizen Experience",
+    "Test Podcast"
   ]
 }

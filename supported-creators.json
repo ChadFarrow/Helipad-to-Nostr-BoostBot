@@ -3,9 +3,9 @@
     "name": "Bowl After Bowl",
     "type": "podcast",
     "firstSupported": "2025-08-06",
-    "lastSupported": "2025-10-07",
-    "totalBoosts": 175,
-    "totalSats": 233170
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 259,
+    "totalSats": 245997
   },
   "podcast:UpBEATs": {
     "name": "UpBEATs",
@@ -35,9 +35,9 @@
     "name": "The Sunday Morning Two Hour Folk Hour",
     "type": "podcast",
     "firstSupported": "2025-08-07",
-    "lastSupported": "2025-10-02",
-    "totalBoosts": 35,
-    "totalSats": 47994
+    "lastSupported": "2025-10-12",
+    "totalBoosts": 40,
+    "totalSats": 57959
   },
   "podcast:The Trusted": {
     "name": "The Trusted",
@@ -51,9 +51,9 @@
     "name": "Homegrown Hits",
     "type": "podcast",
     "firstSupported": "2025-08-07",
-    "lastSupported": "2025-09-26",
-    "totalBoosts": 92,
-    "totalSats": 39885
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 93,
+    "totalSats": 40218
   },
   "musician:The Tjukebox": {
     "name": "The Tjukebox",
@@ -115,17 +115,17 @@
     "name": "Into The Doerfel-Verse",
     "type": "podcast",
     "firstSupported": "2025-08-09",
-    "lastSupported": "2025-09-25",
-    "totalBoosts": 66,
-    "totalSats": 50367
+    "lastSupported": "2025-10-13",
+    "totalBoosts": 67,
+    "totalSats": 50469
   },
   "podcast:The Heycitizen Experience": {
     "name": "The Heycitizen Experience",
     "type": "podcast",
     "firstSupported": "2025-08-09",
-    "lastSupported": "2025-08-09",
-    "totalBoosts": 2,
-    "totalSats": 100
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 5,
+    "totalSats": 400
   },
   "podcast:bitpunk.fm": {
     "name": "bitpunk.fm",
@@ -411,9 +411,9 @@
     "name": "Podcastindex.org",
     "type": "musician",
     "firstSupported": "2025-09-01",
-    "lastSupported": "2025-10-06",
-    "totalBoosts": 33,
-    "totalSats": 14654
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 38,
+    "totalSats": 16319
   },
   "musician:Middle Season": {
     "name": "Middle Season",
@@ -435,9 +435,9 @@
     "name": "Podcast Guru",
     "type": "musician",
     "firstSupported": "2025-09-01",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 13,
-    "totalSats": 3813
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 17,
+    "totalSats": 5145
   },
   "musician:Sovereign Feeds": {
     "name": "Sovereign Feeds",
@@ -499,9 +499,9 @@
     "name": "Mutton, Mead & Music",
     "type": "musician",
     "firstSupported": "2025-09-05",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 5,
-    "totalSats": 1665
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 7,
+    "totalSats": 2331
   },
   "musician:Cottongin - IRC Relay": {
     "name": "Cottongin - IRC Relay",
@@ -515,17 +515,17 @@
     "name": "Podcastindex.org, Podcasting 2.0",
     "type": "musician",
     "firstSupported": "2025-09-05",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 4,
-    "totalSats": 1332
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 6,
+    "totalSats": 1998
   },
   "podcast:Mutton, Mead & Music": {
     "name": "Mutton, Mead & Music",
     "type": "podcast",
     "firstSupported": "2025-09-05",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 39,
-    "totalSats": 38992
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 45,
+    "totalSats": 40990
   },
   "musician:OP3 and reflex.livewire.io": {
     "name": "OP3 and reflex.livewire.io",
@@ -611,9 +611,9 @@
     "name": "Sir TJ The Wrathful",
     "type": "podcast",
     "firstSupported": "2025-09-09",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 28,
-    "totalSats": 1379
+    "lastSupported": "2025-10-12",
+    "totalBoosts": 33,
+    "totalSats": 1683
   },
   "podcast:Ben Doerfel": {
     "name": "Ben Doerfel",
@@ -635,17 +635,17 @@
     "name": "CityBeach",
     "type": "podcast",
     "firstSupported": "2025-09-09",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 38,
-    "totalSats": 1349
+    "lastSupported": "2025-10-12",
+    "totalBoosts": 44,
+    "totalSats": 1949
   },
   "podcast:The Doerfels": {
     "name": "The Doerfels",
     "type": "podcast",
     "firstSupported": "2025-09-09",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 273,
-    "totalSats": 11855
+    "lastSupported": "2025-10-13",
+    "totalBoosts": 294,
+    "totalSats": 13759
   },
   "podcast:Middle Season": {
     "name": "Middle Season",
@@ -715,9 +715,9 @@
     "name": "Music Side Project",
     "type": "musician",
     "firstSupported": "2025-09-10",
-    "lastSupported": "2025-09-21",
-    "totalBoosts": 4,
-    "totalSats": 1332
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 5,
+    "totalSats": 1665
   },
   "musician:Podcast Index": {
     "name": "Podcast Index",
@@ -763,25 +763,25 @@
     "name": "DuhLaurien",
     "type": "musician",
     "firstSupported": "2025-09-12",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 11,
-    "totalSats": 7415
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 14,
+    "totalSats": 8414
   },
   "musician:MaryKateUltra": {
     "name": "MaryKateUltra",
     "type": "musician",
     "firstSupported": "2025-09-12",
-    "lastSupported": "2025-09-26",
-    "totalBoosts": 8,
-    "totalSats": 6329
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 10,
+    "totalSats": 6995
   },
   "podcast:Podcasting 2.0": {
     "name": "Podcasting 2.0",
     "type": "podcast",
     "firstSupported": "2025-09-12",
-    "lastSupported": "2025-09-26",
-    "totalBoosts": 56,
-    "totalSats": 37358
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 62,
+    "totalSats": 42020
   },
   "podcast:Opus": {
     "name": "Opus",
@@ -827,9 +827,9 @@
     "name": "ITDV Lightning",
     "type": "musician",
     "firstSupported": "2025-09-23",
-    "lastSupported": "2025-10-07",
-    "totalBoosts": 147,
-    "totalSats": 24316
+    "lastSupported": "2025-10-14",
+    "totalBoosts": 159,
+    "totalSats": 24716
   },
   "podcast:Podnews Weekly Review": {
     "name": "Podnews Weekly Review",
@@ -963,9 +963,9 @@
     "name": "Monkey Robot War via Wavlake",
     "type": "musician",
     "firstSupported": "2025-10-03",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 3,
-    "totalSats": 533
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 4,
+    "totalSats": 866
   },
   "musician:Sir TJ The Wrathful": {
     "name": "Sir TJ The Wrathful",
@@ -1118,5 +1118,77 @@
     "lastSupported": "2025-10-06",
     "totalBoosts": 1,
     "totalSats": 333
+  },
+  "podcast:Delta OG": {
+    "name": "Delta OG",
+    "type": "podcast",
+    "firstSupported": "2025-10-13",
+    "lastSupported": "2025-10-13",
+    "totalBoosts": 1,
+    "totalSats": 100
+  },
+  "musician:streetclones@fountain.fm": {
+    "name": "streetclones@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-10-17",
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Malachi@fountain.fm": {
+    "name": "Malachi@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-10-17",
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:AKME via Wavlake": {
+    "name": "AKME via Wavlake",
+    "type": "musician",
+    "firstSupported": "2025-10-17",
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "podcast:SOUND COFFEE": {
+    "name": "SOUND COFFEE",
+    "type": "podcast",
+    "firstSupported": "2025-10-17",
+    "lastSupported": "2025-10-17",
+    "totalBoosts": 3,
+    "totalSats": 999
+  },
+  "podcast:Test Podcast Show": {
+    "name": "Test Podcast Show",
+    "type": "podcast",
+    "firstSupported": "2025-10-18",
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 7,
+    "totalSats": 70000
+  },
+  "musician:disco girl": {
+    "name": "disco girl",
+    "type": "musician",
+    "firstSupported": "2025-10-18",
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Fountain": {
+    "name": "Fountain",
+    "type": "musician",
+    "firstSupported": "2025-10-18",
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "podcast:Test Podcast": {
+    "name": "Test Podcast",
+    "type": "podcast",
+    "firstSupported": "2025-10-18",
+    "lastSupported": "2025-10-18",
+    "totalBoosts": 5,
+    "totalSats": null
   }
 }
