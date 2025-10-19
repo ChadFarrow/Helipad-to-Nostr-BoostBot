@@ -13,6 +13,57 @@ import path from 'path';
 import { logger } from './logger.js';
 import crypto from 'crypto';
 
+// Podcast Index API helper function to look up podcast feedID by GUID
+async function lookupFeedIdByGuid(guid: string): Promise<number | null> {
+  const apiKey = process.env.PODCAST_INDEX_API_KEY;
+  const apiSecret = process.env.PODCAST_INDEX_API_SECRET;
+
+  if (!apiKey || !apiSecret) {
+    logger.warn('Podcast Index API credentials not configured');
+    return null;
+  }
+
+  try {
+    const apiTime = Math.floor(Date.now() / 1000);
+    const hash = crypto.createHash('sha1')
+      .update(apiKey + apiSecret + apiTime)
+      .digest('hex');
+
+    const url = `https://api.podcastindex.org/api/1.0/podcasts/byguid?guid=${encodeURIComponent(guid)}`;
+    logger.info(`🔍 Looking up feedID for GUID: ${guid}`);
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'BoostBot/1.0',
+        'X-Auth-Date': apiTime.toString(),
+        'X-Auth-Key': apiKey,
+        'Authorization': hash
+      }
+    });
+
+    if (!response.ok) {
+      logger.warn(`Podcast Index API error: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data = await response.json() as any;
+
+    if (data.status === 'true' && data.feed && data.feed.id) {
+      logger.info(`✅ Found feedID ${data.feed.id} for GUID ${guid}`);
+      return data.feed.id;
+    }
+
+    logger.warn(`No podcast found for GUID: ${guid}`);
+    return null;
+  } catch (error: any) {
+    logger.error('Error looking up feedID by GUID', {
+      error: error?.message,
+      guid
+    });
+    return null;
+  }
+}
+
 // Podcast Index API helper function
 async function lookupTrackNameByGUID(
   guid: string,
@@ -1626,15 +1677,22 @@ async function postBoostToNostr(event: HelipadPaymentEvent, bot: any, sessionId?
   try {
     if (event.tlv) {
       const tlvData = JSON.parse(event.tlv);
-      const feedID = tlvData.feedID;
+      let feedID = tlvData.feedID;
       const showGuid = tlvData.guid;
       
       // Link to show page (has all episodes + app chooser + episodes.fm button)
       if (feedID) {
         showLink = `https://podcastindex.org/podcast/${feedID}`;
       } else if (showGuid) {
-        // Use show GUID for lookup (some apps like PodcastGuru send this)
-        showLink = `https://podcastindex.org/podcast/guid/${showGuid}`;
+        // Use show GUID to lookup feedID (some apps like PodcastGuru send this)
+        logger.info(`🔍 No feedID found, attempting to look up by GUID: ${showGuid}`);
+        const lookedUpFeedId = await lookupFeedIdByGuid(showGuid);
+        if (lookedUpFeedId) {
+          showLink = `https://podcastindex.org/podcast/${lookedUpFeedId}`;
+        } else {
+          // If lookup fails, we can't create a working link
+          logger.warn(`⚠️ Could not find feedID for GUID ${showGuid}, no show link will be included`);
+        }
       }
     }
   } catch (error) {
