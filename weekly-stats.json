@@ -1,64 +1,51 @@
 {
-  "weekStart": "2025-10-13",
-  "streamSats": 136217,
+  "weekStart": "2025-12-22",
+  "streamSats": 21174,
   "boostSats": null,
   "streamShows": [
     "Bowl After Bowl",
-    "Soapbox Sessions",
-    "Homegrown Hits",
+    "The Sunday Morning Two Hour Folk Hour",
     "Lightning Thrashes",
-    "Mutton, Mead & Music",
-    "SOUND COFFEE"
+    "Homegrown Hits",
+    "Hog Story"
   ],
   "boostShows": [
-    "Into The Doerfel-Verse",
-    "The Doerfels",
-    "Delta OG",
-    "The Satellite Skirmish",
     "Bowl After Bowl",
+    "HeyCitizen",
+    "Lightning Thrashes",
+    "The Sunday Morning Two Hour Folk Hour",
     "Homegrown Hits",
-    "Podcasting 2.0",
-    "Mutton, Mead & Music",
-    "SOUND COFFEE",
-    "Test Podcast Show",
-    "The Heycitizen Experience",
+    "ovvrdos",
+    "Rock'n'Roll Breakheart",
+    "Love Ethic",
+    "Drawing Monsters",
+    "Able and The Wolf",
+    "Street Clones",
+    "Red Arrow Highway",
+    "Sir TJ The Wrathful",
+    "Vance Latta",
     "Test Podcast"
   ],
   "dailyBreakdown": [
     {
-      "date": "2025-10-12",
-      "streamSats": 10402,
-      "boostSats": 12475
-    },
-    {
-      "date": "2025-10-13",
+      "date": "2025-12-23",
       "streamSats": 0,
-      "boostSats": 600
+      "boostSats": 0
     },
     {
-      "date": "2025-10-14",
-      "streamSats": 0,
-      "boostSats": 1100
+      "date": "2025-12-24",
+      "streamSats": 3001,
+      "boostSats": 3703
     },
     {
-      "date": "2025-10-15",
-      "streamSats": 15657,
-      "boostSats": 1332
+      "date": "2025-12-25",
+      "streamSats": 4960,
+      "boostSats": 2222
     },
     {
-      "date": "2025-10-16",
-      "streamSats": 19008,
-      "boostSats": 2331
-    },
-    {
-      "date": "2025-10-17",
-      "streamSats": 89156,
-      "boostSats": 10656
-    },
-    {
-      "date": "2025-10-18",
-      "streamSats": 1994,
-      "boostSats": 78430
+      "date": "2025-12-26",
+      "streamSats": 7425,
+      "boostSats": 637
     }
   ]
 }

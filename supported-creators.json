@@ -3,25 +3,25 @@
     "name": "Bowl After Bowl",
     "type": "podcast",
     "firstSupported": "2025-08-06",
-    "lastSupported": "2025-10-18",
-    "totalBoosts": 259,
-    "totalSats": 245997
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 309,
+    "totalSats": 283116
   },
   "podcast:UpBEATs": {
     "name": "UpBEATs",
     "type": "podcast",
     "firstSupported": "2025-08-07",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 71,
-    "totalSats": 44949
+    "lastSupported": "2025-12-14",
+    "totalBoosts": 118,
+    "totalSats": 76603
   },
   "musician:UpBEATs": {
     "name": "UpBEATs",
     "type": "musician",
     "firstSupported": "2025-08-07",
-    "lastSupported": "2025-08-24",
-    "totalBoosts": 19,
-    "totalSats": 6327
+    "lastSupported": "2025-12-16",
+    "totalBoosts": 21,
+    "totalSats": 6993
   },
   "musician:Bringing it all back home to you now": {
     "name": "Bringing it all back home to you now",
@@ -35,9 +35,9 @@
     "name": "The Sunday Morning Two Hour Folk Hour",
     "type": "podcast",
     "firstSupported": "2025-08-07",
-    "lastSupported": "2025-10-12",
-    "totalBoosts": 40,
-    "totalSats": 57959
+    "lastSupported": "2025-12-25",
+    "totalBoosts": 55,
+    "totalSats": 91289
   },
   "podcast:The Trusted": {
     "name": "The Trusted",
@@ -51,9 +51,9 @@
     "name": "Homegrown Hits",
     "type": "podcast",
     "firstSupported": "2025-08-07",
-    "lastSupported": "2025-10-17",
-    "totalBoosts": 93,
-    "totalSats": 40218
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 158,
+    "totalSats": 110406
   },
   "musician:The Tjukebox": {
     "name": "The Tjukebox",
@@ -115,33 +115,33 @@
     "name": "Into The Doerfel-Verse",
     "type": "podcast",
     "firstSupported": "2025-08-09",
-    "lastSupported": "2025-10-13",
-    "totalBoosts": 67,
-    "totalSats": 50469
+    "lastSupported": "2025-12-14",
+    "totalBoosts": 75,
+    "totalSats": 60323
   },
   "podcast:The Heycitizen Experience": {
     "name": "The Heycitizen Experience",
     "type": "podcast",
     "firstSupported": "2025-08-09",
-    "lastSupported": "2025-10-18",
-    "totalBoosts": 5,
-    "totalSats": 400
+    "lastSupported": "2025-11-04",
+    "totalBoosts": 8,
+    "totalSats": 3400
   },
   "podcast:bitpunk.fm": {
     "name": "bitpunk.fm",
     "type": "podcast",
     "firstSupported": "2025-08-09",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 25,
-    "totalSats": 15529
+    "lastSupported": "2025-11-16",
+    "totalBoosts": 33,
+    "totalSats": 46334
   },
   "podcast:bitpunk.fm unwound": {
     "name": "bitpunk.fm unwound",
     "type": "podcast",
     "firstSupported": "2025-08-09",
-    "lastSupported": "2025-08-22",
-    "totalBoosts": 27,
-    "totalSats": 35335
+    "lastSupported": "2025-10-21",
+    "totalBoosts": 34,
+    "totalSats": 37666
   },
   "musician:Kiss Up - EP": {
     "name": "Kiss Up - EP",
@@ -171,9 +171,9 @@
     "name": "V4V Roundtable",
     "type": "podcast",
     "firstSupported": "2025-08-10",
-    "lastSupported": "2025-09-11",
-    "totalBoosts": 59,
-    "totalSats": 38889
+    "lastSupported": "2025-12-17",
+    "totalBoosts": 60,
+    "totalSats": 39222
   },
   "podcast:Sweet Spot": {
     "name": "Sweet Spot",
@@ -187,9 +187,9 @@
     "name": "LNURL Testing Podcast",
     "type": "podcast",
     "firstSupported": "2025-08-11",
-    "lastSupported": "2025-09-24",
-    "totalBoosts": 53,
-    "totalSats": 5751
+    "lastSupported": "2025-12-14",
+    "totalBoosts": 65,
+    "totalSats": 8278
   },
   "podcast:Jesse EP": {
     "name": "Jesse EP",
@@ -219,9 +219,9 @@
     "name": "Two Angry Cunts",
     "type": "podcast",
     "firstSupported": "2025-08-13",
-    "lastSupported": "2025-09-05",
-    "totalBoosts": 54,
-    "totalSats": 25986
+    "lastSupported": "2025-12-16",
+    "totalBoosts": 62,
+    "totalSats": 38984
   },
   "podcast:Movie Archive": {
     "name": "Movie Archive",
@@ -299,9 +299,9 @@
     "name": "Ungovernable Misfits",
     "type": "podcast",
     "firstSupported": "2025-08-21",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 63,
-    "totalSats": 50321
+    "lastSupported": "2025-11-14",
+    "totalBoosts": 83,
+    "totalSats": 71981
   },
   "podcast:Plebchain Radio": {
     "name": "Plebchain Radio",
@@ -331,9 +331,9 @@
     "name": "ChadF",
     "type": "podcast",
     "firstSupported": "2025-08-26",
-    "lastSupported": "2025-09-23",
-    "totalBoosts": 21,
-    "totalSats": 1700
+    "lastSupported": "2025-12-06",
+    "totalBoosts": 38,
+    "totalSats": 3106
   },
   "podcast:vnprc": {
     "name": "vnprc",
@@ -395,9 +395,9 @@
     "name": "StevenB",
     "type": "musician",
     "firstSupported": "2025-09-01",
-    "lastSupported": "2025-09-01",
-    "totalBoosts": 2,
-    "totalSats": 433
+    "lastSupported": "2025-11-28",
+    "totalBoosts": 5,
+    "totalSats": 1432
   },
   "musician:Mike Neumann": {
     "name": "Mike Neumann",
@@ -411,9 +411,9 @@
     "name": "Podcastindex.org",
     "type": "musician",
     "firstSupported": "2025-09-01",
-    "lastSupported": "2025-10-18",
-    "totalBoosts": 38,
-    "totalSats": 16319
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 81,
+    "totalSats": 33172
   },
   "musician:Middle Season": {
     "name": "Middle Season",
@@ -427,25 +427,25 @@
     "name": "DV Media",
     "type": "musician",
     "firstSupported": "2025-09-01",
-    "lastSupported": "2025-09-10",
-    "totalBoosts": 2,
-    "totalSats": 383
+    "lastSupported": "2025-11-14",
+    "totalBoosts": 3,
+    "totalSats": 716
   },
   "musician:Podcast Guru": {
     "name": "Podcast Guru",
     "type": "musician",
     "firstSupported": "2025-09-01",
-    "lastSupported": "2025-10-18",
-    "totalBoosts": 17,
-    "totalSats": 5145
+    "lastSupported": "2025-12-19",
+    "totalBoosts": 24,
+    "totalSats": 13476
   },
   "musician:Sovereign Feeds": {
     "name": "Sovereign Feeds",
     "type": "musician",
     "firstSupported": "2025-09-01",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 10,
-    "totalSats": 3047
+    "lastSupported": "2025-12-26",
+    "totalBoosts": 15,
+    "totalSats": 4712
   },
   "podcast:Its A Mood": {
     "name": "Its A Mood",
@@ -475,9 +475,9 @@
     "name": "ChadF",
     "type": "musician",
     "firstSupported": "2025-09-04",
-    "lastSupported": "2025-09-13",
-    "totalBoosts": 2,
-    "totalSats": 1888
+    "lastSupported": "2025-12-05",
+    "totalBoosts": 4,
+    "totalSats": 3419
   },
   "podcast:Soapbox Sessions": {
     "name": "Soapbox Sessions",
@@ -499,9 +499,9 @@
     "name": "Mutton, Mead & Music",
     "type": "musician",
     "firstSupported": "2025-09-05",
-    "lastSupported": "2025-10-18",
-    "totalBoosts": 7,
-    "totalSats": 2331
+    "lastSupported": "2025-12-19",
+    "totalBoosts": 12,
+    "totalSats": 3996
   },
   "musician:Cottongin - IRC Relay": {
     "name": "Cottongin - IRC Relay",
@@ -515,33 +515,33 @@
     "name": "Podcastindex.org, Podcasting 2.0",
     "type": "musician",
     "firstSupported": "2025-09-05",
-    "lastSupported": "2025-10-18",
-    "totalBoosts": 6,
-    "totalSats": 1998
+    "lastSupported": "2025-12-19",
+    "totalBoosts": 8,
+    "totalSats": 2664
   },
   "podcast:Mutton, Mead & Music": {
     "name": "Mutton, Mead & Music",
     "type": "podcast",
     "firstSupported": "2025-09-05",
-    "lastSupported": "2025-10-17",
-    "totalBoosts": 45,
-    "totalSats": 40990
+    "lastSupported": "2025-12-19",
+    "totalBoosts": 68,
+    "totalSats": 68168
   },
   "musician:OP3 and reflex.livewire.io": {
     "name": "OP3 and reflex.livewire.io",
     "type": "musician",
     "firstSupported": "2025-09-07",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 9,
-    "totalSats": 2997
+    "lastSupported": "2025-12-16",
+    "totalBoosts": 10,
+    "totalSats": 3330
   },
   "musician:steven@getalby.com": {
     "name": "steven@getalby.com",
     "type": "musician",
     "firstSupported": "2025-09-07",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 12,
-    "totalSats": 3996
+    "lastSupported": "2025-11-30",
+    "totalBoosts": 14,
+    "totalSats": 4662
   },
   "musician:PodcastIndex": {
     "name": "PodcastIndex",
@@ -563,17 +563,17 @@
     "name": "RSS Blue",
     "type": "musician",
     "firstSupported": "2025-09-07",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 10,
-    "totalSats": 3330
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 11,
+    "totalSats": 3663
   },
   "musician:UpBEATS Music Podcast": {
     "name": "UpBEATS Music Podcast",
     "type": "musician",
     "firstSupported": "2025-09-07",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 13,
-    "totalSats": 3397
+    "lastSupported": "2025-11-30",
+    "totalBoosts": 21,
+    "totalSats": 6061
   },
   "musician:Preetyboy Psoul via Wavlake": {
     "name": "Preetyboy Psoul via Wavlake",
@@ -611,9 +611,9 @@
     "name": "Sir TJ The Wrathful",
     "type": "podcast",
     "firstSupported": "2025-09-09",
-    "lastSupported": "2025-10-12",
-    "totalBoosts": 33,
-    "totalSats": 1683
+    "lastSupported": "2025-11-24",
+    "totalBoosts": 41,
+    "totalSats": 2021
   },
   "podcast:Ben Doerfel": {
     "name": "Ben Doerfel",
@@ -627,25 +627,25 @@
     "name": "Kurtisdrums",
     "type": "podcast",
     "firstSupported": "2025-09-09",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 213,
-    "totalSats": 9983
+    "lastSupported": "2025-11-26",
+    "totalBoosts": 221,
+    "totalSats": 10351
   },
   "podcast:CityBeach": {
     "name": "CityBeach",
     "type": "podcast",
     "firstSupported": "2025-09-09",
-    "lastSupported": "2025-10-12",
-    "totalBoosts": 44,
-    "totalSats": 1949
+    "lastSupported": "2025-11-24",
+    "totalBoosts": 48,
+    "totalSats": 2081
   },
   "podcast:The Doerfels": {
     "name": "The Doerfels",
     "type": "podcast",
     "firstSupported": "2025-09-09",
-    "lastSupported": "2025-10-13",
-    "totalBoosts": 294,
-    "totalSats": 13759
+    "lastSupported": "2025-12-11",
+    "totalBoosts": 337,
+    "totalSats": 17426
   },
   "podcast:Middle Season": {
     "name": "Middle Season",
@@ -675,9 +675,9 @@
     "name": "DoerfelVerse",
     "type": "musician",
     "firstSupported": "2025-09-10",
-    "lastSupported": "2025-09-10",
-    "totalBoosts": 3,
-    "totalSats": 999
+    "lastSupported": "2025-12-14",
+    "totalBoosts": 10,
+    "totalSats": 4682
   },
   "musician:Cousin Mike": {
     "name": "Cousin Mike",
@@ -699,25 +699,25 @@
     "name": "HeyCitizenNode",
     "type": "musician",
     "firstSupported": "2025-09-10",
-    "lastSupported": "2025-09-11",
-    "totalBoosts": 2,
-    "totalSats": 666
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 3,
+    "totalSats": 999
   },
   "musician:Sharpie": {
     "name": "Sharpie",
     "type": "musician",
     "firstSupported": "2025-09-10",
-    "lastSupported": "2025-09-11",
-    "totalBoosts": 2,
-    "totalSats": 666
+    "lastSupported": "2025-11-11",
+    "totalBoosts": 21,
+    "totalSats": 14216
   },
   "musician:Music Side Project": {
     "name": "Music Side Project",
     "type": "musician",
     "firstSupported": "2025-09-10",
-    "lastSupported": "2025-10-17",
-    "totalBoosts": 5,
-    "totalSats": 1665
+    "lastSupported": "2025-12-12",
+    "totalBoosts": 13,
+    "totalSats": 4329
   },
   "musician:Podcast Index": {
     "name": "Podcast Index",
@@ -739,9 +739,9 @@
     "name": "Doerfel-Node",
     "type": "musician",
     "firstSupported": "2025-09-11",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 3,
-    "totalSats": 999
+    "lastSupported": "2025-12-26",
+    "totalBoosts": 5,
+    "totalSats": 1665
   },
   "musician:Oystein Berge": {
     "name": "Oystein Berge",
@@ -763,33 +763,33 @@
     "name": "DuhLaurien",
     "type": "musician",
     "firstSupported": "2025-09-12",
-    "lastSupported": "2025-10-17",
-    "totalBoosts": 14,
-    "totalSats": 8414
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 34,
+    "totalSats": 20841
   },
   "musician:MaryKateUltra": {
     "name": "MaryKateUltra",
     "type": "musician",
     "firstSupported": "2025-09-12",
-    "lastSupported": "2025-10-17",
-    "totalBoosts": 10,
-    "totalSats": 6995
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 24,
+    "totalSats": 11657
   },
   "podcast:Podcasting 2.0": {
     "name": "Podcasting 2.0",
     "type": "podcast",
     "firstSupported": "2025-09-12",
-    "lastSupported": "2025-10-17",
-    "totalBoosts": 62,
-    "totalSats": 42020
+    "lastSupported": "2025-12-12",
+    "totalBoosts": 85,
+    "totalSats": 101535
   },
   "podcast:Opus": {
     "name": "Opus",
     "type": "podcast",
     "firstSupported": "2025-09-14",
-    "lastSupported": "2025-09-18",
-    "totalBoosts": 14,
-    "totalSats": 700
+    "lastSupported": "2025-11-25",
+    "totalBoosts": 16,
+    "totalSats": 742
   },
   "podcast:Black Bread": {
     "name": "Black Bread",
@@ -803,17 +803,17 @@
     "name": "nolan54",
     "type": "musician",
     "firstSupported": "2025-09-19",
-    "lastSupported": "2025-09-19",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-12-06",
+    "totalBoosts": 3,
+    "totalSats": 999
   },
   "musician:nmnu": {
     "name": "nmnu",
     "type": "musician",
     "firstSupported": "2025-09-19",
-    "lastSupported": "2025-09-21",
-    "totalBoosts": 3,
-    "totalSats": 999
+    "lastSupported": "2025-12-06",
+    "totalBoosts": 10,
+    "totalSats": 3330
   },
   "musician:Edwin": {
     "name": "Edwin",
@@ -827,9 +827,9 @@
     "name": "ITDV Lightning",
     "type": "musician",
     "firstSupported": "2025-09-23",
-    "lastSupported": "2025-10-14",
-    "totalBoosts": 159,
-    "totalSats": 24716
+    "lastSupported": "2025-11-09",
+    "totalBoosts": 244,
+    "totalSats": 80241
   },
   "podcast:Podnews Weekly Review": {
     "name": "Podnews Weekly Review",
@@ -851,17 +851,17 @@
     "name": "natejohnivan@fountain.fm",
     "type": "musician",
     "firstSupported": "2025-09-26",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 2,
-    "totalSats": 666
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 13,
+    "totalSats": 6216
   },
   "musician:boostbot@fountain.fm": {
     "name": "boostbot@fountain.fm",
     "type": "musician",
     "firstSupported": "2025-09-26",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 4,
-    "totalSats": 1332
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 11,
+    "totalSats": 2731
   },
   "musician:the Wolf": {
     "name": "the Wolf",
@@ -899,25 +899,25 @@
     "name": "HPM Lightning",
     "type": "musician",
     "firstSupported": "2025-10-01",
-    "lastSupported": "2025-10-06",
-    "totalBoosts": 43,
-    "totalSats": 1958
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 47,
+    "totalSats": 2208
   },
   "musician:setto@basspistol.com": {
     "name": "setto@basspistol.com",
     "type": "musician",
     "firstSupported": "2025-10-03",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-10-24",
+    "totalBoosts": 2,
+    "totalSats": 666
   },
   "musician:Ericpp": {
     "name": "Ericpp",
     "type": "musician",
     "firstSupported": "2025-10-03",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 3,
-    "totalSats": 999
+    "lastSupported": "2025-11-28",
+    "totalBoosts": 12,
+    "totalSats": 3996
   },
   "podcast:Flowgnar": {
     "name": "Flowgnar",
@@ -955,9 +955,9 @@
     "name": "OP3",
     "type": "musician",
     "firstSupported": "2025-10-03",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 2,
+    "totalSats": 666
   },
   "musician:Monkey Robot War via Wavlake": {
     "name": "Monkey Robot War via Wavlake",
@@ -987,33 +987,33 @@
     "name": "Ben - guitar",
     "type": "musician",
     "firstSupported": "2025-10-03",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-12-26",
+    "totalBoosts": 3,
+    "totalSats": 999
   },
   "musician:Kurt - drums": {
     "name": "Kurt - drums",
     "type": "musician",
     "firstSupported": "2025-10-03",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-12-26",
+    "totalBoosts": 3,
+    "totalSats": 999
   },
   "musician:Ed - acoustic and electric mandolin": {
     "name": "Ed - acoustic and electric mandolin",
     "type": "musician",
     "firstSupported": "2025-10-03",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-12-26",
+    "totalBoosts": 3,
+    "totalSats": 999
   },
   "musician:Joey - Bass": {
     "name": "Joey - Bass",
     "type": "musician",
     "firstSupported": "2025-10-03",
-    "lastSupported": "2025-10-03",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-12-26",
+    "totalBoosts": 3,
+    "totalSats": 999
   },
   "podcast:Slight Curiosity": {
     "name": "Slight Curiosity",
@@ -1035,9 +1035,9 @@
     "name": "Lightning Thrashes",
     "type": "podcast",
     "firstSupported": "2025-10-05",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-12-25",
+    "totalBoosts": 45,
+    "totalSats": 14568
   },
   "musician:Riot in Progress via Wavlake": {
     "name": "Riot in Progress via Wavlake",
@@ -1051,17 +1051,17 @@
     "name": "SirLibre Node",
     "type": "musician",
     "firstSupported": "2025-10-05",
-    "lastSupported": "2025-10-06",
-    "totalBoosts": 3,
-    "totalSats": 999
+    "lastSupported": "2025-11-02",
+    "totalBoosts": 10,
+    "totalSats": 3330
   },
   "musician:DoerfelVerse_Node": {
     "name": "DoerfelVerse_Node",
     "type": "musician",
     "firstSupported": "2025-10-05",
-    "lastSupported": "2025-10-05",
-    "totalBoosts": 2,
-    "totalSats": 666
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 25,
+    "totalSats": 7758
   },
   "musician:Ollie via Wavlake": {
     "name": "Ollie via Wavlake",
@@ -1123,25 +1123,25 @@
     "name": "Delta OG",
     "type": "podcast",
     "firstSupported": "2025-10-13",
-    "lastSupported": "2025-10-13",
-    "totalBoosts": 1,
-    "totalSats": 100
+    "lastSupported": "2025-12-01",
+    "totalBoosts": 32,
+    "totalSats": 2154
   },
   "musician:streetclones@fountain.fm": {
     "name": "streetclones@fountain.fm",
     "type": "musician",
     "firstSupported": "2025-10-17",
-    "lastSupported": "2025-10-17",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-11-07",
+    "totalBoosts": 2,
+    "totalSats": 666
   },
   "musician:Malachi@fountain.fm": {
     "name": "Malachi@fountain.fm",
     "type": "musician",
     "firstSupported": "2025-10-17",
-    "lastSupported": "2025-10-17",
-    "totalBoosts": 1,
-    "totalSats": 333
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 13,
+    "totalSats": 8916
   },
   "musician:AKME via Wavlake": {
     "name": "AKME via Wavlake",
@@ -1187,8 +1187,1120 @@
     "name": "Test Podcast",
     "type": "podcast",
     "firstSupported": "2025-10-18",
-    "lastSupported": "2025-10-18",
-    "totalBoosts": 5,
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 6,
     "totalSats": null
+  },
+  "musician:lavish@fountain.fm": {
+    "name": "lavish@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-10-19",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 29,
+    "totalSats": 20416
+  },
+  "musician:lnaddress music": {
+    "name": "lnaddress music",
+    "type": "musician",
+    "firstSupported": "2025-10-21",
+    "lastSupported": "2025-10-21",
+    "totalBoosts": 1,
+    "totalSats": 10
+  },
+  "podcast:NoSolutions": {
+    "name": "NoSolutions",
+    "type": "podcast",
+    "firstSupported": "2025-10-24",
+    "lastSupported": "2025-10-24",
+    "totalBoosts": 1,
+    "totalSats": 17
+  },
+  "podcast:Mike's Mix Tape": {
+    "name": "Mike's Mix Tape",
+    "type": "podcast",
+    "firstSupported": "2025-10-29",
+    "lastSupported": "2025-10-29",
+    "totalBoosts": 5,
+    "totalSats": 6170
+  },
+  "musician:voidzero": {
+    "name": "voidzero",
+    "type": "musician",
+    "firstSupported": "2025-10-29",
+    "lastSupported": "2025-10-29",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Spencer": {
+    "name": "Spencer",
+    "type": "musician",
+    "firstSupported": "2025-10-29",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 14,
+    "totalSats": 10816
+  },
+  "musician:bitpunk.fm": {
+    "name": "bitpunk.fm",
+    "type": "musician",
+    "firstSupported": "2025-10-29",
+    "lastSupported": "2025-10-29",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:marykateultra@fountain.fm": {
+    "name": "marykateultra@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-10-29",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 3,
+    "totalSats": 533
+  },
+  "musician:Jimmy V": {
+    "name": "Jimmy V",
+    "type": "musician",
+    "firstSupported": "2025-10-31",
+    "lastSupported": "2025-10-31",
+    "totalBoosts": 1,
+    "totalSats": 3333
+  },
+  "musician:Podcasting 2.0 Dave Jones & Adam Curry for making all this possible": {
+    "name": "Podcasting 2.0 Dave Jones & Adam Curry for making all this possible",
+    "type": "musician",
+    "firstSupported": "2025-10-31",
+    "lastSupported": "2025-10-31",
+    "totalBoosts": 1,
+    "totalSats": 3333
+  },
+  "musician:IPFSPodcasting.net for Cameron and all the IPFS nodes' bandwidth": {
+    "name": "IPFSPodcasting.net for Cameron and all the IPFS nodes' bandwidth",
+    "type": "musician",
+    "firstSupported": "2025-10-31",
+    "lastSupported": "2025-10-31",
+    "totalBoosts": 1,
+    "totalSats": 3333
+  },
+  "musician:Fountain Boostbot": {
+    "name": "Fountain Boostbot",
+    "type": "musician",
+    "firstSupported": "2025-10-31",
+    "lastSupported": "2025-10-31",
+    "totalBoosts": 1,
+    "totalSats": 3333
+  },
+  "podcast:The Singles": {
+    "name": "The Singles",
+    "type": "podcast",
+    "firstSupported": "2025-11-01",
+    "lastSupported": "2025-11-01",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "podcast:Insomniak The Sleepless (Singles Playlist)": {
+    "name": "Insomniak The Sleepless (Singles Playlist)",
+    "type": "podcast",
+    "firstSupported": "2025-11-01",
+    "lastSupported": "2025-11-01",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "podcast:Grey State": {
+    "name": "Grey State",
+    "type": "podcast",
+    "firstSupported": "2025-11-01",
+    "lastSupported": "2025-11-01",
+    "totalBoosts": 4,
+    "totalSats": 400
+  },
+  "podcast:Burning Room": {
+    "name": "Burning Room",
+    "type": "podcast",
+    "firstSupported": "2025-11-01",
+    "lastSupported": "2025-11-01",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "podcast:Vote For Love": {
+    "name": "Vote For Love",
+    "type": "podcast",
+    "firstSupported": "2025-11-01",
+    "lastSupported": "2025-11-01",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "musician:Torcon VII": {
+    "name": "Torcon VII",
+    "type": "musician",
+    "firstSupported": "2025-11-02",
+    "lastSupported": "2025-11-02",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:IROH via Wavlake": {
+    "name": "IROH via Wavlake",
+    "type": "musician",
+    "firstSupported": "2025-11-02",
+    "lastSupported": "2025-11-02",
+    "totalBoosts": 2,
+    "totalSats": 666
+  },
+  "musician:Sovereign Feeds and TSK": {
+    "name": "Sovereign Feeds and TSK",
+    "type": "musician",
+    "firstSupported": "2025-11-02",
+    "lastSupported": "2025-11-02",
+    "totalBoosts": 2,
+    "totalSats": 666
+  },
+  "musician:Death by Lions via Wavlake": {
+    "name": "Death by Lions via Wavlake",
+    "type": "musician",
+    "firstSupported": "2025-11-02",
+    "lastSupported": "2025-11-02",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Hollow Sky via Wavlake": {
+    "name": "Hollow Sky via Wavlake",
+    "type": "musician",
+    "firstSupported": "2025-11-02",
+    "lastSupported": "2025-11-02",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Strange Love via Wavlake": {
+    "name": "Strange Love via Wavlake",
+    "type": "musician",
+    "firstSupported": "2025-11-02",
+    "lastSupported": "2025-11-02",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "podcast:Smokestacks": {
+    "name": "Smokestacks",
+    "type": "podcast",
+    "firstSupported": "2025-11-02",
+    "lastSupported": "2025-11-02",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "podcast:Dopesick": {
+    "name": "Dopesick",
+    "type": "podcast",
+    "firstSupported": "2025-11-02",
+    "lastSupported": "2025-11-02",
+    "totalBoosts": 4,
+    "totalSats": 400
+  },
+  "musician:bit_ish@fountain.fm": {
+    "name": "bit_ish@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-03",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 12,
+    "totalSats": 7633
+  },
+  "musician:mooky@fountain.fm": {
+    "name": "mooky@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-03",
+    "lastSupported": "2025-11-11",
+    "totalBoosts": 10,
+    "totalSats": 4783
+  },
+  "podcast:The River": {
+    "name": "The River",
+    "type": "podcast",
+    "firstSupported": "2025-11-04",
+    "lastSupported": "2025-11-04",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "podcast:Auto Inter Woven Minds": {
+    "name": "Auto Inter Woven Minds",
+    "type": "podcast",
+    "firstSupported": "2025-11-05",
+    "lastSupported": "2025-11-05",
+    "totalBoosts": 13,
+    "totalSats": 1782
+  },
+  "podcast:T2D": {
+    "name": "T2D",
+    "type": "podcast",
+    "firstSupported": "2025-11-05",
+    "lastSupported": "2025-11-05",
+    "totalBoosts": 15,
+    "totalSats": 1599
+  },
+  "podcast:Bloodshot Lies - The Album": {
+    "name": "Bloodshot Lies - The Album",
+    "type": "podcast",
+    "firstSupported": "2025-11-06",
+    "lastSupported": "2025-11-10",
+    "totalBoosts": 17,
+    "totalSats": 5300
+  },
+  "podcast:Kick It": {
+    "name": "Kick It",
+    "type": "podcast",
+    "firstSupported": "2025-11-06",
+    "lastSupported": "2025-11-06",
+    "totalBoosts": 5,
+    "totalSats": 500
+  },
+  "podcast:Incoming from the Airwaves": {
+    "name": "Incoming from the Airwaves",
+    "type": "podcast",
+    "firstSupported": "2025-11-06",
+    "lastSupported": "2025-11-06",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "podcast:Stay Awhile": {
+    "name": "Stay Awhile",
+    "type": "podcast",
+    "firstSupported": "2025-11-07",
+    "lastSupported": "2025-11-07",
+    "totalBoosts": 2,
+    "totalSats": 840
+  },
+  "podcast:Deconstruction of Self - Single": {
+    "name": "Deconstruction of Self - Single",
+    "type": "podcast",
+    "firstSupported": "2025-11-07",
+    "lastSupported": "2025-11-07",
+    "totalBoosts": 4,
+    "totalSats": 1332
+  },
+  "podcast:Disco Swag - The Album": {
+    "name": "Disco Swag - The Album",
+    "type": "podcast",
+    "firstSupported": "2025-11-07",
+    "lastSupported": "2025-11-08",
+    "totalBoosts": 15,
+    "totalSats": 3750
+  },
+  "musician:Band of People via Wavlake": {
+    "name": "Band of People via Wavlake",
+    "type": "musician",
+    "firstSupported": "2025-11-07",
+    "lastSupported": "2025-11-07",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "podcast:Get Abused": {
+    "name": "Get Abused",
+    "type": "podcast",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-11-08",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "podcast:The Wait Is Over": {
+    "name": "The Wait Is Over",
+    "type": "podcast",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-11-08",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "musician:bitpunkfm@fountain.fm": {
+    "name": "bitpunkfm@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 27,
+    "totalSats": 11650
+  },
+  "musician:frankiepaint@fountain.fm": {
+    "name": "frankiepaint@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 12,
+    "totalSats": 8350
+  },
+  "musician:Heycitizen": {
+    "name": "Heycitizen",
+    "type": "musician",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 37,
+    "totalSats": 18950
+  },
+  "musician:Cottongin": {
+    "name": "Cottongin",
+    "type": "musician",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 24,
+    "totalSats": 22150
+  },
+  "musician:Matt.The.Tall@fountain.fm": {
+    "name": "Matt.The.Tall@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 32,
+    "totalSats": 14850
+  },
+  "musician:thetrustedband@fountain.fm": {
+    "name": "thetrustedband@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 14,
+    "totalSats": 7600
+  },
+  "musician:mattbigelow@fountain.fm": {
+    "name": "mattbigelow@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-11-11",
+    "totalBoosts": 14,
+    "totalSats": 8550
+  },
+  "musician:user87255943@fountain.fm": {
+    "name": "user87255943@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-11-11",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "musician:HPM Site Metadata": {
+    "name": "HPM Site Metadata",
+    "type": "musician",
+    "firstSupported": "2025-11-08",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 4,
+    "totalSats": 350
+  },
+  "musician:ITDV Site Metadata": {
+    "name": "ITDV Site Metadata",
+    "type": "musician",
+    "firstSupported": "2025-11-09",
+    "lastSupported": "2025-12-14",
+    "totalBoosts": 15,
+    "totalSats": 850
+  },
+  "musician:Doerfel-Verse": {
+    "name": "Doerfel-Verse",
+    "type": "musician",
+    "firstSupported": "2025-11-10",
+    "lastSupported": "2025-11-10",
+    "totalBoosts": 1,
+    "totalSats": 50
+  },
+  "musician:The Doerfels": {
+    "name": "The Doerfels",
+    "type": "musician",
+    "firstSupported": "2025-11-10",
+    "lastSupported": "2025-11-10",
+    "totalBoosts": 1,
+    "totalSats": 50
+  },
+  "musician:ITDV Lightning Platform Fee": {
+    "name": "ITDV Lightning Platform Fee",
+    "type": "musician",
+    "firstSupported": "2025-11-10",
+    "lastSupported": "2025-11-12",
+    "totalBoosts": 10,
+    "totalSats": 20
+  },
+  "podcast:The Satellite Skirmish": {
+    "name": "The Satellite Skirmish",
+    "type": "podcast",
+    "firstSupported": "2025-11-11",
+    "lastSupported": "2025-11-11",
+    "totalBoosts": 14,
+    "totalSats": 1400
+  },
+  "podcast:18 Sundays": {
+    "name": "18 Sundays",
+    "type": "podcast",
+    "firstSupported": "2025-11-11",
+    "lastSupported": "2025-11-24",
+    "totalBoosts": 26,
+    "totalSats": 1471
+  },
+  "podcast:HeyCitizen": {
+    "name": "HeyCitizen",
+    "type": "podcast",
+    "firstSupported": "2025-11-12",
+    "lastSupported": "2025-12-24",
+    "totalBoosts": 5,
+    "totalSats": 335
+  },
+  "musician:CityBeach": {
+    "name": "CityBeach",
+    "type": "musician",
+    "firstSupported": "2025-11-12",
+    "lastSupported": "2025-11-12",
+    "totalBoosts": 6,
+    "totalSats": 126
+  },
+  "musician:DV": {
+    "name": "DV",
+    "type": "musician",
+    "firstSupported": "2025-11-12",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 7,
+    "totalSats": 62
+  },
+  "podcast:Ollie": {
+    "name": "Ollie",
+    "type": "podcast",
+    "firstSupported": "2025-11-12",
+    "lastSupported": "2025-11-20",
+    "totalBoosts": 28,
+    "totalSats": 1722
+  },
+  "musician:Elijah Lied": {
+    "name": "Elijah Lied",
+    "type": "musician",
+    "firstSupported": "2025-11-14",
+    "lastSupported": "2025-11-14",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "podcast:Sista Fista": {
+    "name": "Sista Fista",
+    "type": "podcast",
+    "firstSupported": "2025-11-18",
+    "lastSupported": "2025-11-24",
+    "totalBoosts": 3,
+    "totalSats": 166
+  },
+  "podcast:$2 Holla": {
+    "name": "$2 Holla",
+    "type": "podcast",
+    "firstSupported": "2025-11-19",
+    "lastSupported": "2025-11-25",
+    "totalBoosts": 4,
+    "totalSats": 300
+  },
+  "podcast:Red Arrow Highway": {
+    "name": "Red Arrow Highway",
+    "type": "podcast",
+    "firstSupported": "2025-11-19",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 11,
+    "totalSats": 406
+  },
+  "podcast:Death by Lions": {
+    "name": "Death by Lions",
+    "type": "podcast",
+    "firstSupported": "2025-11-19",
+    "lastSupported": "2025-11-24",
+    "totalBoosts": 6,
+    "totalSats": 179
+  },
+  "podcast:LifePoint Music": {
+    "name": "LifePoint Music",
+    "type": "podcast",
+    "firstSupported": "2025-11-19",
+    "lastSupported": "2025-11-19",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "podcast:Vance Latta": {
+    "name": "Vance Latta",
+    "type": "podcast",
+    "firstSupported": "2025-11-19",
+    "lastSupported": "2025-12-01",
+    "totalBoosts": 9,
+    "totalSats": 290
+  },
+  "podcast:Love Ethic": {
+    "name": "Love Ethic",
+    "type": "podcast",
+    "firstSupported": "2025-11-20",
+    "lastSupported": "2025-12-01",
+    "totalBoosts": 7,
+    "totalSats": 700
+  },
+  "podcast:MK Bowler": {
+    "name": "MK Bowler",
+    "type": "podcast",
+    "firstSupported": "2025-11-20",
+    "lastSupported": "2025-11-24",
+    "totalBoosts": 3,
+    "totalSats": 399
+  },
+  "podcast:snju": {
+    "name": "snju",
+    "type": "podcast",
+    "firstSupported": "2025-11-21",
+    "lastSupported": "2025-11-21",
+    "totalBoosts": 1,
+    "totalSats": 100
+  },
+  "podcast:Herbivore": {
+    "name": "Herbivore",
+    "type": "podcast",
+    "firstSupported": "2025-11-22",
+    "lastSupported": "2025-11-26",
+    "totalBoosts": 3,
+    "totalSats": 200
+  },
+  "podcast:Nate Johnivan": {
+    "name": "Nate Johnivan",
+    "type": "podcast",
+    "firstSupported": "2025-11-23",
+    "lastSupported": "2025-11-28",
+    "totalBoosts": 5,
+    "totalSats": 139
+  },
+  "podcast:The Fifty Four Plates": {
+    "name": "The Fifty Four Plates",
+    "type": "podcast",
+    "firstSupported": "2025-11-24",
+    "lastSupported": "2025-12-06",
+    "totalBoosts": 9,
+    "totalSats": 400
+  },
+  "podcast:1point3": {
+    "name": "1point3",
+    "type": "podcast",
+    "firstSupported": "2025-11-24",
+    "lastSupported": "2025-11-24",
+    "totalBoosts": 2,
+    "totalSats": 66
+  },
+  "podcast:Øystein Berge": {
+    "name": "Øystein Berge",
+    "type": "podcast",
+    "firstSupported": "2025-11-24",
+    "lastSupported": "2025-11-24",
+    "totalBoosts": 2,
+    "totalSats": 66
+  },
+  "podcast:Joe Martin": {
+    "name": "Joe Martin",
+    "type": "podcast",
+    "firstSupported": "2025-11-25",
+    "lastSupported": "2025-11-25",
+    "totalBoosts": 2,
+    "totalSats": 23
+  },
+  "podcast:Caroline Hale": {
+    "name": "Caroline Hale",
+    "type": "podcast",
+    "firstSupported": "2025-11-25",
+    "lastSupported": "2025-11-25",
+    "totalBoosts": 4,
+    "totalSats": 200
+  },
+  "podcast:Longy": {
+    "name": "Longy",
+    "type": "podcast",
+    "firstSupported": "2025-11-25",
+    "lastSupported": "2025-11-25",
+    "totalBoosts": 3,
+    "totalSats": 150
+  },
+  "podcast:Denim Cobra": {
+    "name": "Denim Cobra",
+    "type": "podcast",
+    "firstSupported": "2025-11-25",
+    "lastSupported": "2025-11-25",
+    "totalBoosts": 3,
+    "totalSats": 102
+  },
+  "podcast:Various Artists": {
+    "name": "Various Artists",
+    "type": "podcast",
+    "firstSupported": "2025-11-25",
+    "lastSupported": "2025-11-25",
+    "totalBoosts": 4,
+    "totalSats": 84
+  },
+  "musician:StableKraft": {
+    "name": "StableKraft",
+    "type": "musician",
+    "firstSupported": "2025-11-25",
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 48,
+    "totalSats": 1880
+  },
+  "podcast:12 Rods and Mellow Cassette": {
+    "name": "12 Rods and Mellow Cassette",
+    "type": "podcast",
+    "firstSupported": "2025-11-26",
+    "lastSupported": "2025-11-26",
+    "totalBoosts": 3,
+    "totalSats": 150
+  },
+  "podcast:Prosperous Soul": {
+    "name": "Prosperous Soul",
+    "type": "podcast",
+    "firstSupported": "2025-11-26",
+    "lastSupported": "2025-11-26",
+    "totalBoosts": 6,
+    "totalSats": 300
+  },
+  "musician:Single recipient": {
+    "name": "Single recipient",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-28",
+    "totalBoosts": 2,
+    "totalSats": 100
+  },
+  "musician:tjunta@fountain.fm": {
+    "name": "tjunta@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 2,
+    "totalSats": 666
+  },
+  "musician:Prosperous Soul": {
+    "name": "Prosperous Soul",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Ben Doerfel": {
+    "name": "Ben Doerfel",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 50
+  },
+  "musician:Edward Doerfel": {
+    "name": "Edward Doerfel",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 50
+  },
+  "musician:Kurtisdrums": {
+    "name": "Kurtisdrums",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 2,
+    "totalSats": 383
+  },
+  "musician:Joey Doerfel": {
+    "name": "Joey Doerfel",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 50
+  },
+  "musician:The Wolf": {
+    "name": "The Wolf",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 2,
+    "totalSats": 666
+  },
+  "musician:phifer": {
+    "name": "phifer",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Mother Fucker": {
+    "name": "Mother Fucker",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:WideEye": {
+    "name": "WideEye",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:HeyCitizen": {
+    "name": "HeyCitizen",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 2,
+    "totalSats": 666
+  },
+  "musician:BigBoobieBitch": {
+    "name": "BigBoobieBitch",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:ovvrdos": {
+    "name": "ovvrdos",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:DoerfelVerse-Node": {
+    "name": "DoerfelVerse-Node",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:SirSpencer": {
+    "name": "SirSpencer",
+    "type": "musician",
+    "firstSupported": "2025-11-27",
+    "lastSupported": "2025-11-27",
+    "totalBoosts": 1,
+    "totalSats": 50
+  },
+  "musician:vinny": {
+    "name": "vinny",
+    "type": "musician",
+    "firstSupported": "2025-11-28",
+    "lastSupported": "2025-11-28",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:hearmyroar": {
+    "name": "hearmyroar",
+    "type": "musician",
+    "firstSupported": "2025-11-30",
+    "lastSupported": "2025-11-30",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Fable": {
+    "name": "Fable",
+    "type": "musician",
+    "firstSupported": "2025-11-30",
+    "lastSupported": "2025-12-06",
+    "totalBoosts": 2,
+    "totalSats": 666
+  },
+  "musician:empatheyes@fountain.fm": {
+    "name": "empatheyes@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-11-30",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 2,
+    "totalSats": 433
+  },
+  "musician:ThunderRoad": {
+    "name": "ThunderRoad",
+    "type": "musician",
+    "firstSupported": "2025-11-30",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 4,
+    "totalSats": 866
+  },
+  "podcast:The Ohm": {
+    "name": "The Ohm",
+    "type": "podcast",
+    "firstSupported": "2025-12-02",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 2,
+    "totalSats": 42
+  },
+  "musician:makeheroism@fountain.fm": {
+    "name": "makeheroism@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-12-02",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 2,
+    "totalSats": 200
+  },
+  "musician:duhlaurien": {
+    "name": "duhlaurien",
+    "type": "musician",
+    "firstSupported": "2025-12-02",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 1,
+    "totalSats": 100
+  },
+  "musician:tripodacus@fountain.fm": {
+    "name": "tripodacus@fountain.fm",
+    "type": "musician",
+    "firstSupported": "2025-12-02",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 1,
+    "totalSats": 100
+  },
+  "musician:user86738199@fountain.fm (My Friend Jimi)": {
+    "name": "user86738199@fountain.fm (My Friend Jimi)",
+    "type": "musician",
+    "firstSupported": "2025-12-02",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 1,
+    "totalSats": 100
+  },
+  "musician:sirseatsitter@getalby.com": {
+    "name": "sirseatsitter@getalby.com",
+    "type": "musician",
+    "firstSupported": "2025-12-02",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 1,
+    "totalSats": 100
+  },
+  "musician:Pluto": {
+    "name": "Pluto",
+    "type": "musician",
+    "firstSupported": "2025-12-02",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 1,
+    "totalSats": 100
+  },
+  "musician:Jasmine": {
+    "name": "Jasmine",
+    "type": "musician",
+    "firstSupported": "2025-12-02",
+    "lastSupported": "2025-12-02",
+    "totalBoosts": 1,
+    "totalSats": 100
+  },
+  "podcast:Sir Seat Sitter": {
+    "name": "Sir Seat Sitter",
+    "type": "podcast",
+    "firstSupported": "2025-12-03",
+    "lastSupported": "2025-12-03",
+    "totalBoosts": 1,
+    "totalSats": 100
+  },
+  "podcast:Fable": {
+    "name": "Fable",
+    "type": "podcast",
+    "firstSupported": "2025-12-06",
+    "lastSupported": "2025-12-06",
+    "totalBoosts": 6,
+    "totalSats": 450
+  },
+  "podcast:Kathryn": {
+    "name": "Kathryn",
+    "type": "podcast",
+    "firstSupported": "2025-12-06",
+    "lastSupported": "2025-12-06",
+    "totalBoosts": 4,
+    "totalSats": 101
+  },
+  "musician:edwin": {
+    "name": "edwin",
+    "type": "musician",
+    "firstSupported": "2025-12-06",
+    "lastSupported": "2025-12-06",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "podcast:Tripodacus": {
+    "name": "Tripodacus",
+    "type": "podcast",
+    "firstSupported": "2025-12-07",
+    "lastSupported": "2025-12-20",
+    "totalBoosts": 5,
+    "totalSats": 250
+  },
+  "podcast:ovvrdos": {
+    "name": "ovvrdos",
+    "type": "podcast",
+    "firstSupported": "2025-12-07",
+    "lastSupported": "2025-12-26",
+    "totalBoosts": 7,
+    "totalSats": 302
+  },
+  "podcast:v4vmusic": {
+    "name": "v4vmusic",
+    "type": "podcast",
+    "firstSupported": "2025-12-08",
+    "lastSupported": "2025-12-18",
+    "totalBoosts": 64,
+    "totalSats": 28946
+  },
+  "podcast:Jam with Nate": {
+    "name": "Jam with Nate",
+    "type": "podcast",
+    "firstSupported": "2025-12-11",
+    "lastSupported": "2025-12-11",
+    "totalBoosts": 1,
+    "totalSats": 300
+  },
+  "musician:M": {
+    "name": "M",
+    "type": "musician",
+    "firstSupported": "2025-12-12",
+    "lastSupported": "2025-12-12",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:The 501s": {
+    "name": "The 501s",
+    "type": "musician",
+    "firstSupported": "2025-12-12",
+    "lastSupported": "2025-12-12",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Nate on Fiddle++": {
+    "name": "Nate on Fiddle++",
+    "type": "musician",
+    "firstSupported": "2025-12-12",
+    "lastSupported": "2025-12-12",
+    "totalBoosts": 1,
+    "totalSats": 3333
+  },
+  "musician:Sovereign Feeds++": {
+    "name": "Sovereign Feeds++",
+    "type": "musician",
+    "firstSupported": "2025-12-12",
+    "lastSupported": "2025-12-12",
+    "totalBoosts": 1,
+    "totalSats": 3333
+  },
+  "musician:Tech Support++": {
+    "name": "Tech Support++",
+    "type": "musician",
+    "firstSupported": "2025-12-12",
+    "lastSupported": "2025-12-14",
+    "totalBoosts": 2,
+    "totalSats": 3433
+  },
+  "musician:mangement++": {
+    "name": "mangement++",
+    "type": "musician",
+    "firstSupported": "2025-12-12",
+    "lastSupported": "2025-12-12",
+    "totalBoosts": 1,
+    "totalSats": 3333
+  },
+  "musician:Deez Laughs via Wavlake": {
+    "name": "Deez Laughs via Wavlake",
+    "type": "musician",
+    "firstSupported": "2025-12-12",
+    "lastSupported": "2025-12-12",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "podcast:Paper Bird": {
+    "name": "Paper Bird",
+    "type": "podcast",
+    "firstSupported": "2025-12-13",
+    "lastSupported": "2025-12-13",
+    "totalBoosts": 3,
+    "totalSats": 300
+  },
+  "podcast:Everything Is Lit": {
+    "name": "Everything Is Lit",
+    "type": "podcast",
+    "firstSupported": "2025-12-13",
+    "lastSupported": "2025-12-20",
+    "totalBoosts": 2,
+    "totalSats": 366
+  },
+  "podcast:Think EP LIVE!": {
+    "name": "Think EP LIVE!",
+    "type": "podcast",
+    "firstSupported": "2025-12-14",
+    "lastSupported": "2025-12-19",
+    "totalBoosts": 10,
+    "totalSats": 2682
+  },
+  "podcast:Let Go (What's holding you back)": {
+    "name": "Let Go (What's holding you back)",
+    "type": "podcast",
+    "firstSupported": "2025-12-15",
+    "lastSupported": "2025-12-15",
+    "totalBoosts": 5,
+    "totalSats": 500
+  },
+  "musician:Too Angry Cunts": {
+    "name": "Too Angry Cunts",
+    "type": "musician",
+    "firstSupported": "2025-12-16",
+    "lastSupported": "2025-12-16",
+    "totalBoosts": 2,
+    "totalSats": 666
+  },
+  "musician:The Greensands via Wavlake": {
+    "name": "The Greensands via Wavlake",
+    "type": "musician",
+    "firstSupported": "2025-12-16",
+    "lastSupported": "2025-12-16",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Ben P Williams via Wavlake": {
+    "name": "Ben P Williams via Wavlake",
+    "type": "musician",
+    "firstSupported": "2025-12-16",
+    "lastSupported": "2025-12-16",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "podcast:Sinister Pupose (CCR Cover)": {
+    "name": "Sinister Pupose (CCR Cover)",
+    "type": "podcast",
+    "firstSupported": "2025-12-17",
+    "lastSupported": "2025-12-20",
+    "totalBoosts": 6,
+    "totalSats": 500
+  },
+  "podcast:Acetaminophen": {
+    "name": "Acetaminophen",
+    "type": "podcast",
+    "firstSupported": "2025-12-20",
+    "lastSupported": "2025-12-20",
+    "totalBoosts": 5,
+    "totalSats": 250
+  },
+  "podcast:Maniac on Mute": {
+    "name": "Maniac on Mute",
+    "type": "podcast",
+    "firstSupported": "2025-12-20",
+    "lastSupported": "2025-12-20",
+    "totalBoosts": 4,
+    "totalSats": 200
+  },
+  "podcast:Street Clones": {
+    "name": "Street Clones",
+    "type": "podcast",
+    "firstSupported": "2025-12-27",
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 4,
+    "totalSats": 101
+  },
+  "musician:Lavish": {
+    "name": "Lavish",
+    "type": "musician",
+    "firstSupported": "2025-12-27",
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Homegrown Hits": {
+    "name": "Homegrown Hits",
+    "type": "musician",
+    "firstSupported": "2025-12-27",
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 1,
+    "totalSats": 333
+  },
+  "musician:Mary-Kate Ultra": {
+    "name": "Mary-Kate Ultra",
+    "type": "musician",
+    "firstSupported": "2025-12-27",
+    "lastSupported": "2025-12-27",
+    "totalBoosts": 1,
+    "totalSats": 333
   }
 }

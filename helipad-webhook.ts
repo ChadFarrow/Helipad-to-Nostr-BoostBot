@@ -8,10 +8,7 @@ import { execSync } from 'child_process';
 import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary } from './lib/nostr-bot.ts';
 import { musicShowBot } from './lib/music-show-bot.ts';
 import { logger } from './lib/logger.js';
-import BlockClockController from './lib/blockclock-integration.js';
 
-// Initialize BlockClock controller
-const blockclock = new BlockClockController('192.168.0.182');
 
 // Store active monitor connections
 const monitorClients = new Set();
@@ -153,17 +150,6 @@ app.post('/helipad-webhook', async (req, res) => {
     
     await announceHelipadPayment(event);
 
-    // Send notification to BlockClock Mini
-    try {
-      await blockclock.announceBoost({
-        amount: satsAmount,
-        message: event.message,
-        sender: event.sender,
-        action: event.action
-      });
-    } catch (blockclockError) {
-      logger.warn('BlockClock notification failed', { error: blockclockError.message });
-    }
 
     // Process music show events for song tracking - ONLY for streaming (action 1), not boosts (action 2)
     // Check for both old format (remote_podcast/remote_episode) and new format (remote_item_guid/remote_feed_guid)
@@ -456,37 +442,6 @@ app.get('/test-artist', async (req, res) => {
   }
 });
 
-// Test BlockClock endpoint
-app.get('/test-blockclock', async (req, res) => {
-  try {
-    logger.info('Test BlockClock requested');
-    const message = req.query.message || 'TEST';
-    const amount = req.query.amount;
-    
-    if (amount) {
-      const result = await blockclock.sendNumber(amount);
-      if (result.success) {
-        res.status(200).send(`BlockClock updated with number: ${amount}`);
-      } else if (result.rateLimited) {
-        res.status(429).send(`Rate limited, wait ${result.waitTime} seconds`);
-      } else {
-        res.status(500).send(`BlockClock update failed: ${result.data}`);
-      }
-    } else {
-      const result = await blockclock.sendMessage(message);
-      if (result.success) {
-        res.status(200).send(`BlockClock updated with message: ${message}`);
-      } else if (result.rateLimited) {
-        res.status(429).send(`Rate limited, wait ${result.waitTime} seconds`);
-      } else {
-        res.status(500).send(`BlockClock update failed: ${result.data}`);
-      }
-    }
-  } catch (err) {
-    logger.error('Error testing BlockClock', { error: err.message, stack: err.stack });
-    res.status(500).send('Error testing BlockClock');
-  }
-});
 
 // Test music show endpoint
 app.get('/test-music-show', async (req, res) => {
