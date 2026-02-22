@@ -6,8 +6,8 @@ A webhook receiver that connects Helipad payments to a Nostr bot for automatic p
 
 - **Webhook Receiver**: Listens for Helipad payment events on port 3333
 - **Nostr Integration**: Automatically posts boost events to multiple Nostr relays
-- **Daily/Weekly Summaries**: Posts automated summaries of boost activity
 - **Music Show Support**: Special handling for music shows and artist boosts
+- **Split Payment Grouping**: Groups split payments into sessions and posts the largest split
 - **Comprehensive Monitoring**: Full suite of monitoring and management tools
 - **Auto-Restart**: Automatic recovery from failures
 - **Health Checks**: Built-in health monitoring endpoints
@@ -101,8 +101,6 @@ Access the dashboard at `http://localhost:3333` for:
 
 - **POST** `/helipad-webhook` - Main webhook endpoint for Helipad events
 - **GET** `/health` - Health check endpoint
-- **GET** `/test-daily-summary` - Test daily summary posting
-- **GET** `/test-weekly-summary` - Test weekly summary posting
 - **GET** `/test-music-show` - Test music show functionality
 
 ## Configuration
@@ -147,7 +145,6 @@ Default relays (configurable in `lib/nostr-bot.ts`):
 BoostBot/
 ├── lib/
 │   ├── nostr-bot.ts       # Main Nostr bot implementation
-│   ├── karma-system.ts    # Karma tracking system
 │   ├── music-show-bot.ts  # Music show specific logic
 │   └── logger.js          # Logging utilities
 ├── scripts/
@@ -157,7 +154,6 @@ BoostBot/
 │   ├── logs.js            # Log viewing
 │   ├── auto-restart.js    # Auto-restart monitor
 │   ├── dashboard.js       # Dashboard overview
-│   ├── karma-manager.js   # Karma system management
 │   └── manage-webhooks.js # Webhook management
 ├── public/
 │   └── index.html         # Web dashboard
