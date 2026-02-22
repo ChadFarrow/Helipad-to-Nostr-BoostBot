@@ -33,8 +33,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The bot runs on port 3333 by default (configurable via PORT env var):
 - POST `/helipad-webhook` - Main webhook endpoint
 - GET `/health` - Health check
-- GET `/test-daily-summary` - Test daily summary posting
-- GET `/test-weekly-summary` - Test weekly summary posting
 - GET `/test-music-show` - Test music show functionality
 
 ## Architecture Overview
@@ -50,25 +48,19 @@ The bot runs on port 3333 by default (configurable via PORT env var):
 - Handles all Nostr protocol interactions
 - Manages relay connections and event posting
 - Processes Helipad payment events and formats them for Nostr
-- Implements daily/weekly summary posting
-- Key functions: `announceHelipadPayment()`, `postTestDailySummary()`, `postTestWeeklySummary()`
+- Groups split payments into sessions and posts the largest split after a 30-second delay
+- Key function: `announceHelipadPayment()`
 
 **Music Show Handler**: `lib/music-show-bot.ts`
 - Special logic for music show boosts
 - Artist attribution and show formatting
 - Integrates with main bot for music-specific events
 
-**Karma System**: `lib/karma-system.ts`
-- Tracks boost activity and karma scores
-- Manages supporter statistics
-- Persistent data storage for tracking
-
 ### Data Flow
 1. Helipad sends webhook POST to `/helipad-webhook`
 2. Express server validates and processes the payload
 3. Event is routed to appropriate handler (regular boost or music show)
 4. Bot formats the message and posts to configured Nostr relays
-5. Activity is logged and karma/stats are updated
 
 ### Key Dependencies
 - `nostr-tools` - Nostr protocol implementation

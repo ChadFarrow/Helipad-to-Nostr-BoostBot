@@ -111,8 +111,6 @@ function main() {
   console.log('🌐 Network Information:');
   console.log('  📡 Webhook URL: http://localhost:3001/helipad-webhook');
   console.log('  💚 Health Check: http://localhost:3001/health');
-  console.log('  🧪 Test Daily Summary: http://localhost:3001/test-daily-summary');
-  console.log('  📊 Test Weekly Summary: http://localhost:3001/test-weekly-summary');
   console.log('');
   
   // System Information

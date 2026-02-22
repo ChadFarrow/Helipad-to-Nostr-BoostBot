@@ -110,8 +110,6 @@ function main() {
   console.log('🌐 Webhook Information:');
   console.log(`  📡 Webhook URL: http://${serverIP}:3333/helipad-webhook`);
   console.log(`  💚 Health Check: http://${serverIP}:3333/health`);
-  console.log(`  🧪 Test Daily Summary: http://${serverIP}:3333/test-daily-summary`);
-  console.log(`  📊 Test Weekly Summary: http://${serverIP}:3333/test-weekly-summary`);
   console.log('');
   
   console.log('💡 Management Commands:');

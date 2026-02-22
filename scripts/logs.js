@@ -165,8 +165,6 @@ function main() {
   console.log('🔗 Available Endpoints:');
   console.log('  📡 POST /helipad-webhook - Main webhook endpoint');
   console.log('  💚 GET  /health - Health check');
-  console.log('  🧪 GET  /test-daily-summary - Test daily summary');
-  console.log('  📊 GET  /test-weekly-summary - Test weekly summary');
   console.log('');
   
   console.log('💡 Tips:');

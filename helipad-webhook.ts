@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { announceHelipadPayment, postTestDailySummary, postTestWeeklySummary } from './lib/nostr-bot.ts';
+import { announceHelipadPayment } from './lib/nostr-bot.ts';
 import { musicShowBot } from './lib/music-show-bot.ts';
 import { logger } from './lib/logger.js';
 
@@ -385,30 +385,6 @@ app.get('/last-activity', (req, res) => {
     ...lastActivityData,
     timeAgo: timeAgo
   });
-});
-
-// Test daily summary endpoint
-app.get('/test-daily-summary', async (req, res) => {
-  try {
-    logger.info('Test daily summary requested');
-    await postTestDailySummary();
-    res.status(200).send('Test daily summary posted to Nostr');
-  } catch (err) {
-    logger.error('Error posting test daily summary', { error: err.message, stack: err.stack });
-    res.status(500).send('Error posting test daily summary');
-  }
-});
-
-// Test weekly summary endpoint
-app.get('/test-weekly-summary', async (req, res) => {
-  try {
-    logger.info('Test weekly summary requested');
-    await postTestWeeklySummary();
-    res.status(200).send('Test weekly summary posted to Nostr');
-  } catch (err) {
-    logger.error('Error posting test weekly summary', { error: err.message, stack: err.stack });
-    res.status(500).send('Error posting test weekly summary');
-  }
 });
 
 // Test artist extraction directly
