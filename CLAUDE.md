@@ -56,14 +56,32 @@ The bot runs on port 3333 by default (configurable via PORT env var):
 - Artist attribution and show formatting
 - Integrates with main bot for music-specific events
 
+**AlbyHub NWC Client**: `lib/nwc-client.ts`
+- Connects to AlbyHub via Nostr Wallet Connect (NIP-47)
+- Subscribes to `payment_received` and `payment_sent` notifications
+- Extracts boostagram data from TLV records (key `7629169`)
+- Transforms NWC transactions into HelipadPaymentEvent format
+- Falls back to polling `list_transactions` if notifications aren't supported
+- Deduplicates with Helipad when both sources run simultaneously
+
 ### Data Flow
+**Helipad Mode** (default):
 1. Helipad sends webhook POST to `/helipad-webhook`
 2. Express server validates and processes the payload
 3. Event is routed to appropriate handler (regular boost or music show)
 4. Bot formats the message and posts to configured Nostr relays
 
+**AlbyHub NWC Mode** (set `NWC_URL` env var):
+1. NWC client subscribes to payment notifications over Nostr relay
+2. Incoming payments are checked for boostagram TLV data
+3. Boostagram is decoded and transformed into HelipadPaymentEvent format
+4. Event is routed through the same pipeline as Helipad webhooks
+
+Both modes can run simultaneously with automatic deduplication.
+
 ### Key Dependencies
 - `nostr-tools` - Nostr protocol implementation
+- `@getalby/sdk` - Alby SDK for NWC (Nostr Wallet Connect) integration
 - `express` - Web server framework
 - `tsx` - TypeScript execution for Node.js
 - `ws` - WebSocket implementation for Nostr relay connections
@@ -74,6 +92,7 @@ Environment variables (`.env` file):
 - `HELIPAD_WEBHOOK_TOKEN` - Optional authentication token
 - `PORT` - Server port (default: 3333)
 - `TEST_MODE` - Set to 'true' to disable actual Nostr posting
+- `NWC_URL` - AlbyHub NWC connection string (enables NWC mode, e.g. `nostr+walletconnect://pubkey?relay=wss://relay&secret=secret`)
 
 Default Nostr relays are configured in `lib/nostr-bot.ts`.
 

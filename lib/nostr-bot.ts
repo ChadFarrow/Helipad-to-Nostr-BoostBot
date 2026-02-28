@@ -165,6 +165,11 @@ export interface HelipadPaymentEvent {
   tlv: string;
   remote_podcast?: string;
   remote_episode?: string;
+  remote_feed_guid?: string;
+  remote_item_guid?: string;
+  name?: string;
+  sender_name?: string;
+  app_name?: string;
   reply_sent?: boolean;
   payment_info?: {
     payment_hash: string;
@@ -174,6 +179,8 @@ export interface HelipadPaymentEvent {
     fee_msat: number;
     reply_to_idx: number | null;
   } | null;
+  // Source tracking for deduplication when both Helipad and NWC are active
+  _source?: 'helipad' | 'nwc';
 }
 
 class NostrBot {

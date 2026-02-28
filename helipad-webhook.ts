@@ -8,6 +8,7 @@ import { execSync } from 'child_process';
 import { announceHelipadPayment } from './lib/nostr-bot.ts';
 import { musicShowBot } from './lib/music-show-bot.ts';
 import { logger } from './lib/logger.js';
+import { startNWCClient } from './lib/nwc-client.ts';
 
 
 // Store active monitor connections
@@ -341,7 +342,12 @@ app.post('/helipad-webhook', async (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).send('Webhook receiver is running');
+  const nwcStatus = process.env.NWC_URL ? (nwcClientHandle ? 'connected' : 'connecting') : 'not configured';
+  res.status(200).json({
+    status: 'running',
+    helipad: 'listening',
+    nwc: nwcStatus,
+  });
 });
 
 // Uptime endpoint
@@ -654,12 +660,80 @@ function startPeriodicMonitoring() {
 
 const PORT = process.env.PORT || 4444;
 const SERVER_IP = process.env.SERVER_IP || '192.168.0.243';
+
+// Store NWC client handle for cleanup
+let nwcClientHandle: { close: () => void } | null = null;
+
 app.listen(PORT, () => {
   logger.info(`Helipad webhook receiver started`, { port: PORT });
   logger.info(`Webhook URL: http://${SERVER_IP}:${PORT}/helipad-webhook`);
   logger.info(`Health check: http://${SERVER_IP}:${PORT}/health`);
   logger.info(`Management UI: http://${SERVER_IP}:${PORT}/`);
-  
+
   // Start periodic monitoring
   startPeriodicMonitoring();
-}); 
+
+  // Start NWC client if configured
+  const nwcUrl = process.env.NWC_URL;
+  if (nwcUrl) {
+    logger.info('NWC: AlbyHub connection URL detected, starting NWC listener...');
+    startNWCClient({
+      nwcUrl,
+      onActivity: (event, source) => {
+        const satsAmount = Math.floor(event.value_msat_total / 1000);
+        const actionName = {
+          0: 'Error',
+          1: 'Stream',
+          2: 'Boost',
+          3: 'Unknown',
+          4: 'Auto Boost'
+        }[event.action] || 'Unknown';
+
+        const activityMessage = `⚡ [NWC] ${actionName}: ${satsAmount} sats from ${event.sender || 'Unknown'} → ${event.podcast || 'Unknown'}${event.message ? ` | "${event.message.substring(0, 50)}${event.message.length > 50 ? '...' : ''}"` : ''}`;
+
+        // Update last activity
+        lastActivityData = {
+          timestamp: new Date().toISOString(),
+          message: activityMessage,
+          type: 'activity',
+          action: event.action,
+          amount: satsAmount,
+          sender: event.sender,
+          podcast: event.podcast,
+          episode: event.episode
+        };
+
+        broadcastToMonitorClients({
+          timestamp: new Date().toISOString(),
+          message: activityMessage,
+          type: 'activity',
+          action: event.action,
+          amount: satsAmount,
+          sender: event.sender,
+          podcast: event.podcast,
+          episode: event.episode
+        });
+      },
+    }).then(handle => {
+      nwcClientHandle = handle;
+      logger.info('NWC: AlbyHub listener started successfully');
+    }).catch(error => {
+      logger.error('NWC: Failed to start AlbyHub listener', { error: error?.message });
+    });
+  } else {
+    logger.info('NWC: No NWC_URL configured, running with Helipad webhooks only');
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down...');
+  if (nwcClientHandle) nwcClientHandle.close();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down...');
+  if (nwcClientHandle) nwcClientHandle.close();
+  process.exit(0);
+});
