@@ -29,6 +29,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@getalby/sdk": "^7.0.0",
     "body-parser": "^1.20.2",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
