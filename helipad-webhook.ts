@@ -8,8 +8,10 @@ import { execSync } from 'child_process';
 import { announceHelipadPayment } from './lib/nostr-bot.ts';
 import { musicShowBot } from './lib/music-show-bot.ts';
 import { logger } from './lib/logger.js';
-import { startNWCClient } from './lib/nwc-client.ts';
+import { startNWCClient, markPaymentProcessed } from './lib/nwc-client.ts';
 
+// Store NWC client handle for cleanup
+let nwcClientHandle: { close: () => void } | null = null;
 
 // Store active monitor connections
 const monitorClients = new Set();
@@ -149,8 +151,15 @@ app.post('/helipad-webhook', async (req, res) => {
       episode: event.episode
     });
     
+    // Tag source for deduplication tracking
+    event._source = 'helipad';
+
     await announceHelipadPayment(event);
 
+    // Mark payment hash as processed so NWC doesn't duplicate it
+    if (event.payment_info?.payment_hash) {
+      markPaymentProcessed(event.payment_info.payment_hash);
+    }
 
     // Process music show events for song tracking - ONLY for streaming (action 1), not boosts (action 2)
     // Check for both old format (remote_podcast/remote_episode) and new format (remote_item_guid/remote_feed_guid)
@@ -660,9 +669,6 @@ function startPeriodicMonitoring() {
 
 const PORT = process.env.PORT || 4444;
 const SERVER_IP = process.env.SERVER_IP || '192.168.0.243';
-
-// Store NWC client handle for cleanup
-let nwcClientHandle: { close: () => void } | null = null;
 
 app.listen(PORT, () => {
   logger.info(`Helipad webhook receiver started`, { port: PORT });

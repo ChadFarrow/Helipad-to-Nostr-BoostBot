@@ -5,8 +5,8 @@
 import { NWCClient } from '@getalby/sdk/nwc';
 import type { Nip47Notification, Nip47Transaction } from '@getalby/sdk/nwc';
 import { logger } from './logger.js';
-import { announceHelipadPayment } from './nostr-bot.js';
-import type { HelipadPaymentEvent } from './nostr-bot.js';
+import { announceHelipadPayment } from './nostr-bot.ts';
+import type { HelipadPaymentEvent } from './nostr-bot.ts';
 
 // TLV key for podcast boost metadata (Podcasting 2.0 boostagram)
 const BOOSTAGRAM_TLV_KEY = 7629169;
@@ -126,6 +126,7 @@ function transformToHelipadEvent(
     tlv: JSON.stringify(tlvData),
     remote_podcast: boostagram.remote_podcast,
     remote_episode: boostagram.remote_episode,
+    _source: 'nwc',
     payment_info: {
       payment_hash: transaction.payment_hash || '',
       pubkey: '',
